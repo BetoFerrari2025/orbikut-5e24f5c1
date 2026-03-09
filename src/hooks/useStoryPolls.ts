@@ -13,7 +13,7 @@ export function useCreateStoryWithPoll() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ file, poll }: { file: File; poll?: PollData }) => {
+    mutationFn: async ({ file, poll, caption, linkUrl, linkLabel }: { file: File; poll?: PollData; caption?: string; linkUrl?: string; linkLabel?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop();
@@ -29,10 +29,14 @@ export function useCreateStoryWithPoll() {
         .from('stories')
         .getPublicUrl(fileName);
 
-      // Create story
+      // Create story with optional caption and link
+      const insertData: any = { user_id: user.id, image_url: publicUrl };
+      if (caption) insertData.caption = caption;
+      if (linkUrl) { insertData.link_url = linkUrl; insertData.link_label = linkLabel || 'Saiba mais'; }
+
       const { data: story, error: storyError } = await supabase
         .from('stories')
-        .insert({ user_id: user.id, image_url: publicUrl })
+        .insert(insertData)
         .select()
         .single();
 
