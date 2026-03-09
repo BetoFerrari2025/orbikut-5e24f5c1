@@ -39,7 +39,7 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-lg mx-auto px-4 py-6">
         <div className="relative mb-6">
