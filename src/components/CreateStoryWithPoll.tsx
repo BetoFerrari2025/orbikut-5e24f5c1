@@ -284,7 +284,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
 
               {/* Text input */}
               {showText && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-xs text-muted-foreground">Digite o texto e arraste na imagem para posicionar</p>
                   <Input
                     placeholder="Digite seu texto..."
@@ -292,6 +292,41 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     onChange={(e) => setCaption(e.target.value)}
                     maxLength={200}
                   />
+                  {/* Color picker */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Cor</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {TEXT_COLORS.map((c) => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => setTextColor(c.value)}
+                          className={cn(
+                            "w-7 h-7 rounded-full border-2 transition-transform",
+                            textColor === c.value ? "border-primary scale-110" : "border-muted"
+                          )}
+                          style={{ backgroundColor: c.value }}
+                          title={c.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {/* Font size slider */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Tamanho: {textSize}px</p>
+                    <div className="flex items-center gap-2">
+                      <Minus className="w-3 h-3 text-muted-foreground" />
+                      <Slider
+                        value={[textSize]}
+                        onValueChange={([v]) => setTextSize(v)}
+                        min={10}
+                        max={36}
+                        step={1}
+                        className="flex-1"
+                      />
+                      <Type className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </div>
                 </div>
               )}
 
