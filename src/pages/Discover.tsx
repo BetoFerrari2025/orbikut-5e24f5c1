@@ -108,7 +108,11 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   const [isPlaying, setIsPlaying] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
   const addComment = useAddComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
 
   useEffect(() => {
     if (isActive && !viewRecorded.current) {
