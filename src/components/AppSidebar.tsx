@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import {
   Home, Search, Compass, MessageCircle, Bell, User, Settings,
-  ShieldAlert, Sparkles, PlusSquare,
+  ShieldAlert, Sparkles, PlusSquare, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -23,7 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const { data: isAdmin } = useIsAdmin();
   const { data: unreadCount } = useUnreadCount();
@@ -106,6 +106,20 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        {/* Sign out */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={signOut} className="text-destructive hover:bg-destructive/10">
+                  <LogOut className="w-5 h-5 shrink-0" />
+                  {!collapsed && <span>Sair</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

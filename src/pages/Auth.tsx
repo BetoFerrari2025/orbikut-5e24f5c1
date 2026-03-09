@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -173,7 +174,32 @@ export default function Auth() {
               {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
             </Button>
           </form>
-          <div className="mt-6 text-center">
+          {isLogin && (
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email.trim()) {
+                    toast.error('Digite seu e-mail primeiro');
+                    return;
+                  }
+                  try {
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: `${window.location.origin}/reset-password`,
+                    });
+                    if (error) throw error;
+                    toast.success('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+                  } catch (err: any) {
+                    toast.error(err.message || 'Erro ao enviar e-mail de recuperação');
+                  }
+                }}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Esqueceu sua senha?
+              </button>
+            </div>
+          )}
+          <div className="mt-4 text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
