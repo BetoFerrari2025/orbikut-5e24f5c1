@@ -279,7 +279,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         ) : (
           <>
             {/* Fullscreen preview with overlays */}
-            <div ref={previewContainerRef} className="relative w-full flex-1 min-h-[50vh] max-h-[95vh] overflow-hidden bg-black">
+            <div ref={previewContainerRef} className="relative w-full h-[100dvh] overflow-hidden bg-black">
               {selectedFile?.type.startsWith('video') ? (
                 <video src={preview} className="absolute inset-0 w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop playsInline />
               ) : (
@@ -290,14 +290,27 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white border-none"
+                className="absolute top-3 right-3 z-30 bg-black/50 hover:bg-black/70 text-white border-none"
                 onClick={() => { setSelectedFile(null); setPreview(null); }}
               >
                 <X className="w-4 h-4" />
               </Button>
 
-              {/* Draggable text overlay */}
+              {/* Top area: text input when active */}
               {showText && (
+                <div className="absolute top-12 left-3 right-14 z-25">
+                  <Input
+                    placeholder="Digite seu texto..."
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    maxLength={200}
+                    className="bg-black/40 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                  />
+                </div>
+              )}
+
+              {/* Draggable text overlay - positioned high by default so it's above controls */}
+              {showText && caption && (
                 <DraggablePreview
                   onPositionChange={(centerX, centerY, containerW, containerH) => {
                     setTextPosPercent({
@@ -306,7 +319,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     });
                   }}
                 >
-                  <div className="flex items-center gap-1" style={{ visibility: caption ? 'visible' : 'hidden' }}>
+                  <div className="flex items-center gap-1">
                     <GripVertical className="w-3 h-3 text-white/50 shrink-0" />
                     <p
                       className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2"
@@ -389,7 +402,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
 
               {/* Bottom controls overlay - always visible */}
               <div className="absolute bottom-0 left-0 right-0 z-20">
-                <div className="bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-8 p-3 space-y-3 max-h-[45vh] overflow-y-auto">
+                <div className="bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-8 p-3 space-y-3 max-h-[40vh] overflow-y-auto">
                     {/* Tool buttons */}
                     <div className="flex gap-2 flex-wrap">
                       <Button
@@ -448,16 +461,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                       </Button>
                     </div>
 
-                    {/* Text input */}
+                    {/* Text style controls (input moved to top) */}
                     {showText && (
                       <div className="space-y-2">
-                        <Input
-                          placeholder="Digite seu texto..."
-                          value={caption}
-                          onChange={(e) => setCaption(e.target.value)}
-                          maxLength={200}
-                          className="bg-white/20 border-0 text-white placeholder:text-white/70"
-                        />
                         <div className="flex gap-1.5 flex-wrap">
                           {TEXT_COLORS.map((c) => (
                             <button

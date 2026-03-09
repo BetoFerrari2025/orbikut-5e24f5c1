@@ -25,40 +25,61 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const VideoWithUnmute = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttributes<HTMLVideoElement>>(
+const VideoWithAudio = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttributes<HTMLVideoElement>>(
   (props, ref) => {
-    const [isMuted, setIsMuted] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
+    const [showIcon, setShowIcon] = useState(false);
+    const iconTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const localRef = useRef<HTMLVideoElement>(null);
 
-    // Merge refs
     const setRefs = useCallback((node: HTMLVideoElement | null) => {
       (localRef as any).current = node;
       if (typeof ref === 'function') ref(node);
       else if (ref) (ref as any).current = node;
     }, [ref]);
 
-    const toggleMute = (e: React.MouseEvent) => {
+    // Try to play with audio first, fallback to muted
+    useEffect(() => {
+      const video = localRef.current;
+      if (!video) return;
+      video.muted = false;
+      video.play().catch(() => {
+        // Browser blocked unmuted autoplay, fallback to muted
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch(() => {});
+      });
+    }, [props.src]);
+
+    const handleTapScreen = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (localRef.current) {
-        localRef.current.muted = !isMuted;
-        setIsMuted(!isMuted);
+        const newMuted = !isMuted;
+        localRef.current.muted = newMuted;
+        setIsMuted(newMuted);
       }
+      // Show icon in center
+      setShowIcon(true);
+      if (iconTimerRef.current) clearTimeout(iconTimerRef.current);
+      iconTimerRef.current = setTimeout(() => setShowIcon(false), 1200);
     };
 
     return (
-      <div className="relative">
-        <video ref={setRefs} {...props} autoPlay playsInline muted={isMuted} />
-        <button
-          onClick={toggleMute}
-          className="absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center"
-        >
-          {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
-        </button>
+      <div className="relative" onClick={handleTapScreen}>
+        <video ref={setRefs} {...props} playsInline muted={isMuted} />
+        {/* Center audio icon overlay */}
+        {showIcon && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+            <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in zoom-in fade-in duration-200">
+              {isMuted ? <VolumeX className="w-8 h-8 text-white" /> : <Volume2 className="w-8 h-8 text-white" />}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 );
-VideoWithUnmute.displayName = 'VideoWithUnmute';
+VideoWithAudio.displayName = 'VideoWithAudio';
 
 interface StoryViewerProps {
   stories: Story[] | null;
@@ -210,7 +231,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <VideoWithUnmute ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
+              <VideoWithAudio ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
@@ -284,6 +305,9 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               <span className="text-white text-[10px] mt-0.5">Novo</span>
             </button>
           </div>
+
+          {/* Emoji reactions bar */}
+          <StoryEmojiReactions storyId={currentStory.id} />
 
           {/* Owner-only edit buttons */}
           <StoryOwnerControls
@@ -417,6 +441,61 @@ function StoryAudioPlayer({ musicUrl, storyId }: { musicUrl: string; storyId: st
         <button onClick={toggleMute} className="shrink-0">{muted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-white/70" />}</button>
       </div>
     </>
+  );
+}
+
+// ─── Emoji Reactions (Instagram-style) ───
+const STORY_EMOJIS = ['❤️', '😂', '😮', '😢', '👏', '🔥', '🎉', '😍'];
+
+function StoryEmojiReactions({ storyId }: { storyId: string }) {
+  const [sentEmoji, setSentEmoji] = useState<string | null>(null);
+  const [floatingEmojis, setFloatingEmojis] = useState<{ id: number; emoji: string }[]>([]);
+  const idCounter = useRef(0);
+
+  const handleReaction = (emoji: string) => {
+    setSentEmoji(emoji);
+    // Add floating emoji
+    idCounter.current += 1;
+    const id = idCounter.current;
+    setFloatingEmojis(prev => [...prev, { id, emoji }]);
+    setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 1500);
+    setTimeout(() => setSentEmoji(null), 1500);
+  };
+
+  return (
+    <div className="absolute bottom-4 left-0 right-0 z-10 px-4" onClick={(e) => e.stopPropagation()}>
+      {/* Floating emojis animation */}
+      <div className="relative h-0">
+        {floatingEmojis.map((fe) => (
+          <span
+            key={fe.id}
+            className="absolute text-4xl pointer-events-none"
+            style={{
+              left: '50%',
+              bottom: 0,
+              animation: 'float-up 1.5s ease-out forwards',
+            }}
+          >
+            {fe.emoji}
+          </span>
+        ))}
+      </div>
+      {/* Emoji bar */}
+      <div className="flex justify-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
+        {STORY_EMOJIS.map((emoji) => (
+          <button
+            key={emoji}
+            onClick={() => handleReaction(emoji)}
+            className={cn(
+              "text-2xl hover:scale-125 transition-transform active:scale-150",
+              sentEmoji === emoji && "scale-150"
+            )}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
