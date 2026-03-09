@@ -32,6 +32,7 @@ export function useCreateStoryWithPoll() {
       // Create story with optional caption and link
       const insertData: any = { user_id: user.id, image_url: publicUrl };
       if (caption) insertData.caption = caption;
+      if (musicUrl) insertData.music_url = musicUrl;
       if (linkUrl) { insertData.link_url = linkUrl; insertData.link_label = linkLabel || 'Saiba mais'; }
 
       const { data: story, error: storyError } = await supabase
