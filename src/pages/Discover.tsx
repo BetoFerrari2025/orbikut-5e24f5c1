@@ -116,6 +116,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
