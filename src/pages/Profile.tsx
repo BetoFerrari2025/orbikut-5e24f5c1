@@ -167,6 +167,15 @@ export default function Profile() {
               <Film className="w-4 h-4" />
               <span className="text-sm font-semibold uppercase tracking-wide">Vídeos</span>
             </TabsTrigger>
+            {isOwnProfile && (
+              <TabsTrigger
+                value="saved"
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent -mt-px"
+              >
+                <Bookmark className="w-4 h-4" />
+                <span className="text-sm font-semibold uppercase tracking-wide">Salvos</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="photos">
