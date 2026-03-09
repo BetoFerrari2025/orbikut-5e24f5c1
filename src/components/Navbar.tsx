@@ -9,6 +9,7 @@ import { useUnreadCount } from '@/hooks/useNotifications';
 export function Navbar() {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile(user?.id);
+  const { data: unreadCount } = useUnreadCount();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
