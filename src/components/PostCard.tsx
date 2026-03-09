@@ -81,7 +81,6 @@ export function PostCard({ post }: PostCardProps) {
                 likesData?.isLiked ? 'fill-primary text-primary' : 'hover:text-muted-foreground'
               )}
             />
-            />
           </button>
           <button onClick={() => setShowComments(!showComments)}>
             <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
