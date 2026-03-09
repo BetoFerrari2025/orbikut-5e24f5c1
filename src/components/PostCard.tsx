@@ -3,17 +3,16 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { useLikes, useToggleLike, useComments } from '@/hooks/usePosts';
 import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
+import { CommentsDialog } from '@/components/CommentsDialog';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface PostCardProps {
@@ -33,7 +32,6 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState('');
   const [hidden, setHidden] = useState(false);
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
@@ -41,7 +39,6 @@ export function PostCard({ post }: PostCardProps) {
   const { data: savedData } = useSavedPost(post.id);
   const { data: viewCount } = usePostViews(post.id);
   const toggleLike = useToggleLike();
-  const addComment = useAddComment();
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
   const sendNotification = useSendNotification();
@@ -81,180 +78,147 @@ export function PostCard({ post }: PostCardProps) {
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim() || !user) return;
-    addComment.mutate({ postId: post.id, content: newComment });
-    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'comment', postId: post.id, content: newComment });
-    setNewComment('');
-  };
-
   if (hidden) return null;
 
   return (
-    <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
-      {/* Header */}
-      <div className="flex items-center justify-between p-3">
-        <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={post.profiles.avatar_url ?? undefined} />
-            <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary font-semibold text-sm h-auto py-1 px-2"
-              disabled={toggleFollow.isPending}
-              onClick={() => {
-                toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
-                sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
-              }}
-            >
-              Seguir
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="w-5 h-5" />
+    <>
+      <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3">
+          <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={post.profiles.avatar_url ?? undefined} />
+              <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary font-semibold text-sm h-auto py-1 px-2"
+                disabled={toggleFollow.isPending}
+                onClick={() => {
+                  toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
+                  sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+                }}
+              >
+                Seguir
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
-                <EyeOff className="w-4 h-4" />
-                Ocultar post
-              </DropdownMenuItem>
-              {!isOwnPost && (
-                <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
-                  <Flag className="w-4 h-4" />
-                  Denunciar
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
+                  <EyeOff className="w-4 h-4" />
+                  Ocultar post
                 </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Image or Video */}
-      <div className="aspect-square bg-muted">
-        {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
-          <video
-            src={post.image_url}
-            className="w-full h-full object-cover"
-            controls
-            playsInline
-            muted
-            loop
-          />
-        ) : (
-          <img
-            src={post.image_url}
-            alt={post.caption ?? 'Post image'}
-            className="w-full h-full object-cover"
-          />
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <SparkReaction
-              isLiked={likesData?.isLiked ?? false}
-              onLike={handleLike}
-              disabled={!user}
-              iconClassName="text-foreground"
-            />
-            <button onClick={() => setShowComments(!showComments)}>
-              <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
-            </button>
-            <button onClick={handleShare}>
-              <Share2 className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
-            </button>
+                {!isOwnPost && (
+                  <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
+                    <Flag className="w-4 h-4" />
+                    Denunciar
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
+
+        {/* Image or Video */}
+        <div className="aspect-square bg-muted">
+          {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
+            <video
+              src={post.image_url}
+              className="w-full h-full object-cover"
+              controls
+              playsInline
+              muted
+              loop
+            />
+          ) : (
+            <img
+              src={post.image_url}
+              alt={post.caption ?? 'Post image'}
+              className="w-full h-full object-cover"
+            />
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SparkReaction
+                isLiked={likesData?.isLiked ?? false}
+                onLike={handleLike}
+                disabled={!user}
+                iconClassName="text-foreground"
+              />
+              <button onClick={() => setShowComments(true)}>
+                <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
+              </button>
+              <button onClick={handleShare}>
+                <Share2 className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Eye className="w-4 h-4" /> {viewCount ?? 0}
+              </span>
+              <button onClick={handleSave} disabled={!user}>
+                {savedData?.isSaved ? (
+                  <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
+                ) : (
+                  <Bookmark className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Stats */}
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Eye className="w-4 h-4" /> {viewCount ?? 0}
-            </span>
-            <button onClick={handleSave} disabled={!user}>
-              {savedData?.isSaved ? (
-                <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
-              ) : (
-                <Bookmark className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
-              )}
-            </button>
+            <p className="font-semibold text-sm text-foreground">{likesData?.count ?? 0} curtidas</p>
           </div>
-        </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-3">
-          <p className="font-semibold text-sm text-foreground">{likesData?.count ?? 0} curtidas</p>
-        </div>
+          {/* Caption */}
+          {post.caption && (
+            <p className="text-sm text-foreground">
+              <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
+                {post.profiles.username}
+              </Link>
+              {post.caption}
+            </p>
+          )}
 
-        {/* Caption */}
-        {post.caption && (
-          <p className="text-sm text-foreground">
-            <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
-              {post.profiles.username}
-            </Link>
-            {post.caption}
-          </p>
-        )}
-
-        {/* Comments preview */}
-        {comments && comments.length > 0 && !showComments && (
-          <button
-            onClick={() => setShowComments(true)}
-            className="text-sm text-muted-foreground"
-          >
-            Ver todos os {comments.length} comentários
-          </button>
-        )}
-
-        {/* Comments section */}
-        {showComments && comments && (
-          <div className="space-y-2 pt-2 border-t">
-            {comments.map((comment: any) => (
-              <p key={comment.id} className="text-sm text-foreground">
-                <Link to={`/profile/${comment.profiles.username}`} className="font-semibold mr-2 text-foreground">
-                  {comment.profiles.username}
-                </Link>
-                {comment.content}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {/* Timestamp */}
-        <p className="text-xs text-muted-foreground uppercase">
-          {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR })}
-        </p>
-
-        {/* Add comment */}
-        {user && (
-          <form onSubmit={handleAddComment} className="flex items-center gap-2 pt-2 border-t">
-            <Input
-              placeholder="Adicione um comentário..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="border-0 focus-visible:ring-0 px-0 text-foreground"
-            />
-            <Button
-              type="submit"
-              variant="ghost"
-              size="sm"
-              disabled={!newComment.trim()}
-              className="text-primary font-semibold"
+          {/* Comments preview */}
+          {comments && comments.length > 0 && (
+            <button
+              onClick={() => setShowComments(true)}
+              className="text-sm text-muted-foreground"
             >
-              Publicar
-            </Button>
-          </form>
-        )}
+              Ver todos os {comments.length} comentários
+            </button>
+          )}
+
+          {/* Timestamp */}
+          <p className="text-xs text-muted-foreground uppercase">
+            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR })}
+          </p>
+        </div>
       </div>
-    </div>
+
+      {/* Comments Dialog */}
+      <CommentsDialog
+        postId={post.id}
+        postOwnerId={post.profiles.id}
+        open={showComments}
+        onOpenChange={setShowComments}
+      />
+    </>
   );
 }
