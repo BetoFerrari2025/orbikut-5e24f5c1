@@ -18,6 +18,7 @@ import Notifications from "./pages/Notifications";
 import Discover from "./pages/Discover";
 import Post from "./pages/Post";
 import AdminUsers from "./pages/AdminUsers";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
