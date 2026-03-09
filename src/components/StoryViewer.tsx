@@ -109,6 +109,12 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const TICK_INTERVAL = 50;
   const isPaused = showComments || showCaptionEdit || showMusicInput || showLinkInput || showViewers || showHighlightSave;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasAdvancedRef = useRef(false);
+
+  // Reset advance flag when index changes
+  useEffect(() => {
+    hasAdvancedRef.current = false;
+  }, [currentIndex]);
 
   useEffect(() => {
     if (!stories || !stories[currentIndex]) return;
