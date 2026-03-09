@@ -369,6 +369,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 >
                   <Music className="w-4 h-4 mr-2" />
                   Música
+                </Button>
                 <Button
                   variant={showFilters ? 'default' : 'outline'}
                   onClick={() => setShowFilters(!showFilters)}
