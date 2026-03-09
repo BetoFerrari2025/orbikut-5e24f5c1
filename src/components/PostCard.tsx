@@ -97,6 +97,9 @@ export function PostCard({ post }: PostCardProps) {
             {post.caption}
           </p>
         )}
+
+        {/* Comments preview */}
+        {comments && comments.length > 0 && !showComments && (
           <button
             onClick={() => setShowComments(true)}
             className="text-sm text-muted-foreground"
