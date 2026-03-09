@@ -22,6 +22,7 @@ import {
 } from '@/hooks/useStoryInteractions';
 import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hooks/useHighlights';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSendNotification } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -307,7 +308,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           </div>
 
           {/* Emoji reactions bar */}
-          <StoryEmojiReactions storyId={currentStory.id} />
+          <StoryEmojiReactions storyId={currentStory.id} storyOwnerId={currentStory.user_id} />
 
           {/* Owner-only edit buttons */}
           <StoryOwnerControls
@@ -323,7 +324,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           <StoryPollOverlay storyId={currentStory.id} />
         </div>
 
-        {showComments && <StoryCommentsPanel storyId={currentStory.id} onClose={() => setShowComments(false)} />}
+        {showComments && <StoryCommentsPanel storyId={currentStory.id} storyOwnerId={currentStory.user_id} onClose={() => setShowComments(false)} />}
         {showCaptionEdit && <CaptionEditOverlay story={currentStory} onClose={() => setShowCaptionEdit(false)} />}
         {showMusicInput && <MusicInputOverlay story={currentStory} onClose={() => setShowMusicInput(false)} />}
         {showLinkInput && user?.id === currentStory.user_id && <LinkInputOverlay story={currentStory} onClose={() => setShowLinkInput(false)} />}
@@ -447,10 +448,12 @@ function StoryAudioPlayer({ musicUrl, storyId }: { musicUrl: string; storyId: st
 // ─── Emoji Reactions (Instagram-style) ───
 const STORY_EMOJIS = ['❤️', '😂', '😮', '😢', '👏', '🔥', '🎉', '😍'];
 
-function StoryEmojiReactions({ storyId }: { storyId: string }) {
+function StoryEmojiReactions({ storyId, storyOwnerId }: { storyId: string; storyOwnerId: string }) {
   const [sentEmoji, setSentEmoji] = useState<string | null>(null);
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const idCounter = useRef(0);
+  const { user } = useAuth();
+  const sendNotification = useSendNotification();
 
   const handleReaction = (emoji: string) => {
     setSentEmoji(emoji);
@@ -460,6 +463,16 @@ function StoryEmojiReactions({ storyId }: { storyId: string }) {
     setFloatingEmojis(prev => [...prev, { id, emoji }]);
     setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 1500);
     setTimeout(() => setSentEmoji(null), 1500);
+
+    // Send notification to story owner
+    if (user && user.id !== storyOwnerId) {
+      sendNotification.mutate({
+        userId: storyOwnerId,
+        actorId: user.id,
+        type: 'like',
+        content: `reagiu com ${emoji} ao seu story`,
+      });
+    }
   };
 
   return (
@@ -603,7 +616,7 @@ function renderCommentWithMentions(content: string) {
 }
 
 // ─── Comments Panel with @mention ───
-function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: () => void }) {
+function StoryCommentsPanel({ storyId, storyOwnerId, onClose }: { storyId: string; storyOwnerId: string; onClose: () => void }) {
   const { data: comments } = useStoryComments(storyId);
   const addComment = useAddStoryComment();
   const [text, setText] = useState('');
@@ -611,11 +624,22 @@ function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: ()
   const [mentionResults, setMentionResults] = useState<any[]>([]);
   const [mentionLoading, setMentionLoading] = useState(false);
   const { user } = useAuth();
+  const sendNotification = useSendNotification();
 
   const handleSend = async () => {
     if (!text.trim() || !user) return;
     const content = text.trim();
     addComment.mutate({ storyId, content });
+
+    // Notify story owner about the comment
+    if (user.id !== storyOwnerId) {
+      sendNotification.mutate({
+        userId: storyOwnerId,
+        actorId: user.id,
+        type: 'comment',
+        content: content.length > 100 ? content.slice(0, 100) + '...' : content,
+      });
+    }
 
     // Send @mention notifications
     const mentions = content.match(/@(\w+)/g);
