@@ -456,6 +456,7 @@ export type Database = {
           expires_at: string
           id: string
           image_url: string
+          link_url: string | null
           music_url: string | null
           user_id: string
         }
@@ -465,6 +466,7 @@ export type Database = {
           expires_at?: string
           id?: string
           image_url: string
+          link_url?: string | null
           music_url?: string | null
           user_id: string
         }
@@ -474,6 +476,7 @@ export type Database = {
           expires_at?: string
           id?: string
           image_url?: string
+          link_url?: string | null
           music_url?: string | null
           user_id?: string
         }
