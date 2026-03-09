@@ -20,12 +20,26 @@ const typeConfig = {
   follow: { icon: UserPlus, label: 'começou a seguir você', color: 'text-green-500' },
 };
 
+type FilterType = 'all' | 'like' | 'comment' | 'follow';
+
+const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
+  { value: 'all', label: 'Todas', icon: Bell },
+  { value: 'like', label: 'Curtidas', icon: Heart },
+  { value: 'comment', label: 'Comentários', icon: MessageCircle },
+  { value: 'follow', label: 'Seguidores', icon: UserPlus },
+];
+
 export default function Notifications() {
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
   const deleteOne = useDeleteNotification();
   const deleteAll = useDeleteAllNotifications();
+  const [filter, setFilter] = useState<FilterType>('all');
+
+  const filteredNotifications = notifications?.filter(
+    n => filter === 'all' || n.type === filter
+  );
 
   useEffect(() => {
     if (notifications && notifications.some(n => !n.read)) {
