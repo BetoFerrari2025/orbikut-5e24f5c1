@@ -17,12 +17,12 @@ export function useProfileLinks(userId?: string) {
     queryFn: async () => {
       if (!userId) return [];
       const { data, error } = await supabase
-        .from('profile_links' as any)
+        .from('profile_links')
         .select('*')
         .eq('user_id', userId)
         .order('display_order', { ascending: true });
       if (error) throw error;
-      return (data || []) as unknown as ProfileLink[];
+      return (data || []) as ProfileLink[];
     },
     enabled: !!userId,
   });
@@ -35,8 +35,24 @@ export function useAddProfileLink() {
     mutationFn: async ({ title, url }: { title: string; url: string }) => {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
-        .from('profile_links' as any)
-        .insert({ user_id: user.id, title, url } as any);
+        .from('profile_links')
+        .insert({ user_id: user.id, title, url });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile-links'] });
+    },
+  });
+}
+
+export function useUpdateProfileLink() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, title, url }: { id: string; title: string; url: string }) => {
+      const { error } = await supabase
+        .from('profile_links')
+        .update({ title, url })
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -50,7 +66,7 @@ export function useDeleteProfileLink() {
   return useMutation({
     mutationFn: async (linkId: string) => {
       const { error } = await supabase
-        .from('profile_links' as any)
+        .from('profile_links')
         .delete()
         .eq('id', linkId);
       if (error) throw error;

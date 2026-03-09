@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useProfileLinks, useAddProfileLink, useDeleteProfileLink } from '@/hooks/useProfileLinks';
+import { useProfileLinks, useAddProfileLink, useUpdateProfileLink, useDeleteProfileLink } from '@/hooks/useProfileLinks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ExternalLink, Plus, X, Link as LinkIcon } from 'lucide-react';
+import { ExternalLink, Plus, X, Link as LinkIcon, Pencil, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProfileLinksProps {
@@ -13,10 +13,14 @@ interface ProfileLinksProps {
 export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
   const { data: links, isLoading } = useProfileLinks(userId);
   const addLink = useAddProfileLink();
+  const updateLink = useUpdateProfileLink();
   const deleteLink = useDeleteProfileLink();
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editUrl, setEditUrl] = useState('');
 
   const handleAdd = () => {
     if (!title.trim() || !url.trim()) {
@@ -35,6 +39,34 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
     });
   };
 
+  const startEdit = (link: { id: string; title: string; url: string }) => {
+    setEditingId(link.id);
+    setEditTitle(link.title);
+    setEditUrl(link.url);
+  };
+
+  const handleUpdate = () => {
+    if (!editingId || !editTitle.trim() || !editUrl.trim()) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    const finalUrl = editUrl.startsWith('http') ? editUrl : `https://${editUrl}`;
+    updateLink.mutate({ id: editingId, title: editTitle.trim(), url: finalUrl }, {
+      onSuccess: () => {
+        setEditingId(null);
+        toast.success('Link atualizado!');
+      },
+      onError: () => toast.error('Erro ao atualizar link'),
+    });
+  };
+
+  const handleDelete = (linkId: string) => {
+    deleteLink.mutate(linkId, {
+      onSuccess: () => toast.success('Link removido!'),
+      onError: () => toast.error('Erro ao remover link'),
+    });
+  };
+
   if (isLoading) return null;
   if (!links?.length && !isOwnProfile) return null;
 
@@ -43,25 +75,56 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
       {links && links.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
           {links.map((link) => (
-            <div key={link.id} className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5 text-sm group">
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
-              >
-                {link.title}
-              </a>
-              {isOwnProfile && (
-                <button
-                  onClick={() => deleteLink.mutate(link.id)}
-                  className="ml-1 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+            editingId === link.id ? (
+              <div key={link.id} className="flex items-center gap-2 w-full">
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Título"
+                  className="h-8 text-sm flex-1"
+                />
+                <Input
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  placeholder="URL"
+                  className="h-8 text-sm flex-1"
+                />
+                <Button size="sm" onClick={handleUpdate} disabled={updateLink.isPending} className="h-8">
+                  <Check className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8">
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div key={link.id} className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5 text-sm group">
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
                 >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+                  {link.title}
+                </a>
+                {isOwnProfile && (
+                  <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => startEdit(link)}
+                      className="text-muted-foreground hover:text-primary"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(link.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
           ))}
         </div>
       )}
