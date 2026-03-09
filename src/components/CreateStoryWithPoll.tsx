@@ -144,6 +144,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setOptionB('');
     setShowText(false);
     setCaption('');
+    setTextColor('#ffffff');
+    setTextSize(14);
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
