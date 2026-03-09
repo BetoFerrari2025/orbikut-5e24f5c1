@@ -103,12 +103,22 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
+  const { data: viewCount } = usePostViews(post.id);
   const toggleLike = useToggleLike();
+  const recordView = useRecordView();
+  const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const addComment = useAddComment();
+
+  useEffect(() => {
+    if (isActive && !viewRecorded.current) {
+      viewRecorded.current = true;
+      recordView.mutate({ postId: post.id, userId: user?.id });
+    }
+  }, [isActive, post.id]);
 
   useEffect(() => {
     if (videoRef.current) {
