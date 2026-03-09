@@ -532,8 +532,15 @@ export type Database = {
       stories: {
         Row: {
           caption: string | null
+          caption_color: string | null
+          caption_size: number | null
+          caption_x: number | null
+          caption_y: number | null
           created_at: string
           expires_at: string
+          filter_brightness: number | null
+          filter_contrast: number | null
+          filter_saturation: number | null
           id: string
           image_url: string
           link_label: string | null
@@ -543,8 +550,15 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          caption_color?: string | null
+          caption_size?: number | null
+          caption_x?: number | null
+          caption_y?: number | null
           created_at?: string
           expires_at?: string
+          filter_brightness?: number | null
+          filter_contrast?: number | null
+          filter_saturation?: number | null
           id?: string
           image_url: string
           link_label?: string | null
@@ -554,8 +568,15 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          caption_color?: string | null
+          caption_size?: number | null
+          caption_x?: number | null
+          caption_y?: number | null
           created_at?: string
           expires_at?: string
+          filter_brightness?: number | null
+          filter_contrast?: number | null
+          filter_saturation?: number | null
           id?: string
           image_url?: string
           link_label?: string | null

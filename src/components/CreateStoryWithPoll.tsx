@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -94,6 +94,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [caption, setCaption] = useState('');
   const [textColor, setTextColor] = useState('#ffffff');
   const [textSize, setTextSize] = useState(14);
+  // Text position as percentage (0-100)
+  const [textPosPercent, setTextPosPercent] = useState({ x: 50, y: 50 });
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Link overlay
   const [showLink, setShowLink] = useState(false);
@@ -107,6 +110,13 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const musicAudioRef = useRef<HTMLAudioElement>(null);
   const musicInputRef = useRef<HTMLInputElement>(null);
+
+  // Filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -146,9 +156,16 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         file: selectedFile,
         poll,
         caption: showText && caption.trim() ? caption.trim() : undefined,
+        captionX: showText && caption.trim() ? textPosPercent.x : undefined,
+        captionY: showText && caption.trim() ? textPosPercent.y : undefined,
+        captionColor: showText && caption.trim() ? textColor : undefined,
+        captionSize: showText && caption.trim() ? textSize : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
         musicUrl,
+        filterBrightness: brightness,
+        filterContrast: contrast,
+        filterSaturation: saturation,
       });
       toast.success('Story publicado!');
       resetForm();
@@ -169,6 +186,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setCaption('');
     setTextColor('#ffffff');
     setTextSize(14);
+    setTextPosPercent({ x: 50, y: 50 });
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
@@ -178,6 +196,10 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setMusicPreviewUrl(null);
     setIsMusicPlaying(false);
     if (musicAudioRef.current) { musicAudioRef.current.pause(); musicAudioRef.current.currentTime = 0; }
+    setShowFilters(false);
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,11 +245,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               />
             </div>
           ) : (
-            <div className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
+            <div ref={previewContainerRef} className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
               {selectedFile?.type.startsWith('video') ? (
-                <video src={preview} className="w-full h-full object-cover" muted autoPlay loop />
+                <video src={preview} className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop />
               ) : (
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                <img src={preview} alt="Preview" className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} />
               )}
               <Button
                 variant="secondary"
@@ -241,9 +263,22 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 <X className="w-4 h-4" />
               </Button>
 
-              {/* Draggable text overlay - starts centered */}
+              {/* Draggable text overlay - percentage based */}
               {showText && caption && (
-                <DraggablePreview initialX={50} initialY={180}>
+                <DraggablePreview
+                  initialX={50}
+                  initialY={180}
+                  onPositionChange={(x, y) => {
+                    const container = previewContainerRef.current;
+                    if (container) {
+                      const rect = container.getBoundingClientRect();
+                      setTextPosPercent({
+                        x: Math.round((x / rect.width) * 100),
+                        y: Math.round((y / rect.height) * 100),
+                      });
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-1">
                     <GripVertical className="w-3 h-3 text-white/50" />
                     <p
@@ -256,7 +291,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </DraggablePreview>
               )}
 
-              {/* Draggable link CTA overlay - starts centered */}
+              {/* Draggable link CTA overlay */}
               {showLink && linkUrl && (
                 <DraggablePreview initialX={50} initialY={240}>
                   <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
@@ -334,6 +369,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 >
                   <Music className="w-4 h-4 mr-2" />
                   Música
+                </Button>
+                <Button
+                  variant={showFilters ? 'default' : 'outline'}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(showFilters && 'gradient-brand')}
+                  size="sm"
+                >
+                  <SlidersHorizontal className="w-4 h-4 mr-2" />
+                  Filtros
                 </Button>
               </div>
 
@@ -419,6 +463,30 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Filters */}
+              {showFilters && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Ajuste os filtros visuais do story</p>
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Sun className="w-3 h-3" /> Brilho: {brightness}%</p>
+                      <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={50} max={150} step={1} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Contrast className="w-3 h-3" /> Contraste: {contrast}%</p>
+                      <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">🎨 Saturação: {saturation}%</p>
+                      <Slider value={[saturation]} onValueChange={([v]) => setSaturation(v)} min={0} max={200} step={1} />
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => { setBrightness(100); setContrast(100); setSaturation(100); }}>
+                      Resetar filtros
+                    </Button>
+                  </div>
                 </div>
               )}
             </>
