@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { StreakBadge } from '@/components/StreakBadge';
-import { Grid3X3, Settings, MessageCircle, Film, Bookmark } from 'lucide-react';
+import { Grid3X3, Settings, MessageCircle, Film, Bookmark, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
