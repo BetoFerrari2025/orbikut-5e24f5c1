@@ -488,6 +488,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   </div>
                 </div>
               )}
+            </>
+          )}
 
           <Button
             onClick={handleSubmit}
