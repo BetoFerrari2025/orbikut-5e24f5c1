@@ -624,11 +624,22 @@ function StoryCommentsPanel({ storyId, storyOwnerId, onClose }: { storyId: strin
   const [mentionResults, setMentionResults] = useState<any[]>([]);
   const [mentionLoading, setMentionLoading] = useState(false);
   const { user } = useAuth();
+  const sendNotification = useSendNotification();
 
   const handleSend = async () => {
     if (!text.trim() || !user) return;
     const content = text.trim();
     addComment.mutate({ storyId, content });
+
+    // Notify story owner about the comment
+    if (user.id !== storyOwnerId) {
+      sendNotification.mutate({
+        userId: storyOwnerId,
+        actorId: user.id,
+        type: 'comment',
+        content: content.length > 100 ? content.slice(0, 100) + '...' : content,
+      });
+    }
 
     // Send @mention notifications
     const mentions = content.match(/@(\w+)/g);
