@@ -369,6 +369,14 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 >
                   <Music className="w-4 h-4 mr-2" />
                   Música
+                <Button
+                  variant={showFilters ? 'default' : 'outline'}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(showFilters && 'gradient-brand')}
+                  size="sm"
+                >
+                  <SlidersHorizontal className="w-4 h-4 mr-2" />
+                  Filtros
                 </Button>
               </div>
 
