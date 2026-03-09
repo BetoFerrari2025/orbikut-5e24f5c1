@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { PwaInstallButton } from '@/components/PwaInstallButton';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUpdateOnlineStatus } from '@/hooks/useOnlineStatus';
 
 interface AppLayoutProps {
   children: ReactNode;
