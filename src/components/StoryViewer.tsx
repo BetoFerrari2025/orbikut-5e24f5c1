@@ -357,8 +357,10 @@ function StoryLikeButton({ storyId }: { storyId: string }) {
   );
 }
 
-// ─── Owner Controls (caption + music + viewers) ───
-function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers }: { story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void }) {
+// ─── Owner Controls ───
+function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers, onSaveHighlight }: {
+  story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
+}) {
   const { user } = useAuth();
   if (user?.id !== story.user_id) return null;
 
@@ -381,6 +383,12 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers }
           <Eye className="w-5 h-5 text-white" />
         </div>
         <span className="text-white text-[10px] mt-0.5">Vistas</span>
+      </button>
+      <button onClick={onSaveHighlight} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <Star className="w-5 h-5 text-white" />
+        </div>
+        <span className="text-white text-[10px] mt-0.5">Destaque</span>
       </button>
     </div>
   );
