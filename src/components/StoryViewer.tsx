@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star, Link2, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,6 +24,41 @@ import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hook
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+
+const VideoWithUnmute = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttributes<HTMLVideoElement>>(
+  (props, ref) => {
+    const [isMuted, setIsMuted] = useState(true);
+    const localRef = useRef<HTMLVideoElement>(null);
+
+    // Merge refs
+    const setRefs = useCallback((node: HTMLVideoElement | null) => {
+      (localRef as any).current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) (ref as any).current = node;
+    }, [ref]);
+
+    const toggleMute = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (localRef.current) {
+        localRef.current.muted = !isMuted;
+        setIsMuted(!isMuted);
+      }
+    };
+
+    return (
+      <div className="relative">
+        <video ref={setRefs} {...props} autoPlay playsInline muted={isMuted} />
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center"
+        >
+          {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
+        </button>
+      </div>
+    );
+  }
+);
+VideoWithUnmute.displayName = 'VideoWithUnmute';
 
 interface StoryViewerProps {
   stories: Story[] | null;
@@ -175,7 +210,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <video ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} autoPlay playsInline muted />
+              <VideoWithUnmute ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
