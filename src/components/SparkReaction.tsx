@@ -20,7 +20,7 @@ interface SparkReactionProps {
 
 const emojis = ['❤️', '🔥', '💥', '⭐', '✨', '💫', '🎉', '💖'];
 
-export function SparkReaction({ isLiked, onLike, disabled }: SparkReactionProps) {
+export function SparkReaction({ isLiked, onLike, disabled, iconClassName }: SparkReactionProps) {
   const [floating, setFloating] = useState<FloatingEmoji[]>([]);
   const [isHolding, setIsHolding] = useState(false);
   const [holdTimer, setHoldTimer] = useState<NodeJS.Timeout | null>(null);
