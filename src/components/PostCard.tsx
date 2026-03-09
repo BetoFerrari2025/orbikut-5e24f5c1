@@ -212,7 +212,7 @@ export function PostCard({ post }: PostCardProps) {
                 disabled={!user}
                 iconClassName="text-foreground"
               />
-              <button onClick={() => setShowComments(true)}>
+              <button onClick={handleCommentOpen}>
                 <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
               <button onClick={handleShare}>
