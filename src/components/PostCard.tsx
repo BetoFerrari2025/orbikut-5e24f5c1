@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2 } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
 import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +34,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [hidden, setHidden] = useState(false);
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
@@ -87,6 +89,8 @@ export function PostCard({ post }: PostCardProps) {
     setNewComment('');
   };
 
+  if (hidden) return null;
+
   return (
     <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
       {/* Header */}
@@ -113,9 +117,25 @@ export function PostCard({ post }: PostCardProps) {
               Seguir
             </Button>
           )}
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="w-5 h-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
+                <EyeOff className="w-4 h-4" />
+                Ocultar post
+              </DropdownMenuItem>
+              {!isOwnPost && (
+                <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
+                  <Flag className="w-4 h-4" />
+                  Denunciar
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
