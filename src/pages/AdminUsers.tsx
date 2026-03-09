@@ -14,7 +14,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert,
+  Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
   TrendingUp, UserPlus, FileText, Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
