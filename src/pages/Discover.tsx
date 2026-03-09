@@ -233,6 +233,11 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
         <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="w-10 h-10 flex items-center justify-center">
           <Share2 className="w-7 h-7 text-white" />
         </button>
+
+        <div className="flex flex-col items-center gap-1">
+          <Eye className="w-6 h-6 text-white/70" />
+          <span className="text-white text-xs font-semibold">{viewCount ?? 0}</span>
+        </div>
       </div>
 
       <div className="absolute left-4 right-20 bottom-24 z-10">
