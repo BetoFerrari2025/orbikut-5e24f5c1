@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Camera, Moon } from 'lucide-react';
 
 export default function Settings() {
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
