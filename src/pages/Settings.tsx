@@ -154,6 +154,22 @@ export default function Settings() {
           {updateProfile.isPending ? 'Salvando...' : 'Salvar'}
         </Button>
       </form>
+
+      {/* Theme toggle */}
+      <div className="mt-8 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Aparência</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Moon className="w-5 h-5 text-foreground" />
+            <Label htmlFor="dark-mode" className="cursor-pointer">Modo escuro</Label>
+          </div>
+          <Switch
+            id="dark-mode"
+            checked={theme === 'dark'}
+            onCheckedChange={toggleTheme}
+          />
+        </div>
+      </div>
     </main>
   );
 }
