@@ -156,6 +156,9 @@ export default function Profile() {
           <p className="text-sm whitespace-pre-wrap text-foreground mb-4">{profile.bio}</p>
         )}
 
+        {/* Story Highlights */}
+        <ProfileHighlights userId={profile.id} isOwnProfile={isOwnProfile} />
+
         {/* Tabs */}
         <Tabs defaultValue="photos" className="w-full">
           <TabsList className="w-full bg-transparent border-t rounded-none h-auto p-0">
