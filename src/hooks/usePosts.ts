@@ -133,7 +133,7 @@ export function useComments(postId: string) {
         .from('comments')
         .select(`
           *,
-          profiles (id, username, avatar_url)
+          profiles (id, username, avatar_url, last_seen)
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
