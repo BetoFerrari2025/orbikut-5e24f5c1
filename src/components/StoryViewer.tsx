@@ -18,6 +18,7 @@ import {
   useRecordStoryView,
   useStoryViewers,
 } from '@/hooks/useStoryInteractions';
+import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hooks/useHighlights';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
