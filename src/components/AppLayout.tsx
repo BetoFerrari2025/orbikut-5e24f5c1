@@ -26,7 +26,7 @@ export function AppLayout({ children, hideNavbar }: AppLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         {/* Desktop sidebar */}
         <div className="hidden md:block">
           <AppSidebar />
