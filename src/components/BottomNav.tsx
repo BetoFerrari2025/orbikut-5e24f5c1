@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, Compass, User } from 'lucide-react';
+import { Home, Search, PlusSquare, Compass, User, Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUnreadCount } from '@/hooks/useNotifications';
 import { CreatePost } from '@/components/CreatePost';
 import { cn } from '@/lib/utils';
 
