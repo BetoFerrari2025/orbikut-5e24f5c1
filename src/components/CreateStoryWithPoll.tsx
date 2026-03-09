@@ -100,6 +100,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [linkUrl, setLinkUrl] = useState('');
   const [linkLabel, setLinkLabel] = useState('');
 
+  // Music
+  const [showMusic, setShowMusic] = useState(false);
+  const [musicFile, setMusicFile] = useState<File | null>(null);
+  const [musicPreviewUrl, setMusicPreviewUrl] = useState<string | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const musicAudioRef = useRef<HTMLAudioElement>(null);
+  const musicInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createStory = useCreateStoryWithPoll();
 
