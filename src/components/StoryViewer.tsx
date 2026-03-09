@@ -22,6 +22,7 @@ import {
 } from '@/hooks/useStoryInteractions';
 import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hooks/useHighlights';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSendNotification } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
