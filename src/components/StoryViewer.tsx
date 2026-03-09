@@ -158,25 +158,29 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     const video = videoRef.current;
     if (!video || !isCurrentVideo || !stories) return;
 
-    const onTimeUpdate = () => {
-      if (video.duration && video.duration !== Infinity) {
-        setProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-    const onEnded = () => {
+    const advanceToNext = () => {
+      if (hasAdvancedRef.current) return;
+      hasAdvancedRef.current = true;
       if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
       else onClose();
     };
 
-    // Also use a fallback timer for mobile where ended may not fire
+    const onTimeUpdate = () => {
+      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+
+    const onEnded = () => advanceToNext();
+
+    // Fallback timer for mobile where ended may not fire
     let fallbackTimer: ReturnType<typeof setInterval> | null = null;
-    const onLoadedMetadata = () => {
-      if (video.duration && video.duration !== Infinity) {
-        // Fallback: check every 500ms if video has finished
+    const startFallback = () => {
+      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
         fallbackTimer = setInterval(() => {
           if (video.currentTime >= video.duration - 0.3) {
             if (fallbackTimer) clearInterval(fallbackTimer);
-            onEnded();
+            advanceToNext();
           }
         }, 500);
       }
@@ -184,16 +188,15 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
-    video.addEventListener('loadedmetadata', onLoadedMetadata);
-    // If metadata already loaded
-    if (video.readyState >= 1 && video.duration && video.duration !== Infinity) {
-      onLoadedMetadata();
+    video.addEventListener('loadedmetadata', startFallback);
+    if (video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
+      startFallback();
     }
 
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
-      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      video.removeEventListener('loadedmetadata', startFallback);
       if (fallbackTimer) clearInterval(fallbackTimer);
     };
   }, [currentIndex, stories, isCurrentVideo]);
