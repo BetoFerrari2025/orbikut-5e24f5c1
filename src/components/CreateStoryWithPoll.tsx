@@ -464,8 +464,30 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   )}
                 </div>
               )}
-            </>
-          )}
+
+              {/* Filters */}
+              {showFilters && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Ajuste os filtros visuais do story</p>
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Sun className="w-3 h-3" /> Brilho: {brightness}%</p>
+                      <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={50} max={150} step={1} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Contrast className="w-3 h-3" /> Contraste: {contrast}%</p>
+                      <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">🎨 Saturação: {saturation}%</p>
+                      <Slider value={[saturation]} onValueChange={([v]) => setSaturation(v)} min={0} max={200} step={1} />
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => { setBrightness(100); setContrast(100); setSaturation(100); }}>
+                      Resetar filtros
+                    </Button>
+                  </div>
+                </div>
+              )}
 
           <Button
             onClick={handleSubmit}
