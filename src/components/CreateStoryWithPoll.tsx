@@ -94,6 +94,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [caption, setCaption] = useState('');
   const [textColor, setTextColor] = useState('#ffffff');
   const [textSize, setTextSize] = useState(14);
+  // Text position as percentage (0-100)
+  const [textPosPercent, setTextPosPercent] = useState({ x: 50, y: 50 });
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Link overlay
   const [showLink, setShowLink] = useState(false);
