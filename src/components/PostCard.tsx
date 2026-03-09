@@ -79,6 +79,7 @@ export function PostCard({ post }: PostCardProps) {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
     addComment.mutate({ postId: post.id, content: newComment });
+    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'comment', postId: post.id, content: newComment });
     setNewComment('');
   };
 
