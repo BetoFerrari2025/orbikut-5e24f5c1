@@ -1,13 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useNotifications, useMarkAsRead, Notification } from '@/hooks/useNotifications';
+import { useNotifications, useMarkAsRead, useDeleteNotification, useDeleteAllNotifications, Notification } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Heart, MessageCircle, UserPlus, Bell } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, Bell, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const typeConfig = {
   like: { icon: Heart, label: 'curtiu seu post', color: 'text-red-500' },
@@ -19,6 +24,8 @@ export default function Notifications() {
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
+  const deleteOne = useDeleteNotification();
+  const deleteAll = useDeleteAllNotifications();
 
   useEffect(() => {
     if (notifications && notifications.some(n => !n.read)) {
@@ -36,8 +43,29 @@ export default function Notifications() {
 
   return (
     <main className="max-w-lg mx-auto">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b flex items-center justify-between">
         <h1 className="text-xl font-bold">Notificações</h1>
+        {notifications && notifications.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <Trash2 className="w-4 h-4 mr-1" /> Excluir tudo
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir todas as notificações?</AlertDialogTitle>
+                <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => deleteAll.mutate()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Excluir tudo
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
 
       {isLoading && (
@@ -65,7 +93,7 @@ export default function Notifications() {
       {notifications && notifications.length > 0 && (
         <div>
           {notifications.map((notif) => (
-            <NotificationItem key={notif.id} notification={notif} />
+            <NotificationItem key={notif.id} notification={notif} onDelete={(id) => deleteOne.mutate(id)} />
           ))}
         </div>
       )}
@@ -73,7 +101,7 @@ export default function Notifications() {
   );
 }
 
-function NotificationItem({ notification }: { notification: Notification }) {
+function NotificationItem({ notification, onDelete }: { notification: Notification; onDelete: (id: string) => void }) {
   const config = typeConfig[notification.type];
   const Icon = config.icon;
 
@@ -84,35 +112,41 @@ function NotificationItem({ notification }: { notification: Notification }) {
       : '#';
 
   return (
-    <Link
-      to={linkTo}
-      className={cn(
-        "flex items-center gap-3 p-4 border-b hover:bg-muted/50 transition-colors",
-        !notification.read && "bg-primary/5"
-      )}
-    >
-      <div className="relative">
-        <Avatar className="w-10 h-10">
-          <AvatarImage src={notification.actor?.avatar_url ?? undefined} />
-          <AvatarFallback>{notification.actor?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-        </Avatar>
-        <div className={cn("absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background flex items-center justify-center")}>
-          <Icon className={cn("w-3 h-3", config.color)} />
+    <div className={cn(
+      "flex items-center gap-3 p-4 border-b hover:bg-muted/50 transition-colors",
+      !notification.read && "bg-primary/5"
+    )}>
+      <Link to={linkTo} className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="relative shrink-0">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={notification.actor?.avatar_url ?? undefined} />
+            <AvatarFallback>{notification.actor?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+          </Avatar>
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background flex items-center justify-center">
+            <Icon className={cn("w-3 h-3", config.color)} />
+          </div>
         </div>
-      </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">
-          <span className="font-semibold">{notification.actor?.username ?? 'Alguém'}</span>
-          {' '}{config.label}
-          {notification.content && (
-            <span className="text-muted-foreground">: "{notification.content}"</span>
-          )}
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {formatDistanceToNow(new Date(notification.created_at), { locale: ptBR, addSuffix: true })}
-        </p>
-      </div>
-    </Link>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm">
+            <span className="font-semibold">{notification.actor?.username ?? 'Alguém'}</span>
+            {' '}{config.label}
+            {notification.content && (
+              <span className="text-muted-foreground">: "{notification.content}"</span>
+            )}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {formatDistanceToNow(new Date(notification.created_at), { locale: ptBR, addSuffix: true })}
+          </p>
+        </div>
+      </Link>
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
+        className="shrink-0 p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
   );
 }
