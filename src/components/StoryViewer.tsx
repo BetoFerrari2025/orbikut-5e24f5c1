@@ -294,7 +294,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           {currentStory.music_url && <StoryAudioPlayer musicUrl={currentStory.music_url} storyId={currentStory.id} />}
 
           {/* Right-side action buttons */}
-          <div className="absolute right-3 bottom-28 z-10 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute right-3 bottom-24 z-20 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
             <StoryLikeButton storyId={currentStory.id} />
             <button onClick={() => setShowComments(true)} className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
