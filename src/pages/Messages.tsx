@@ -436,12 +436,18 @@ function ChatView({ conversation, onBack, currentUserId }: {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={conversation.other_user?.avatar_url ?? undefined} />
-          <AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={conversation.other_user?.avatar_url ?? undefined} />
+            <AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+          </Avatar>
+          <OnlineIndicator isOnline={isUserOnline((conversation.other_user as any)?.last_seen)} size="sm" />
+        </div>
         <div>
           <span className="font-semibold">{conversation.other_user?.username ?? 'Usuário'}</span>
+          {isUserOnline((conversation.other_user as any)?.last_seen) && !otherTyping && (
+            <p className="text-xs text-green-500">online</p>
+          )}
           {otherTyping && (
             <p className="text-xs text-primary animate-pulse">digitando...</p>
           )}
