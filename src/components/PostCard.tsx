@@ -134,7 +134,7 @@ export function PostCard({ post }: PostCardProps) {
               placeholder="Adicione um comentário..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="border-0 focus-visible:ring-0 px-0"
+              className="border-0 focus-visible:ring-0 px-0 text-foreground"
             />
             <Button
               type="submit"
