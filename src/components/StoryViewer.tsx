@@ -36,6 +36,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showComments, setShowComments] = useState(false);
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
   const [showHighlightSave, setShowHighlightSave] = useState(false);
   const [progress, setProgress] = useState(0);
