@@ -50,7 +50,7 @@ export function CreatePost() {
       if (!isOpen) resetForm();
     }}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="hover:bg-muted">
+        <Button variant="ghost" size="icon" className="hover:bg-muted text-foreground">
           <ImagePlus className="w-6 h-6" />
         </Button>
       </DialogTrigger>
