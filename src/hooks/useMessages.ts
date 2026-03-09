@@ -147,7 +147,7 @@ export function useMessageReactions(conversationId: string | undefined) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data as MessageReaction[];
+      return (data as unknown) as MessageReaction[];
     },
     enabled: !!conversationId,
   });
