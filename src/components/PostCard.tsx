@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { MessageCircle, MoreHorizontal } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
+import { SparkReaction } from '@/components/SparkReaction';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -55,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
             <AvatarImage src={post.profiles.avatar_url ?? undefined} />
             <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold text-sm">{post.profiles.username}</span>
+          <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
         </Link>
         <Button variant="ghost" size="icon">
           <MoreHorizontal className="w-5 h-5" />
@@ -74,14 +75,11 @@ export function PostCard({ post }: PostCardProps) {
       {/* Actions */}
       <div className="p-3 space-y-2">
         <div className="flex items-center gap-4">
-          <button onClick={handleLike} disabled={!user}>
-            <Heart
-              className={cn(
-                'w-6 h-6 transition-colors',
-                likesData?.isLiked ? 'fill-primary text-primary' : 'hover:text-muted-foreground'
-              )}
-            />
-          </button>
+          <SparkReaction
+            isLiked={likesData?.isLiked ?? false}
+            onLike={handleLike}
+            disabled={!user}
+          />
           <button onClick={() => setShowComments(!showComments)}>
             <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
           </button>
