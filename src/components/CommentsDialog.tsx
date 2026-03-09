@@ -12,6 +12,8 @@ import { useSendNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { OnlineIndicator } from '@/components/OnlineIndicator';
+import { isUserOnline } from '@/hooks/useOnlineStatus';
 
 interface CommentsDialogProps {
   postId: string;
