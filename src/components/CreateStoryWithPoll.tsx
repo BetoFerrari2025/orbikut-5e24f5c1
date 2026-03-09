@@ -416,6 +416,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
                   Filtros
                 </Button>
+                <Button
+                  variant={showStickers ? 'default' : 'outline'}
+                  onClick={() => setShowStickers(!showStickers)}
+                  className={cn(showStickers && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Smile className="w-4 h-4 mr-2" />
+                  Stickers
+                </Button>
               </div>
 
               {/* Text input */}
