@@ -580,8 +580,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     >
                       {createStory.isPending ? 'Publicando...' : 'Publicar Story'}
                     </Button>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </>
