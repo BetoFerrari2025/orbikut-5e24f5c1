@@ -81,7 +81,14 @@ export default function Discover() {
             post={post}
             isActive={index === currentIndex}
             isMuted={isMuted}
-            onToggleMute={() => setIsMuted(!isMuted)}
+            showMuteIcon={showMuteIcon}
+            onToggleMute={() => {
+              const newMuted = !isMuted;
+              setIsMuted(newMuted);
+              setShowMuteIcon(true);
+              if (muteTimeoutRef.current) clearTimeout(muteTimeoutRef.current);
+              muteTimeoutRef.current = setTimeout(() => setShowMuteIcon(false), 1500);
+            }}
             onShare={() => handleShare(post.id)}
           />
         ))}
