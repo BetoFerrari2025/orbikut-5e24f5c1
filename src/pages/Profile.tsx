@@ -15,6 +15,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
+import { ProfileHighlights } from '@/components/ProfileHighlights';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
