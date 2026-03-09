@@ -81,12 +81,15 @@ export default function Profile() {
     <main className="max-w-4xl mx-auto px-4 py-8">
       {/* Profile header */}
       <div className="flex items-center gap-4 sm:gap-6 mb-4">
-        <Avatar className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0">
-          <AvatarImage src={profile.avatar_url ?? undefined} />
-          <AvatarFallback className="text-2xl sm:text-4xl">
-            {profile.username[0].toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative flex-shrink-0">
+          <Avatar className="w-20 h-20 sm:w-28 sm:h-28">
+            <AvatarImage src={profile.avatar_url ?? undefined} />
+            <AvatarFallback className="text-2xl sm:text-4xl">
+              {profile.username[0].toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <OnlineIndicator isOnline={isUserOnline((profile as any).last_seen)} size="md" />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-3 flex-wrap">

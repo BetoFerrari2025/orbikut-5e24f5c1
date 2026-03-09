@@ -79,11 +79,12 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
 
           {comments?.map((c: any) => (
             <div key={c.id} className="flex gap-3 group">
-              <Link to={`/profile/${c.profiles.username}`}>
+              <Link to={`/profile/${c.profiles.username}`} className="relative">
                 <Avatar className="w-8 h-8 shrink-0">
                   <AvatarImage src={c.profiles?.avatar_url ?? undefined} />
                   <AvatarFallback className="text-xs">{c.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
+                <OnlineIndicator isOnline={isUserOnline(c.profiles?.last_seen)} />
               </Link>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
