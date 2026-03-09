@@ -243,8 +243,11 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          current_streak: number | null
           full_name: string | null
           id: string
+          last_post_date: string | null
+          max_streak: number | null
           updated_at: string
           username: string
         }
@@ -252,8 +255,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          current_streak?: number | null
           full_name?: string | null
           id: string
+          last_post_date?: string | null
+          max_streak?: number | null
           updated_at?: string
           username: string
         }
@@ -261,8 +267,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          current_streak?: number | null
           full_name?: string | null
           id?: string
+          last_post_date?: string | null
+          max_streak?: number | null
           updated_at?: string
           username?: string
         }
@@ -296,6 +305,80 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          poll_id: string
+          selected_option: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poll_id: string
+          selected_option: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poll_id?: string
+          selected_option?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "story_polls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_poll_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_polls: {
+        Row: {
+          created_at: string
+          id: string
+          option_a: string
+          option_b: string
+          question: string
+          story_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_a: string
+          option_b: string
+          question: string
+          story_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          question?: string
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_polls_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
             referencedColumns: ["id"]
           },
         ]

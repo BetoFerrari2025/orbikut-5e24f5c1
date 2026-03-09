@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
+import { StreakBadge } from '@/components/StreakBadge';
 import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
@@ -85,7 +86,10 @@ export default function Profile() {
 
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold">{profile.username}</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{profile.username}</h1>
+              {(profile as any).current_streak > 0 && (
+                <StreakBadge streak={(profile as any).current_streak} />
+              )}
               {isOwnProfile ? (
                 <Button variant="secondary" size="sm" asChild>
                   <Link to="/settings">

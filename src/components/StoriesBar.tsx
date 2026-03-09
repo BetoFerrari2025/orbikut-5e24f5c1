@@ -2,32 +2,20 @@ import { useState, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useStories, useCreateStory, Story } from '@/hooks/useStories';
+import { useStories, Story } from '@/hooks/useStories';
+import { useStoryPoll, useVotePoll, useUserVote } from '@/hooks/useStoryPolls';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { toast } from 'sonner';
+import { CreateStoryWithPoll } from '@/components/CreateStoryWithPoll';
 import { cn } from '@/lib/utils';
 
 export function StoriesBar() {
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const { data: storiesMap } = useStories();
-  const createStory = useCreateStory();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [viewingStories, setViewingStories] = useState<Story[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleCreateStory = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      await createStory.mutateAsync(file);
-      toast.success('Story publicado!');
-    } catch {
-      toast.error('Erro ao publicar story');
-    }
-    e.target.value = '';
-  };
+  const [showCreateStory, setShowCreateStory] = useState(false);
 
   const openStories = (stories: Story[]) => {
     setViewingStories(stories);
@@ -62,33 +50,26 @@ export function StoriesBar() {
                 const ownStories = storiesMap?.get(user.id);
                 if (ownStories) openStories(ownStories);
               } else {
-                fileInputRef.current?.click();
+                setShowCreateStory(true);
               }
             }}
             className="flex flex-col items-center gap-1 min-w-[68px]"
-            disabled={createStory.isPending}
           >
             <div className="relative">
               <Avatar className={cn("w-16 h-16 border-2", hasOwnStory ? "border-transparent" : "border-muted")}>
                 <AvatarImage src={profile?.avatar_url ?? undefined} />
                 <AvatarFallback>{profile?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
               </Avatar>
-              {hasOwnStory ? (
+              {hasOwnStory && (
                 <div className="absolute inset-0 rounded-full p-[2px] gradient-brand -m-[2px]">
                   <div className="w-full h-full rounded-full bg-background" />
                 </div>
-              ) : null}
-              <div className={cn(
-                "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground z-10",
-                "bg-primary"
-              )}>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground z-10 bg-primary">
                 <Plus className="w-3 h-3" />
               </div>
             </div>
-            <span className="text-xs text-muted-foreground truncate w-16 text-center">
-              {createStory.isPending ? '...' : 'Seu story'}
-            </span>
-            <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleCreateStory} className="hidden" />
+            <span className="text-xs text-muted-foreground truncate w-16 text-center">Seu story</span>
           </button>
         )}
 
@@ -108,11 +89,14 @@ export function StoriesBar() {
                   <AvatarFallback>{storyUser.username[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
               </div>
-              <span className="text-xs truncate w-16 text-center">{storyUser.username}</span>
+              <span className="text-xs text-foreground truncate w-16 text-center">{storyUser.username}</span>
             </button>
           );
         })}
       </div>
+
+      {/* Create story with poll */}
+      <CreateStoryWithPoll open={showCreateStory} onOpenChange={setShowCreateStory} />
 
       {/* Story viewer */}
       <Dialog open={!!viewingStories} onOpenChange={(open) => !open && setViewingStories(null)}>
@@ -153,10 +137,78 @@ export function StoriesBar() {
                   className="w-full aspect-[9/16] object-cover"
                 />
               )}
+
+              {/* Story Poll overlay */}
+              <StoryPollOverlay storyId={viewingStories[currentIndex].id} />
             </div>
           )}
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function StoryPollOverlay({ storyId }: { storyId: string }) {
+  const { data: poll } = useStoryPoll(storyId);
+  const votePoll = useVotePoll();
+  const { data: userVote } = useUserVote(poll?.id ?? '');
+  const { user } = useAuth();
+
+  if (!poll) return null;
+
+  const handleVote = (option: 'A' | 'B') => {
+    if (!user || userVote) return;
+    votePoll.mutate({ pollId: poll.id, option, storyId });
+  };
+
+  return (
+    <div className="absolute bottom-8 left-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3">
+        <p className="text-white font-semibold text-center">{poll.question}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => handleVote('A')}
+            className={cn(
+              "relative overflow-hidden rounded-lg p-3 text-white font-medium transition-all",
+              userVote === 'A' ? "ring-2 ring-primary" : "",
+              !userVote ? "hover:scale-105 bg-primary/40" : "bg-primary/30"
+            )}
+          >
+            {userVote && (
+              <div
+                className="absolute inset-0 bg-primary/50"
+                style={{ width: `${poll.percentA}%` }}
+              />
+            )}
+            <span className="relative z-10">
+              {poll.option_a}
+              {userVote && <span className="ml-2 text-sm">{poll.percentA}%</span>}
+            </span>
+          </button>
+          <button
+            onClick={() => handleVote('B')}
+            className={cn(
+              "relative overflow-hidden rounded-lg p-3 text-white font-medium transition-all",
+              userVote === 'B' ? "ring-2 ring-accent" : "",
+              !userVote ? "hover:scale-105 bg-accent/40" : "bg-accent/30"
+            )}
+          >
+            {userVote && (
+              <div
+                className="absolute inset-0 bg-accent/50"
+                style={{ width: `${poll.percentB}%` }}
+              />
+            )}
+            <span className="relative z-10">
+              {poll.option_b}
+              {userVote && <span className="ml-2 text-sm">{poll.percentB}%</span>}
+            </span>
+          </button>
+        </div>
+        {userVote && (
+          <p className="text-white/70 text-xs text-center">{poll.total} votos</p>
+        )}
+      </div>
+    </div>
   );
 }

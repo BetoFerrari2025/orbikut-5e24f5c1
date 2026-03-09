@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
+import Discover from "./pages/Discover";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/search" element={<Search />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/discover" element={<Discover />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
