@@ -18,6 +18,7 @@ import {
   useUpdateStoryLink,
   useRecordStoryView,
   useStoryViewers,
+  useDeleteStory,
 } from '@/hooks/useStoryInteractions';
 import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hooks/useHighlights';
 import { useAuth } from '@/contexts/AuthContext';
