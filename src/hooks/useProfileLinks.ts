@@ -22,7 +22,7 @@ export function useProfileLinks(userId?: string) {
         .eq('user_id', userId)
         .order('display_order', { ascending: true });
       if (error) throw error;
-      return (data || []) as ProfileLink[];
+      return (data || []) as unknown as ProfileLink[];
     },
     enabled: !!userId,
   });
