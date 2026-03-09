@@ -117,6 +117,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
 
+  // Stickers
+  const [showStickers, setShowStickers] = useState(false);
+  const [stickers, setStickers] = useState<{ id: string; emoji: string }[]>([]);
+  const stickerIdCounter = useRef(0);
+
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
