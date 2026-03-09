@@ -90,6 +90,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   // Text overlay
   const [showText, setShowText] = useState(false);
   const [caption, setCaption] = useState('');
+  const [textColor, setTextColor] = useState('#ffffff');
+  const [textSize, setTextSize] = useState(14);
 
   // Link overlay
   const [showLink, setShowLink] = useState(false);
