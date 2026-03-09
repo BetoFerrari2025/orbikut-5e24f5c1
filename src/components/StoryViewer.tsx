@@ -684,3 +684,92 @@ function StoryPollOverlay({ storyId }: { storyId: string }) {
     </div>
   );
 }
+
+// ─── Highlight Save Panel ───
+function HighlightSavePanel({ storyId, userId, onClose }: { storyId: string; userId: string; onClose: () => void }) {
+  const { data: highlights } = useUserHighlights(userId);
+  const createHighlight = useCreateHighlight();
+  const addToHighlight = useAddToHighlight();
+  const [newName, setNewName] = useState('');
+  const [showNewInput, setShowNewInput] = useState(false);
+
+  const handleAddToExisting = async (highlightId: string) => {
+    try {
+      await addToHighlight.mutateAsync({ highlightId, storyId });
+      toast.success('Adicionado ao destaque!');
+      onClose();
+    } catch {
+      toast.error('Erro ao adicionar');
+    }
+  };
+
+  const handleCreateNew = async () => {
+    if (!newName.trim()) return;
+    try {
+      await createHighlight.mutateAsync({ name: newName.trim(), storyId });
+      toast.success('Destaque criado!');
+      onClose();
+    } catch {
+      toast.error('Erro ao criar destaque');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={onClose} />
+      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl max-h-[60%] flex flex-col animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="text-foreground font-semibold flex items-center gap-2">
+            <Star className="w-4 h-4" />
+            Salvar em Destaque
+          </h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {highlights && highlights.length > 0 && highlights.map((h: any) => (
+            <button
+              key={h.id}
+              onClick={() => handleAddToExisting(h.id)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                {h.cover_url ? (
+                  <img src={h.cover_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Star className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+              <span className="text-foreground font-medium">{h.name}</span>
+            </button>
+          ))}
+
+          {showNewInput ? (
+            <div className="flex gap-2 pt-2">
+              <Input
+                placeholder="Nome do destaque..."
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateNew()}
+                className="flex-1"
+                autoFocus
+              />
+              <Button onClick={handleCreateNew} disabled={!newName.trim() || createHighlight.isPending} size="sm">
+                {createHighlight.isPending ? '...' : 'Criar'}
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowNewInput(true)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Plus className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-primary font-medium">Novo destaque</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
