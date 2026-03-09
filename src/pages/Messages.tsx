@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatage } from '@/components/ui/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck, Smile } from 'lucide-react';
-import { cntoast } from 'sonnerv } from '@/components/BottomNav';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
