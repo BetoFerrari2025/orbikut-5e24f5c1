@@ -49,24 +49,38 @@ export function StoriesBar() {
   const userGroups = storiesMap ? Array.from(storiesMap.entries()) : [];
   const hasOwnStory = user ? storiesMap?.has(user.id) : false;
 
+  const isVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+
   return (
     <>
       <div className="flex gap-4 overflow-x-auto py-4 px-2 scrollbar-hide">
         {/* Add story button */}
         {user && (
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (hasOwnStory) {
+                const ownStories = storiesMap?.get(user.id);
+                if (ownStories) openStories(ownStories);
+              } else {
+                fileInputRef.current?.click();
+              }
+            }}
             className="flex flex-col items-center gap-1 min-w-[68px]"
             disabled={createStory.isPending}
           >
             <div className="relative">
-              <Avatar className="w-16 h-16 border-2 border-muted">
+              <Avatar className={cn("w-16 h-16 border-2", hasOwnStory ? "border-transparent" : "border-muted")}>
                 <AvatarImage src={profile?.avatar_url ?? undefined} />
                 <AvatarFallback>{profile?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
               </Avatar>
+              {hasOwnStory ? (
+                <div className="absolute inset-0 rounded-full p-[2px] gradient-brand -m-[2px]">
+                  <div className="w-full h-full rounded-full bg-background" />
+                </div>
+              ) : null}
               <div className={cn(
-                "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground",
-                hasOwnStory ? "gradient-brand" : "bg-primary"
+                "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground z-10",
+                "bg-primary"
               )}>
                 <Plus className="w-3 h-3" />
               </div>
@@ -74,7 +88,7 @@ export function StoriesBar() {
             <span className="text-xs text-muted-foreground truncate w-16 text-center">
               {createStory.isPending ? '...' : 'Seu story'}
             </span>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleCreateStory} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleCreateStory} className="hidden" />
           </button>
         )}
 
@@ -123,11 +137,22 @@ export function StoriesBar() {
                 <span className="text-white text-sm font-semibold">{viewingStories[currentIndex].profiles.username}</span>
               </div>
 
-              <img
-                src={viewingStories[currentIndex].image_url}
-                alt="Story"
-                className="w-full aspect-[9/16] object-cover"
-              />
+              {isVideo(viewingStories[currentIndex].image_url) ? (
+                <video
+                  src={viewingStories[currentIndex].image_url}
+                  className="w-full aspect-[9/16] object-cover"
+                  autoPlay
+                  muted
+                  playsInline
+                  loop
+                />
+              ) : (
+                <img
+                  src={viewingStories[currentIndex].image_url}
+                  alt="Story"
+                  className="w-full aspect-[9/16] object-cover"
+                />
+              )}
             </div>
           )}
         </DialogContent>
