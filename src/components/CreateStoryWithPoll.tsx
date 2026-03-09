@@ -200,7 +200,12 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 <DraggablePreview initialX={50} initialY={180}>
                   <div className="flex items-center gap-1">
                     <GripVertical className="w-3 h-3 text-white/50" />
-                    <p className="text-white text-sm bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[200px] break-words">{caption}</p>
+                    <p
+                      className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[200px] break-words"
+                      style={{ color: textColor, fontSize: `${textSize}px` }}
+                    >
+                      {caption}
+                    </p>
                   </div>
                 </DraggablePreview>
               )}
