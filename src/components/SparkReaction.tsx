@@ -15,6 +15,7 @@ interface SparkReactionProps {
   isLiked: boolean;
   onLike: () => void;
   disabled?: boolean;
+  iconClassName?: string;
 }
 
 const emojis = ['❤️', '🔥', '💥', '⭐', '✨', '💫', '🎉', '💖'];
