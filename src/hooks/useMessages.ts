@@ -23,6 +23,8 @@ export interface Message {
   conversation_id: string;
   sender_id: string;
   content: string;
+  media_url: string | null;
+  media_type: string | null;
   created_at: string;
   read_at: string | null;
 }
@@ -43,7 +45,6 @@ export function useConversations() {
 
       if (error) throw error;
 
-      // Fetch other user profiles and last messages
       const conversations: Conversation[] = await Promise.all(
         (data || []).map(async (conv: any) => {
           const otherUserId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
@@ -112,16 +113,26 @@ export function useSendMessage() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ conversationId, content }: { conversationId: string; content: string }) => {
+    mutationFn: async ({ conversationId, content, mediaUrl, mediaType }: {
+      conversationId: string;
+      content: string;
+      mediaUrl?: string;
+      mediaType?: string;
+    }) => {
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
         .from('messages')
-        .insert({ conversation_id: conversationId, sender_id: user.id, content });
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content,
+          media_url: mediaUrl || null,
+          media_type: mediaType || null,
+        } as any);
 
       if (error) throw error;
 
-      // Update conversation timestamp
       await supabase
         .from('conversations')
         .update({ updated_at: new Date().toISOString() })
@@ -134,6 +145,28 @@ export function useSendMessage() {
   });
 }
 
+export function useUploadChatMedia() {
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('chat-media')
+        .upload(path, file);
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('chat-media').getPublicUrl(path);
+      return { url: data.publicUrl, type: file.type };
+    },
+  });
+}
+
 export function useGetOrCreateConversation() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -142,7 +175,6 @@ export function useGetOrCreateConversation() {
     mutationFn: async (otherUserId: string) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Check existing conversation in both directions
       const { data: existing } = await supabase
         .from('conversations')
         .select('*')

@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useConversations, useMessages, useSendMessage, Conversation } from '@/hooks/useMessages';
+import { useConversations, useMessages, useSendMessage, useUploadChatMedia, Conversation } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Image, Mic, Square, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
 import { BottomNav } from '@/components/BottomNav';
+import { toast } from 'sonner';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -54,6 +54,14 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
   onSelect: (c: Conversation) => void;
   currentUserId: string;
 }) {
+  const getLastMessagePreview = (conv: Conversation) => {
+    if (!conv.last_message) return '';
+    const prefix = conv.last_message.sender_id === currentUserId ? 'Você: ' : '';
+    if (conv.last_message.media_type?.startsWith('image/')) return `${prefix}📷 Foto`;
+    if (conv.last_message.media_type?.startsWith('audio/')) return `${prefix}🎤 Áudio`;
+    return `${prefix}${conv.last_message.content}`;
+  };
+
   return (
     <div>
       <div className="p-4 border-b">
@@ -80,8 +88,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
             <p className="font-semibold text-sm">{conv.other_user?.username ?? 'Usuário'}</p>
             {conv.last_message && (
               <p className="text-sm text-muted-foreground truncate">
-                {conv.last_message.sender_id === currentUserId ? 'Você: ' : ''}
-                {conv.last_message.content}
+                {getLastMessagePreview(conv)}
               </p>
             )}
           </div>
@@ -103,8 +110,16 @@ function ChatView({ conversation, onBack, currentUserId }: {
 }) {
   const { data: messages } = useMessages(conversation.id);
   const sendMessage = useSendMessage();
+  const uploadMedia = useUploadChatMedia();
   const [newMessage, setNewMessage] = useState('');
+  const [pendingMedia, setPendingMedia] = useState<{ url: string; type: string } | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -112,9 +127,102 @@ function ChatView({ conversation, onBack, currentUserId }: {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-    sendMessage.mutate({ conversationId: conversation.id, content: newMessage });
+    if ((!newMessage.trim() && !pendingMedia) || sendMessage.isPending) return;
+
+    sendMessage.mutate({
+      conversationId: conversation.id,
+      content: newMessage || (pendingMedia?.type.startsWith('image/') ? '📷 Foto' : '🎤 Áudio'),
+      mediaUrl: pendingMedia?.url,
+      mediaType: pendingMedia?.type,
+    });
     setNewMessage('');
+    setPendingMedia(null);
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Selecione uma imagem válida');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Imagem muito grande (máx. 10MB)');
+      return;
+    }
+
+    try {
+      const result = await uploadMedia.mutateAsync(file);
+      setPendingMedia(result);
+    } catch {
+      toast.error('Erro ao enviar imagem');
+    }
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const file = new File([blob], `audio-${Date.now()}.webm`, { type: 'audio/webm' });
+
+        try {
+          const result = await uploadMedia.mutateAsync(file);
+          sendMessage.mutate({
+            conversationId: conversation.id,
+            content: '🎤 Áudio',
+            mediaUrl: result.url,
+            mediaType: result.type,
+          });
+        } catch {
+          toast.error('Erro ao enviar áudio');
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
+    } catch {
+      toast.error('Não foi possível acessar o microfone');
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRecordingTime(0);
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+      mediaRecorderRef.current = null;
+    }
+    chunksRef.current = [];
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRecordingTime(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -136,30 +244,115 @@ function ChatView({ conversation, onBack, currentUserId }: {
         {messages?.map((msg) => (
           <div key={msg.id} className={cn("flex", msg.sender_id === currentUserId ? "justify-end" : "justify-start")}>
             <div className={cn(
-              "max-w-[70%] px-4 py-2 rounded-2xl text-sm",
+              "max-w-[70%] rounded-2xl text-sm overflow-hidden",
               msg.sender_id === currentUserId
                 ? "bg-primary text-primary-foreground rounded-br-md"
                 : "bg-muted rounded-bl-md"
             )}>
-              {msg.content}
+              {/* Image */}
+              {msg.media_url && msg.media_type?.startsWith('image/') && (
+                <img
+                  src={msg.media_url}
+                  alt="Imagem"
+                  className="max-w-full rounded-t-2xl cursor-pointer"
+                  onClick={() => window.open(msg.media_url!, '_blank')}
+                />
+              )}
+
+              {/* Audio */}
+              {msg.media_url && msg.media_type?.startsWith('audio/') && (
+                <div className="px-4 pt-3">
+                  <audio controls src={msg.media_url} className="max-w-full h-8" />
+                </div>
+              )}
+
+              {/* Text content (hide default emoji labels for media-only) */}
+              {msg.content && !(msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio')) && (
+                <div className="px-4 py-2">{msg.content}</div>
+              )}
+
+              {/* If media without custom text, add small padding */}
+              {msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio' || !msg.content) && (
+                <div className="pb-1" />
+              )}
             </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Pending media preview */}
+      {pendingMedia && (
+        <div className="px-4 py-2 border-t bg-muted/50 flex items-center gap-2">
+          {pendingMedia.type.startsWith('image/') && (
+            <img src={pendingMedia.url} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
+          )}
+          <span className="text-sm text-muted-foreground flex-1">
+            {pendingMedia.type.startsWith('image/') ? 'Imagem pronta para enviar' : 'Áudio pronto para enviar'}
+          </span>
+          <Button variant="ghost" size="icon" onClick={() => setPendingMedia(null)}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
       {/* Input */}
-      <form onSubmit={handleSend} className="p-4 border-t flex gap-2">
-        <Input
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Mensagem..."
-          className="flex-1"
-        />
-        <Button type="submit" size="icon" disabled={!newMessage.trim() || sendMessage.isPending} className="gradient-brand hover:opacity-90">
-          <Send className="w-4 h-4" />
-        </Button>
-      </form>
+      {isRecording ? (
+        <div className="p-4 border-t flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={cancelRecording}>
+            <X className="w-5 h-5 text-destructive" />
+          </Button>
+          <div className="flex-1 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+            <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+            <span className="text-sm text-muted-foreground">Gravando...</span>
+          </div>
+          <Button size="icon" onClick={stopRecording} className="gradient-brand hover:opacity-90">
+            <Square className="w-4 h-4" />
+          </Button>
+        </div>
+      ) : (
+        <form onSubmit={handleSend} className="p-4 border-t flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageSelect}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadMedia.isPending}
+          >
+            <Image className="w-5 h-5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={startRecording}
+          >
+            <Mic className="w-5 h-5" />
+          </Button>
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Mensagem..."
+            className="flex-1"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={(!newMessage.trim() && !pendingMedia) || sendMessage.isPending}
+            className="gradient-brand hover:opacity-90"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </form>
+      )}
     </div>
   );
 }
