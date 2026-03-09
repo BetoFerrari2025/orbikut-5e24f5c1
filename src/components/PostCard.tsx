@@ -9,6 +9,7 @@ import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hook
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { useSendNotification } from '@/hooks/useNotifications';
+import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -42,7 +43,10 @@ export function PostCard({ post }: PostCardProps) {
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
   const sendNotification = useSendNotification();
+  const { data: followStatus } = useFollowStatus(post.profiles.id);
+  const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
+  const isOwnPost = user?.id === post.profiles.id;
 
   useEffect(() => {
     if (!viewRecorded.current) {
@@ -94,9 +98,25 @@ export function PostCard({ post }: PostCardProps) {
           </Avatar>
           <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
         </Link>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary font-semibold text-sm h-auto py-1 px-2"
+              disabled={toggleFollow.isPending}
+              onClick={() => {
+                toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
+                sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+              }}
+            >
+              Seguir
+            </Button>
+          )}
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Image or Video */}
