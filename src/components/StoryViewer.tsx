@@ -189,13 +189,17 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
                 left: `${(currentStory as any).caption_x ?? 50}%`,
                 top: `${(currentStory as any).caption_y ?? 50}%`,
                 transform: 'translate(-50%, -50%)',
+                maxWidth: '80%',
               }}
             >
               <p
-                className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[80%] break-words"
+                className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2"
                 style={{
                   color: (currentStory as any).caption_color || '#ffffff',
                   fontSize: `${(currentStory as any).caption_size || 14}px`,
+                  overflowWrap: 'break-word',
+                  wordBreak: 'normal',
+                  whiteSpace: 'pre-wrap',
                 }}
               >
                 {currentStory.caption}
@@ -472,17 +476,72 @@ function StoryViewersPanel({ storyId, onClose }: { storyId: string; onClose: () 
   );
 }
 
-// ─── Comments Panel ───
+// ─── Render comment text with @mentions highlighted ───
+function renderCommentWithMentions(content: string) {
+  const parts = content.split(/(@\w+)/g);
+  return parts.map((part, i) => {
+    if (/^@\w+$/.test(part)) {
+      return (
+        <span key={i} className="text-primary font-semibold cursor-pointer hover:underline">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
+// ─── Comments Panel with @mention ───
 function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: () => void }) {
   const { data: comments } = useStoryComments(storyId);
   const addComment = useAddStoryComment();
   const [text, setText] = useState('');
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [mentionLoading, setMentionLoading] = useState(false);
   const { user } = useAuth();
+
   const handleSend = () => {
     if (!text.trim() || !user) return;
     addComment.mutate({ storyId, content: text.trim() });
     setText('');
+    setMentionQuery(null);
+    setMentionResults([]);
   };
+
+  const handleTextChange = async (value: string) => {
+    setText(value);
+    // Detect @mention being typed
+    const match = value.match(/@(\w{1,})$/);
+    if (match) {
+      const query = match[1];
+      setMentionQuery(query);
+      setMentionLoading(true);
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .ilike('username', `${query}%`)
+          .limit(5);
+        setMentionResults(data ?? []);
+      } catch {
+        setMentionResults([]);
+      }
+      setMentionLoading(false);
+    } else {
+      setMentionQuery(null);
+      setMentionResults([]);
+    }
+  };
+
+  const selectMention = (username: string) => {
+    // Replace the partial @query with the full @username
+    const newText = text.replace(/@\w*$/, `@${username} `);
+    setText(newText);
+    setMentionQuery(null);
+    setMentionResults([]);
+  };
+
   return (
     <div className="absolute inset-0 z-20 flex flex-col" onClick={(e) => e.stopPropagation()}>
       <div className="flex-1" onClick={onClose} />
@@ -501,15 +560,48 @@ function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: ()
               </Avatar>
               <div>
                 <span className="text-foreground text-xs font-semibold">{c.profiles?.username}</span>
-                <p className="text-foreground text-sm">{c.content}</p>
+                <p className="text-foreground text-sm" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
+                  {renderCommentWithMentions(c.content)}
+                </p>
               </div>
             </div>
           ))}
         </div>
         {user && (
-          <div className="p-3 border-t border-border flex gap-2">
-            <Input placeholder="Escreva um comentário..." value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} className="flex-1 text-sm" />
-            <Button size="icon" onClick={handleSend} disabled={!text.trim()}><Send className="w-4 h-4" /></Button>
+          <div className="relative p-3 border-t border-border">
+            {/* Mention suggestions dropdown */}
+            {mentionQuery !== null && mentionResults.length > 0 && (
+              <div className="absolute bottom-full left-3 right-3 bg-background border border-border rounded-lg shadow-lg mb-1 max-h-40 overflow-y-auto z-30">
+                {mentionResults.map((p: any) => (
+                  <button
+                    key={p.id}
+                    onClick={() => selectMention(p.username)}
+                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted transition-colors text-left"
+                  >
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={p.avatar_url ?? undefined} />
+                      <AvatarFallback className="text-[9px]">{p.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-foreground text-sm">@{p.username}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {mentionQuery !== null && mentionResults.length === 0 && !mentionLoading && (
+              <div className="absolute bottom-full left-3 right-3 bg-background border border-border rounded-lg shadow-lg mb-1 p-3 z-30">
+                <p className="text-muted-foreground text-xs text-center">Nenhum usuário encontrado</p>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Escreva um comentário... use @ para mencionar"
+                value={text}
+                onChange={(e) => handleTextChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                className="flex-1 text-sm"
+              />
+              <Button size="icon" onClick={handleSend} disabled={!text.trim()}><Send className="w-4 h-4" /></Button>
+            </div>
           </div>
         )}
       </div>
