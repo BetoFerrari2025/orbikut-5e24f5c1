@@ -26,17 +26,30 @@ interface CreateStoryWithPollProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function DraggablePreview({ children, className, initialX, initialY, onPositionChange }: {
+function DraggablePreview({ children, className, onPositionChange }: {
   children: React.ReactNode;
   className?: string;
-  initialX: number;
-  initialY: number;
   onPositionChange?: (x: number, y: number) => void;
 }) {
-  const [pos, setPos] = useState({ x: initialX, y: initialY });
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const elRef = useRef<HTMLDivElement>(null);
+
+  // Center on first render
+  useEffect(() => {
+    if (pos === null && elRef.current) {
+      const parent = elRef.current.parentElement;
+      if (parent) {
+        const parentRect = parent.getBoundingClientRect();
+        const elRect = elRef.current.getBoundingClientRect();
+        const cx = (parentRect.width - elRect.width) / 2;
+        const cy = (parentRect.height - elRect.height) / 2;
+        setPos({ x: cx, y: cy });
+        onPositionChange?.(cx, cy);
+      }
+    }
+  });
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.stopPropagation();
@@ -55,7 +68,6 @@ function DraggablePreview({ children, className, initialX, initialY, onPositionC
     const elRect = elRef.current.getBoundingClientRect();
     let x = e.clientX - parentRect.left - offset.current.x;
     let y = e.clientY - parentRect.top - offset.current.y;
-    // Clamp within parent
     x = Math.max(0, Math.min(x, parentRect.width - elRect.width));
     y = Math.max(0, Math.min(y, parentRect.height - elRect.height));
     setPos({ x, y });
@@ -71,7 +83,7 @@ function DraggablePreview({ children, className, initialX, initialY, onPositionC
     <div
       ref={elRef}
       className={cn("absolute cursor-grab active:cursor-grabbing touch-none select-none z-10", className)}
-      style={{ left: pos.x, top: pos.y }}
+      style={{ left: pos?.x ?? 0, top: pos?.y ?? 0, visibility: pos === null ? 'hidden' : 'visible' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -274,8 +286,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               {/* Draggable text overlay - percentage based */}
               {showText && (
                 <DraggablePreview
-                  initialX={20}
-                  initialY={180}
                   onPositionChange={(x, y) => {
                     const container = previewContainerRef.current;
                     if (container) {
@@ -308,7 +318,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
 
               {/* Draggable link CTA overlay */}
               {showLink && linkUrl && (
-                <DraggablePreview initialX={50} initialY={240}>
+                <DraggablePreview>
                   <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
                     <GripVertical className="w-3 h-3 opacity-50" />
                     <ExternalLink className="w-4 h-4 shrink-0" />
@@ -321,8 +331,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               {stickers.map((sticker, idx) => (
                 <DraggablePreview
                   key={sticker.id}
-                  initialX={30 + (idx * 20) % 120}
-                  initialY={100 + (idx * 30) % 200}
                 >
                   <div className="relative group">
                     <span className="text-4xl select-none drop-shadow-lg">{sticker.emoji}</span>
