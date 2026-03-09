@@ -326,6 +326,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Enquete
                 </Button>
+                <Button
+                  variant={showMusic ? 'default' : 'outline'}
+                  onClick={() => setShowMusic(!showMusic)}
+                  className={cn(showMusic && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Music className="w-4 h-4 mr-2" />
+                  Música
+                </Button>
               </div>
 
               {/* Text input */}
