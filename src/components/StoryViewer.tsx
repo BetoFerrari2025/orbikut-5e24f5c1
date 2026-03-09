@@ -36,8 +36,10 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
+  const [showHighlightSave, setShowHighlightSave] = useState(false);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const { user } = useAuth();
   const recordView = useRecordStoryView();
 
