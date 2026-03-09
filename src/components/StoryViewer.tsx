@@ -177,6 +177,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             story={currentStory}
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
+            onShowViewers={() => setShowViewers(true)}
           />
 
           {/* Poll overlay */}
