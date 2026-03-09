@@ -12,12 +12,14 @@ import { Link } from 'react-router-dom';
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useProfileByUsername(username);
   const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.id);
   const { data: followStatus } = useFollowStatus(profile?.id);
   const { data: followersCount } = useFollowersCount(profile?.id);
   const { data: followingCount } = useFollowingCount(profile?.id);
   const toggleFollow = useToggleFollow();
+  const getOrCreateConversation = useGetOrCreateConversation();
 
   const isOwnProfile = user?.id === profile?.id;
 
