@@ -292,16 +292,61 @@ function CaptionEditOverlay({ story, onClose }: { story: Story; onClose: () => v
 
 // ─── Music Input ───
 function MusicInputOverlay({ story, onClose }: { story: Story; onClose: () => void }) {
-  const [musicUrl, setMusicUrl] = useState(story.music_url ?? '');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const updateMusic = useUpdateStoryMusic();
+  const { user } = useAuth();
 
-  const handleSave = async () => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('audio/')) {
+        toast.error('Selecione um arquivo de áudio');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Arquivo muito grande (máx 10MB)');
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !user) return;
+    setUploading(true);
     try {
-      await updateMusic.mutateAsync({ storyId: story.id, musicUrl });
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('story-music')
+        .upload(fileName, selectedFile, { contentType: selectedFile.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('story-music')
+        .getPublicUrl(fileName);
+
+      await updateMusic.mutateAsync({ storyId: story.id, musicUrl: publicUrl });
       toast.success('Música adicionada!');
       onClose();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao enviar música');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    try {
+      await updateMusic.mutateAsync({ storyId: story.id, musicUrl: '' });
+      toast.success('Música removida!');
+      onClose();
     } catch {
-      toast.error('Erro ao adicionar música');
+      toast.error('Erro ao remover música');
     }
   };
 
@@ -313,15 +358,40 @@ function MusicInputOverlay({ story, onClose }: { story: Story; onClose: () => vo
           <h3 className="text-foreground font-semibold">Adicionar Música</h3>
           <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
         </div>
-        <Input
-          placeholder="Cole a URL da música (MP3, etc)..."
-          value={musicUrl}
-          onChange={(e) => setMusicUrl(e.target.value)}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/*"
+          onChange={handleFileSelect}
+          className="hidden"
         />
-        <p className="text-muted-foreground text-xs">Cole um link direto para um arquivo de áudio (.mp3, .wav, etc)</p>
-        <Button onClick={handleSave} disabled={updateMusic.isPending || !musicUrl.trim()} className="w-full">
-          {updateMusic.isPending ? 'Salvando...' : 'Salvar Música'}
-        </Button>
+
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-4 text-center hover:border-primary transition-colors"
+        >
+          <Music className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+          <p className="text-muted-foreground text-sm">
+            {selectedFile ? selectedFile.name : 'Toque para selecionar um áudio'}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">MP3, WAV, M4A (máx 10MB)</p>
+        </button>
+
+        <div className="flex gap-2">
+          <Button
+            onClick={handleUpload}
+            disabled={!selectedFile || uploading}
+            className="flex-1"
+          >
+            {uploading ? 'Enviando...' : 'Salvar Música'}
+          </Button>
+          {story.music_url && (
+            <Button variant="destructive" onClick={handleRemove} disabled={uploading}>
+              Remover
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
