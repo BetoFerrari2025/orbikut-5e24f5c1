@@ -38,8 +38,11 @@ export default function Profile() {
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
 
   const handleFollowToggle = () => {
-    if (!profile || !followStatus) return;
+    if (!profile || !followStatus || !user) return;
     toggleFollow.mutate({ targetUserId: profile.id, isFollowing: followStatus.isFollowing });
+    if (!followStatus.isFollowing) {
+      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
+    }
   };
 
   const handleMessage = async () => {
