@@ -61,12 +61,21 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }
   }, [currentIndex, stories]);
 
+  // For images: use fixed timer. For videos: use video events.
   useEffect(() => {
     if (!stories || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
     setProgress(0);
+
+    if (isCurrentVideo) {
+      // For videos, progress is driven by video timeupdate, not a timer
+      // Advancement happens via the 'ended' event on the video element
+      return;
+    }
+
+    // Image timer
     const startTime = Date.now();
     timerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -80,6 +89,29 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }, TICK_INTERVAL);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [currentIndex, stories, isPaused]);
+
+  // Video progress and ended handler
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isCurrentVideo || !stories) return;
+
+    const onTimeUpdate = () => {
+      if (video.duration) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    const onEnded = () => {
+      if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
+      else onClose();
+    };
+
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('ended', onEnded);
+    return () => {
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('ended', onEnded);
+    };
+  }, [currentIndex, stories, isCurrentVideo]);
 
   const handleStoryNav = (e: React.MouseEvent) => {
     if (!stories) return;
