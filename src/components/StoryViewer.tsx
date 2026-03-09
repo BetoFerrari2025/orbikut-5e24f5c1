@@ -60,7 +60,7 @@ const VideoWithUnmute = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttrib
 );
 VideoWithUnmute.displayName = 'VideoWithUnmute';
 
-
+interface StoryViewerProps {
   stories: Story[] | null;
   currentIndex: number;
   setCurrentIndex: (i: number) => void;
