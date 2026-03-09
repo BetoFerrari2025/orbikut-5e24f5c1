@@ -5,6 +5,7 @@ import { StoriesBar } from '@/components/StoriesBar';
 import { usePosts } from '@/hooks/usePosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles } from 'lucide-react';
+import { PwaInstallButton } from '@/components/PwaInstallButton';
 
 const Index = () => {
   const { data: posts, isLoading, error } = usePosts();
