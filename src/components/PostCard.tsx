@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MoreHorizontal } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface PostCardProps {
   post: {
@@ -32,8 +34,35 @@ export function PostCard({ post }: PostCardProps) {
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
+  const { data: savedData } = useSavedPost(post.id);
+  const { data: viewCount } = usePostViews(post.id);
   const toggleLike = useToggleLike();
   const addComment = useAddComment();
+  const toggleSave = useToggleSave();
+  const recordView = useRecordView();
+  const viewRecorded = useRef(false);
+
+  useEffect(() => {
+    if (!viewRecorded.current) {
+      viewRecorded.current = true;
+      recordView.mutate({ postId: post.id, userId: user?.id });
+    }
+  }, [post.id]);
+
+  const handleSave = () => {
+    if (!user) return;
+    toggleSave.mutate({ postId: post.id, isSaved: savedData?.isSaved ?? false });
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Orbik', url }); } catch {}
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copiado!');
+    }
+  };
 
   const handleLike = () => {
     if (!user) return;
@@ -85,19 +114,36 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Actions */}
       <div className="p-3 space-y-2">
-        <div className="flex items-center gap-4">
-          <SparkReaction
-            isLiked={likesData?.isLiked ?? false}
-            onLike={handleLike}
-            disabled={!user}
-          />
-          <button onClick={() => setShowComments(!showComments)}>
-            <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <SparkReaction
+              isLiked={likesData?.isLiked ?? false}
+              onLike={handleLike}
+              disabled={!user}
+            />
+            <button onClick={() => setShowComments(!showComments)}>
+              <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            </button>
+            <button onClick={handleShare}>
+              <Share2 className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            </button>
+          </div>
+          <button onClick={handleSave} disabled={!user}>
+            {savedData?.isSaved ? (
+              <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
+            ) : (
+              <Bookmark className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            )}
           </button>
         </div>
 
-        {/* Likes count */}
-        <p className="font-semibold text-sm">{likesData?.count ?? 0} curtidas</p>
+        {/* Stats */}
+        <div className="flex items-center gap-3">
+          <p className="font-semibold text-sm">{likesData?.count ?? 0} curtidas</p>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Eye className="w-3.5 h-3.5" /> {viewCount ?? 0}
+          </span>
+        </div>
 
         {/* Caption */}
         {post.caption && (

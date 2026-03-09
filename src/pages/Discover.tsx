@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { usePosts, useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
@@ -102,12 +103,22 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
+  const { data: viewCount } = usePostViews(post.id);
   const toggleLike = useToggleLike();
+  const recordView = useRecordView();
+  const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const addComment = useAddComment();
+
+  useEffect(() => {
+    if (isActive && !viewRecorded.current) {
+      viewRecorded.current = true;
+      recordView.mutate({ postId: post.id, userId: user?.id });
+    }
+  }, [isActive, post.id]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -222,6 +233,11 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
         <button onClick={(e) => { e.stopPropagation(); onShare(); }} className="w-10 h-10 flex items-center justify-center">
           <Share2 className="w-7 h-7 text-white" />
         </button>
+
+        <div className="flex flex-col items-center gap-1">
+          <Eye className="w-6 h-6 text-white/70" />
+          <span className="text-white text-xs font-semibold">{viewCount ?? 0}</span>
+        </div>
       </div>
 
       <div className="absolute left-4 right-20 bottom-24 z-10">
