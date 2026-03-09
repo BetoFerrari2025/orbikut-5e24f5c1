@@ -133,3 +133,35 @@ export function useUpdateStoryMusic() {
     },
   });
 }
+
+// ─── Story Views ───
+export function useRecordStoryView() {
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (storyId: string) => {
+      if (!user) return;
+      await supabase
+        .from('story_views' as any)
+        .upsert(
+          { story_id: storyId, viewer_id: user.id },
+          { onConflict: 'story_id,viewer_id' }
+        );
+    },
+  });
+}
+
+export function useStoryViewers(storyId: string) {
+  return useQuery({
+    queryKey: ['story-viewers', storyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('story_views' as any)
+        .select('*, profiles:viewer_id (id, username, avatar_url)')
+        .eq('story_id', storyId)
+        .order('viewed_at', { ascending: false });
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+}

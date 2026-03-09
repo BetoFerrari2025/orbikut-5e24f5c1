@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ import {
   useAddStoryComment,
   useUpdateStoryCaption,
   useUpdateStoryMusic,
+  useRecordStoryView,
+  useStoryViewers,
 } from '@/hooks/useStoryInteractions';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -32,12 +34,24 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showComments, setShowComments] = useState(false);
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
+  const [showViewers, setShowViewers] = useState(false);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { user } = useAuth();
+  const recordView = useRecordStoryView();
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
-  const isPaused = showComments || showCaptionEdit || showMusicInput;
+  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers;
+
+  // Record view when story changes (not for own stories)
+  useEffect(() => {
+    if (!stories || !stories[currentIndex]) return;
+    const s = stories[currentIndex];
+    if (user && s.user_id !== user.id) {
+      recordView.mutate(s.id);
+    }
+  }, [currentIndex, stories]);
 
   // Auto-advance timer
   useEffect(() => {
@@ -163,6 +177,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             story={currentStory}
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
+            onShowViewers={() => setShowViewers(true)}
           />
 
           {/* Poll overlay */}
@@ -190,6 +205,14 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           <MusicInputOverlay
             story={currentStory}
             onClose={() => setShowMusicInput(false)}
+          />
+        )}
+
+        {/* Viewers overlay (owner only) */}
+        {showViewers && user?.id === currentStory.user_id && (
+          <StoryViewersPanel
+            storyId={currentStory.id}
+            onClose={() => setShowViewers(false)}
           />
         )}
       </DialogContent>
@@ -297,8 +320,8 @@ function StoryLikeButton({ storyId }: { storyId: string }) {
   );
 }
 
-// ─── Owner Controls (caption + music) ───
-function StoryOwnerControls({ story, onEditCaption, onEditMusic }: { story: Story; onEditCaption: () => void; onEditMusic: () => void }) {
+// ─── Owner Controls (caption + music + viewers) ───
+function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers }: { story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void }) {
   const { user } = useAuth();
   if (user?.id !== story.user_id) return null;
 
@@ -316,6 +339,48 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic }: { story: Stor
         </div>
         <span className="text-white text-[10px] mt-0.5">Música</span>
       </button>
+      <button onClick={onShowViewers} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <Eye className="w-5 h-5 text-white" />
+        </div>
+        <span className="text-white text-[10px] mt-0.5">Vistas</span>
+      </button>
+    </div>
+  );
+}
+
+// ─── Viewers Panel ───
+function StoryViewersPanel({ storyId, onClose }: { storyId: string; onClose: () => void }) {
+  const { data: viewers } = useStoryViewers(storyId);
+
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={onClose} />
+      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl max-h-[60%] flex flex-col animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="text-foreground font-semibold flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Visualizações ({viewers?.length ?? 0})
+          </h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {(!viewers || viewers.length === 0) && (
+            <p className="text-muted-foreground text-sm text-center py-4">Ninguém viu ainda</p>
+          )}
+          {viewers?.map((v: any) => (
+            <div key={v.id} className="flex items-center gap-3">
+              <Avatar className="w-9 h-9">
+                <AvatarImage src={v.profiles?.avatar_url ?? undefined} />
+                <AvatarFallback className="text-xs">{v.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="text-foreground text-sm font-medium">{v.profiles?.username}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
