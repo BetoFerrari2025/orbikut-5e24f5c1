@@ -220,6 +220,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             story={currentStory}
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
+            onEditLink={() => setShowLinkInput(true)}
             onShowViewers={() => setShowViewers(true)}
             onSaveHighlight={() => setShowHighlightSave(true)}
           />
