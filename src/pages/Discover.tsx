@@ -101,6 +101,7 @@ interface DiscoverCardProps {
   post: any;
   isActive: boolean;
   isMuted: boolean;
+  showMuteIcon: boolean;
   onToggleMute: () => void;
   onShare: () => void;
 }
