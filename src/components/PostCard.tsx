@@ -63,13 +63,24 @@ export function PostCard({ post }: PostCardProps) {
         </Button>
       </div>
 
-      {/* Image */}
+      {/* Image or Video */}
       <div className="aspect-square bg-muted">
-        <img
-          src={post.image_url}
-          alt={post.caption ?? 'Post image'}
-          className="w-full h-full object-cover"
-        />
+        {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
+          <video
+            src={post.image_url}
+            className="w-full h-full object-cover"
+            controls
+            playsInline
+            muted
+            loop
+          />
+        ) : (
+          <img
+            src={post.image_url}
+            alt={post.caption ?? 'Post image'}
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
 
       {/* Actions */}

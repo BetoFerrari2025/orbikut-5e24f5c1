@@ -79,11 +79,20 @@ export function CreatePost() {
             </div>
           ) : (
             <div className="relative">
-              <img
-                src={preview}
-                alt="Preview"
-                className="w-full aspect-square object-cover rounded-lg"
-              />
+              {selectedImage && /^video\//i.test(selectedImage.type) ? (
+                <video
+                  src={preview!}
+                  className="w-full aspect-square object-cover rounded-lg"
+                  controls
+                  muted
+                />
+              ) : (
+                <img
+                  src={preview!}
+                  alt="Preview"
+                  className="w-full aspect-square object-cover rounded-lg"
+                />
+              )}
               <Button
                 variant="secondary"
                 size="icon"
