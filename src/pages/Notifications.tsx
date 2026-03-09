@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BottomNav } from '@/components/BottomNav';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotifications, useMarkAsRead, Notification } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';

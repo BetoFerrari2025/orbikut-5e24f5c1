@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/buttonton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Camera } from 'lucide-react';
-import { BottomNav } from '@/components/BottomNav';
+import { Camera } from 'lucide-reactv';
 
 export default function Settings() {
   const navigate = useNavigate();

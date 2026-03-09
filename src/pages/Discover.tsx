@@ -8,7 +8,7 @@ import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
-import { BottomNav } from '@/components/BottomNav';
+import { toast } from 'sonner';
 import { toast } from 'sonner';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
