@@ -1,11 +1,23 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
 import { useCreateStoryWithPoll } from '@/hooks/useStoryPolls';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+const TEXT_COLORS = [
+  { label: 'Branco', value: '#ffffff' },
+  { label: 'Preto', value: '#000000' },
+  { label: 'Vermelho', value: '#ef4444' },
+  { label: 'Azul', value: '#3b82f6' },
+  { label: 'Verde', value: '#22c55e' },
+  { label: 'Amarelo', value: '#eab308' },
+  { label: 'Rosa', value: '#ec4899' },
+  { label: 'Roxo', value: '#a855f7' },
+];
 
 interface CreateStoryWithPollProps {
   open: boolean;
