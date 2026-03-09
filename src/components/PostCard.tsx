@@ -102,7 +102,33 @@ export function PostCard({ post }: PostCardProps) {
     toggleLike.mutate({ postId: post.id, isLiked });
     if (!isLiked) {
       sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+      trackSignal(post.id, 'like');
     }
+  };
+
+  const handleSaveWithTracking = () => {
+    if (!user) return;
+    const isSaved = savedData?.isSaved ?? false;
+    toggleSave.mutate({ postId: post.id, isSaved });
+    if (!isSaved) {
+      trackSignal(post.id, 'save');
+    }
+  };
+
+  const handleShareWithTracking = async () => {
+    trackSignal(post.id, 'share');
+    const url = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Orbita', url }); } catch {}
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copiado!');
+    }
+  };
+
+  const handleCommentOpen = () => {
+    trackSignal(post.id, 'comment');
+    setShowComments(true);
   };
 
   if (hidden) return null;
