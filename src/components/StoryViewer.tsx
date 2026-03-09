@@ -306,6 +306,9 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </button>
           </div>
 
+          {/* Emoji reactions bar */}
+          <StoryEmojiReactions storyId={currentStory.id} />
+
           {/* Owner-only edit buttons */}
           <StoryOwnerControls
             story={currentStory}
