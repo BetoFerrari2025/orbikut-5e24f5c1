@@ -279,11 +279,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         ) : (
           <>
             {/* Fullscreen preview with overlays */}
-            <div ref={previewContainerRef} className="relative flex-1 min-h-0 overflow-hidden">
+            <div ref={previewContainerRef} className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden">
               {selectedFile?.type.startsWith('video') ? (
-                <video src={preview} className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop />
+                <video src={preview} className="absolute inset-0 w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop playsInline />
               ) : (
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} />
+                <img src={preview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} />
               )}
 
               {/* Close / change media button */}
