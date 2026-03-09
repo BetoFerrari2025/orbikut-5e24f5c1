@@ -205,6 +205,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setBrightness(100);
     setContrast(100);
     setSaturation(100);
+    setShowStickers(false);
+    setStickers([]);
+    stickerIdCounter.current = 0;
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
