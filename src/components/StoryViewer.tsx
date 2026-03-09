@@ -28,9 +28,6 @@ import { toast } from 'sonner';
 
 const VideoWithAudio = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttributes<HTMLVideoElement>>(
   (props, ref) => {
-    const [isMuted, setIsMuted] = useState(false);
-    const [showIcon, setShowIcon] = useState(false);
-    const iconTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const localRef = useRef<HTMLVideoElement>(null);
 
     const setRefs = useCallback((node: HTMLVideoElement | null) => {
@@ -39,43 +36,19 @@ const VideoWithAudio = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttribu
       else if (ref) (ref as any).current = node;
     }, [ref]);
 
-    // Try to play with audio first, fallback to muted
+    // Auto-play with audio, fallback to muted if browser blocks
     useEffect(() => {
       const video = localRef.current;
       if (!video) return;
       video.muted = false;
       video.play().catch(() => {
-        // Browser blocked unmuted autoplay, fallback to muted
         video.muted = true;
-        setIsMuted(true);
         video.play().catch(() => {});
       });
     }, [props.src]);
 
-    const handleTapScreen = (e: React.MouseEvent) => {
-      // Don't stop propagation — let parent handle navigation
-      if (localRef.current) {
-        const newMuted = !isMuted;
-        localRef.current.muted = newMuted;
-        setIsMuted(newMuted);
-      }
-      setShowIcon(true);
-      if (iconTimerRef.current) clearTimeout(iconTimerRef.current);
-      iconTimerRef.current = setTimeout(() => setShowIcon(false), 1200);
-    };
-
     return (
-      <div className="relative" onClick={handleTapScreen}>
-        <video ref={setRefs} {...props} playsInline muted={isMuted} />
-        {/* Center audio icon overlay */}
-        {showIcon && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-            <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in zoom-in fade-in duration-200">
-              {isMuted ? <VolumeX className="w-8 h-8 text-white" /> : <Volume2 className="w-8 h-8 text-white" />}
-            </div>
-          </div>
-        )}
-      </div>
+      <video ref={setRefs} {...props} playsInline autoPlay />
     );
   }
 );
