@@ -112,8 +112,8 @@ export function PostCard({ post }: PostCardProps) {
         {showComments && comments && (
           <div className="space-y-2 pt-2 border-t">
             {comments.map((comment: any) => (
-              <p key={comment.id} className="text-sm">
-                <Link to={`/profile/${comment.profiles.username}`} className="font-semibold mr-2">
+              <p key={comment.id} className="text-sm text-foreground">
+                <Link to={`/profile/${comment.profiles.username}`} className="font-semibold mr-2 text-foreground">
                   {comment.profiles.username}
                 </Link>
                 {comment.content}
@@ -134,7 +134,7 @@ export function PostCard({ post }: PostCardProps) {
               placeholder="Adicione um comentário..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="border-0 focus-visible:ring-0 px-0"
+              className="border-0 focus-visible:ring-0 px-0 text-foreground"
             />
             <Button
               type="submit"
