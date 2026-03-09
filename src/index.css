@@ -5,88 +5,87 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 0 0% 5%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 0 0% 5%;
 
-    --primary: 340 82% 52%;
+    --primary: 349 100% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 5%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 25 95% 53%;
+    --accent: 172 100% 42%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 340 82% 52%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 349 100% 55%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Instagram gradient colors */
-    --instagram-pink: 340 82% 52%;
-    --instagram-purple: 286 74% 46%;
-    --instagram-orange: 25 95% 53%;
-    --instagram-yellow: 45 93% 58%;
+    /* Brand colors - TikTok inspired */
+    --brand-red: 349 100% 55%;
+    --brand-cyan: 172 100% 42%;
+    --brand-pink: 330 100% 60%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 0 0% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 349 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 95%;
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 340 82% 52%;
+    --sidebar-ring: 349 100% 55%;
   }
 
   .dark {
     --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 340 82% 52%;
+    --primary: 349 100% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
+    --muted: 0 0% 12%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 25 95% 53%;
+    --accent: 172 100% 42%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 340 82% 52%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 349 100% 55%;
 
-    --sidebar-background: 0 0% 5%;
+    --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 340 82% 52%;
+    --sidebar-primary: 349 100% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 340 82% 52%;
+    --sidebar-ring: 349 100% 55%;
   }
 }
 
@@ -101,26 +100,28 @@
 }
 
 @layer utilities {
-  .gradient-instagram {
+  .gradient-brand {
     background: linear-gradient(
-      45deg,
-      hsl(var(--instagram-yellow)) 0%,
-      hsl(var(--instagram-orange)) 25%,
-      hsl(var(--instagram-pink)) 50%,
-      hsl(var(--instagram-purple)) 100%
+      135deg,
+      hsl(var(--brand-cyan)) 0%,
+      hsl(var(--brand-red)) 50%,
+      hsl(var(--brand-pink)) 100%
     );
   }
 
-  .text-gradient-instagram {
+  .text-gradient-brand {
     background: linear-gradient(
-      45deg,
-      hsl(var(--instagram-yellow)) 0%,
-      hsl(var(--instagram-orange)) 25%,
-      hsl(var(--instagram-pink)) 50%,
-      hsl(var(--instagram-purple)) 100%
+      135deg,
+      hsl(var(--brand-cyan)) 0%,
+      hsl(var(--brand-red)) 50%,
+      hsl(var(--brand-pink)) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
   }
 }

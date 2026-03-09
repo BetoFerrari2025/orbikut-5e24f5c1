@@ -47,7 +47,7 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card border rounded-lg overflow-hidden">
+    <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
       {/* Header */}
       <div className="flex items-center justify-between p-3">
         <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export function PostCard({ post }: PostCardProps) {
             <Heart
               className={cn(
                 'w-6 h-6 transition-colors',
-                likesData?.isLiked ? 'fill-red-500 text-red-500' : 'hover:text-muted-foreground'
+                likesData?.isLiked ? 'fill-primary text-primary' : 'hover:text-muted-foreground'
               )}
             />
           </button>

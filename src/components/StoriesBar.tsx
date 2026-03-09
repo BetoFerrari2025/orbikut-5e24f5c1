@@ -66,7 +66,7 @@ export function StoriesBar() {
               </Avatar>
               <div className={cn(
                 "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground",
-                hasOwnStory ? "gradient-instagram" : "bg-primary"
+                hasOwnStory ? "gradient-brand" : "bg-primary"
               )}>
                 <Plus className="w-3 h-3" />
               </div>
@@ -88,7 +88,7 @@ export function StoriesBar() {
               onClick={() => openStories(stories)}
               className="flex flex-col items-center gap-1 min-w-[68px]"
             >
-              <div className="p-[2px] rounded-full gradient-instagram">
+              <div className="p-[2px] rounded-full gradient-brand">
                 <Avatar className="w-[60px] h-[60px] border-2 border-background">
                   <AvatarImage src={storyUser.avatar_url ?? undefined} />
                   <AvatarFallback>{storyUser.username[0].toUpperCase()}</AvatarFallback>

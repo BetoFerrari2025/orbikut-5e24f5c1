@@ -98,7 +98,7 @@ export default function Profile() {
                     onClick={handleFollowToggle}
                     disabled={toggleFollow.isPending}
                     variant={followStatus?.isFollowing ? 'secondary' : 'default'}
-                    className={!followStatus?.isFollowing ? 'gradient-instagram hover:opacity-90' : ''}
+                    className={!followStatus?.isFollowing ? 'gradient-brand hover:opacity-90' : ''}
                   >
                     {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
                   </Button>

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Camera } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -50,12 +50,12 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl gradient-instagram flex items-center justify-center">
-              <Camera className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center glow-primary">
+              <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold text-gradient-instagram">
-            PhotoShare
+          <CardTitle className="text-3xl font-bold text-gradient-brand">
+            Orbik
           </CardTitle>
           <CardDescription>
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}
@@ -113,7 +113,7 @@ export default function Auth() {
             </div>
             <Button 
               type="submit" 
-              className="w-full gradient-instagram hover:opacity-90"
+              className="w-full gradient-brand hover:opacity-90 glow-primary"
               disabled={loading}
             >
               {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}

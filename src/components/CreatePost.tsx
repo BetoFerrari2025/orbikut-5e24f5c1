@@ -105,7 +105,7 @@ export function CreatePost() {
           <Button
             onClick={handleSubmit}
             disabled={!selectedImage || createPost.isPending}
-            className="w-full gradient-instagram hover:opacity-90"
+            className="w-full gradient-brand hover:opacity-90 glow-primary"
           >
             {createPost.isPending ? 'Publicando...' : 'Compartilhar'}
           </Button>
