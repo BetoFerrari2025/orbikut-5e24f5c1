@@ -45,7 +45,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
-  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers;
+  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers || showHighlightSave;
 
   // Record view when story changes (not for own stories)
   useEffect(() => {
