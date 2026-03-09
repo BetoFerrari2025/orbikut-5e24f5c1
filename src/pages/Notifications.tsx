@@ -118,7 +118,7 @@ export default function Notifications() {
         </div>
       )}
 
-      {!isLoading && (!notifications || notifications.length === 0) && (
+      {!isLoading && (!filteredNotifications || filteredNotifications.length === 0) && (
         <div className="text-center py-16">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
           <p className="text-muted-foreground">Nenhuma notificação ainda</p>
