@@ -81,20 +81,6 @@ export function PostCard({ post }: PostCardProps) {
     }
   }, [post.id]);
 
-  const handleSave = () => {
-    if (!user) return;
-    toggleSave.mutate({ postId: post.id, isSaved: savedData?.isSaved ?? false });
-  };
-
-  const handleShare = async () => {
-    const url = `${window.location.origin}/post/${post.id}`;
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Orbita', url }); } catch {}
-    } else {
-      navigator.clipboard.writeText(url);
-      toast.success('Link copiado!');
-    }
-  };
 
   const handleLike = () => {
     if (!user) return;
