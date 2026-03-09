@@ -131,7 +131,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   return (
     <Dialog open={!!stories} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md p-0 bg-black border-none overflow-hidden [&>button]:text-white [&>button]:z-20">
-        <div className="relative" onClick={handleStoryNav}>
+        <div className="relative" onClick={handleStoryNav} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {/* Progress bars */}
           <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
             {stories.map((_, i) => (
