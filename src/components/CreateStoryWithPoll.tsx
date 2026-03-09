@@ -110,6 +110,13 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const musicAudioRef = useRef<HTMLAudioElement>(null);
   const musicInputRef = useRef<HTMLInputElement>(null);
+
+  // Filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
