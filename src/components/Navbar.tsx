@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home, Search, User, LogOut, Camera } from 'lucide-react';
+import { Home, Search, User, LogOut, Camera, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
