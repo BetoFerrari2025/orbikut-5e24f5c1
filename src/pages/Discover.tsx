@@ -107,6 +107,9 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   const toggleLike = useToggleLike();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const addComment = useAddComment();
 
   const isVideo = /\.(mp4|webm|mov)$/i.test(post.image_url);
 
