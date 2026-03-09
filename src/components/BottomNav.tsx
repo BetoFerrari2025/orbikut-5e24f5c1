@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, Compass, User } from 'lucide-react';
+import { Home, Search, PlusSquare, Compass, User, Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUnreadCount } from '@/hooks/useNotifications';
 import { CreatePost } from '@/components/CreatePost';
 import { cn } from '@/lib/utils';
 
 export function BottomNav() {
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
+  const { data: unreadCount } = useUnreadCount();
   const location = useLocation();
 
   if (!user) return null;
@@ -40,6 +42,19 @@ export function BottomNav() {
         <div className="flex flex-col items-center justify-center w-full h-full">
           <CreatePost />
         </div>
+
+        <Link
+          to="/notifications"
+          className={cn(
+            "flex flex-col items-center justify-center w-full h-full transition-colors relative",
+            isActive('/notifications') ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <Bell className="w-6 h-6" />
+          {(unreadCount ?? 0) > 0 && (
+            <span className="absolute top-1 right-1/4 w-2 h-2 rounded-full bg-destructive" />
+          )}
+        </Link>
 
         <Link
           to="/search"

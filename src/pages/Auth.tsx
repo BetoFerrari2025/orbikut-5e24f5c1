@@ -56,7 +56,7 @@ export default function Auth() {
             </div>
           </div>
           <CardTitle className="text-3xl font-bold text-gradient-brand">
-            Orbik
+            Orbita
           </CardTitle>
           <CardDescription>
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Home, Search, User, LogOut, Sparkles, MessageCircle } from 'lucide-react';
+import { Home, Search, User, LogOut, Sparkles, MessageCircle, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile(user?.id);
+  const { data: unreadCount } = useUnreadCount();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
@@ -16,7 +18,7 @@ export function Navbar() {
           <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center glow-primary">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-gradient-brand">Orbik</span>
+          <span className="text-2xl font-extrabold text-gradient-brand">Orbita</span>
         </Link>
 
         {/* Desktop navigation */}
@@ -32,6 +34,19 @@ export function Navbar() {
               <Search className="w-6 h-6" />
             </Link>
           </Button>
+
+          {user && (
+            <Button variant="ghost" size="icon" asChild className="relative">
+              <Link to="/notifications">
+                <Bell className="w-6 h-6" />
+                {(unreadCount ?? 0) > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                    {unreadCount! > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            </Button>
+          )}
 
           {user && (
             <Button variant="ghost" size="icon" asChild>

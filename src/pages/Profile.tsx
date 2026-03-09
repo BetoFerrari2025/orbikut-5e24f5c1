@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
+import { useSendNotification } from '@/hooks/useNotifications';
 import { StreakBadge } from '@/components/StreakBadge';
 import { Grid3X3, Settings, MessageCircle, Film, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -28,6 +29,7 @@ export default function Profile() {
   const { data: followingCount } = useFollowingCount(profile?.id);
   const toggleFollow = useToggleFollow();
   const getOrCreateConversation = useGetOrCreateConversation();
+  const sendNotification = useSendNotification();
 
   const isOwnProfile = user?.id === profile?.id;
   const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
@@ -36,8 +38,11 @@ export default function Profile() {
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
 
   const handleFollowToggle = () => {
-    if (!profile || !followStatus) return;
+    if (!profile || !followStatus || !user) return;
     toggleFollow.mutate({ targetUserId: profile.id, isFollowing: followStatus.isFollowing });
+    if (!followStatus.isFollowing) {
+      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
+    }
   };
 
   const handleMessage = async () => {

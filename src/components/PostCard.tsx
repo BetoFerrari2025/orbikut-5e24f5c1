@@ -8,6 +8,7 @@ import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/use
 import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
+import { useSendNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,7 @@ export function PostCard({ post }: PostCardProps) {
   const addComment = useAddComment();
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
+  const sendNotification = useSendNotification();
   const viewRecorded = useRef(false);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function PostCard({ post }: PostCardProps) {
   const handleShare = async () => {
     const url = `${window.location.origin}/post/${post.id}`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'Orbik', url }); } catch {}
+      try { await navigator.share({ title: 'Orbita', url }); } catch {}
     } else {
       navigator.clipboard.writeText(url);
       toast.success('Link copiado!');
@@ -66,13 +68,18 @@ export function PostCard({ post }: PostCardProps) {
 
   const handleLike = () => {
     if (!user) return;
-    toggleLike.mutate({ postId: post.id, isLiked: likesData?.isLiked ?? false });
+    const isLiked = likesData?.isLiked ?? false;
+    toggleLike.mutate({ postId: post.id, isLiked });
+    if (!isLiked) {
+      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+    }
   };
 
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
     addComment.mutate({ postId: post.id, content: newComment });
+    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'comment', postId: post.id, content: newComment });
     setNewComment('');
   };
 
