@@ -96,7 +96,7 @@ export function SparkReaction({ isLiked, onLike, disabled, iconClassName }: Spar
         <Heart
           className={cn(
             'w-7 h-7 transition-all duration-200',
-            isLiked ? 'fill-primary text-primary scale-110' : 'hover:text-muted-foreground',
+            isLiked ? 'fill-primary text-primary scale-110' : iconClassName || 'hover:text-muted-foreground',
             isHolding && 'animate-pulse'
           )}
         />
