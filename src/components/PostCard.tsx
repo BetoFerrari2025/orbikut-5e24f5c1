@@ -98,9 +98,25 @@ export function PostCard({ post }: PostCardProps) {
           </Avatar>
           <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
         </Link>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary font-semibold text-sm h-auto py-1 px-2"
+              disabled={toggleFollow.isPending}
+              onClick={() => {
+                toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
+                sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+              }}
+            >
+              Seguir
+            </Button>
+          )}
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Image or Video */}
