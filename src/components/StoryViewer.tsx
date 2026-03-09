@@ -204,7 +204,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }
   };
 
-  const isVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+  const isVideo = (url: string) => /\.(mp4|webm|mov|avi|quicktime)$/i.test(url) || url.includes('video');
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
