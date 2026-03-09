@@ -1,11 +1,23 @@
 import { useState, useRef, useCallback } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
 import { useCreateStoryWithPoll } from '@/hooks/useStoryPolls';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+const TEXT_COLORS = [
+  { label: 'Branco', value: '#ffffff' },
+  { label: 'Preto', value: '#000000' },
+  { label: 'Vermelho', value: '#ef4444' },
+  { label: 'Azul', value: '#3b82f6' },
+  { label: 'Verde', value: '#22c55e' },
+  { label: 'Amarelo', value: '#eab308' },
+  { label: 'Rosa', value: '#ec4899' },
+  { label: 'Roxo', value: '#a855f7' },
+];
 
 interface CreateStoryWithPollProps {
   open: boolean;
@@ -78,6 +90,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   // Text overlay
   const [showText, setShowText] = useState(false);
   const [caption, setCaption] = useState('');
+  const [textColor, setTextColor] = useState('#ffffff');
+  const [textSize, setTextSize] = useState(14);
 
   // Link overlay
   const [showLink, setShowLink] = useState(false);
@@ -130,6 +144,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setOptionB('');
     setShowText(false);
     setCaption('');
+    setTextColor('#ffffff');
+    setTextSize(14);
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
@@ -184,7 +200,12 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 <DraggablePreview initialX={50} initialY={180}>
                   <div className="flex items-center gap-1">
                     <GripVertical className="w-3 h-3 text-white/50" />
-                    <p className="text-white text-sm bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[200px] break-words">{caption}</p>
+                    <p
+                      className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[200px] break-words"
+                      style={{ color: textColor, fontSize: `${textSize}px` }}
+                    >
+                      {caption}
+                    </p>
                   </div>
                 </DraggablePreview>
               )}
@@ -263,7 +284,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
 
               {/* Text input */}
               {showText && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-xs text-muted-foreground">Digite o texto e arraste na imagem para posicionar</p>
                   <Input
                     placeholder="Digite seu texto..."
@@ -271,6 +292,41 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     onChange={(e) => setCaption(e.target.value)}
                     maxLength={200}
                   />
+                  {/* Color picker */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Cor</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {TEXT_COLORS.map((c) => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => setTextColor(c.value)}
+                          className={cn(
+                            "w-7 h-7 rounded-full border-2 transition-transform",
+                            textColor === c.value ? "border-primary scale-110" : "border-muted"
+                          )}
+                          style={{ backgroundColor: c.value }}
+                          title={c.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {/* Font size slider */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Tamanho: {textSize}px</p>
+                    <div className="flex items-center gap-2">
+                      <Minus className="w-3 h-3 text-muted-foreground" />
+                      <Slider
+                        value={[textSize]}
+                        onValueChange={([v]) => setTextSize(v)}
+                        min={10}
+                        max={36}
+                        step={1}
+                        className="flex-1"
+                      />
+                      <Type className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </div>
                 </div>
               )}
 

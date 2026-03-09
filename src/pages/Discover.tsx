@@ -116,6 +116,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -142,6 +143,18 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
       }
     }
   }, [isActive]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onTimeUpdate = () => {
+      if (video.duration) {
+        setVideoProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    video.addEventListener('timeupdate', onTimeUpdate);
+    return () => video.removeEventListener('timeupdate', onTimeUpdate);
+  }, []);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -258,6 +271,14 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
           <Eye className="w-6 h-6 text-white/70" />
           <span className="text-white text-xs font-semibold">{viewCount ?? 0}</span>
         </div>
+      </div>
+
+      {/* Video progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/20">
+        <div
+          className="h-full bg-primary transition-[width] duration-200 ease-linear"
+          style={{ width: `${videoProgress}%` }}
+        />
       </div>
 
       <div className="absolute left-4 right-20 bottom-24 z-10">
