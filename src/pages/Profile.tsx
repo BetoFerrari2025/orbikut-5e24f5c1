@@ -15,6 +15,8 @@ import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
 import { ProfileHighlights } from '@/components/ProfileHighlights';
 import { ProfileLinks } from '@/components/ProfileLinks';
+import { OnlineIndicator } from '@/components/OnlineIndicator';
+import { isUserOnline } from '@/hooks/useOnlineStatus';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
