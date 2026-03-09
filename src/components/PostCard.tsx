@@ -120,29 +120,32 @@ export function PostCard({ post }: PostCardProps) {
               isLiked={likesData?.isLiked ?? false}
               onLike={handleLike}
               disabled={!user}
+              iconClassName="text-foreground"
             />
             <button onClick={() => setShowComments(!showComments)}>
-              <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+              <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
             </button>
             <button onClick={handleShare}>
-              <Share2 className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+              <Share2 className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
             </button>
           </div>
-          <button onClick={handleSave} disabled={!user}>
-            {savedData?.isSaved ? (
-              <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
-            ) : (
-              <Bookmark className="w-6 h-6 hover:text-muted-foreground transition-colors" />
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Eye className="w-4 h-4" /> {viewCount ?? 0}
+            </span>
+            <button onClick={handleSave} disabled={!user}>
+              {savedData?.isSaved ? (
+                <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
+              ) : (
+                <Bookmark className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
         <div className="flex items-center gap-3">
-          <p className="font-semibold text-sm">{likesData?.count ?? 0} curtidas</p>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Eye className="w-3.5 h-3.5" /> {viewCount ?? 0}
-          </span>
+          <p className="font-semibold text-sm text-foreground">{likesData?.count ?? 0} curtidas</p>
         </div>
 
         {/* Caption */}
