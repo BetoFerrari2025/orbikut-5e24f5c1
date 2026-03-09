@@ -48,7 +48,7 @@ export default function Install() {
         </div>
 
         <div className="space-y-2 max-w-sm">
-          <h2 className="text-2xl font-bold text-foreground">Instale o Orbikut</h2>
+          <h2 className="text-2xl font-bold text-foreground">Instale o Orbita</h2>
           <p className="text-muted-foreground text-sm">
             Tenha acesso rápido direto da tela inicial do seu celular, como um app nativo.
           </p>
