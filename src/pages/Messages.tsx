@@ -10,6 +10,8 @@ import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck, Smile } from
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { OnlineIndicator } from '@/components/OnlineIndicator';
+import { isUserOnline } from '@/hooks/useOnlineStatus';
 
 const QUICK_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
 
