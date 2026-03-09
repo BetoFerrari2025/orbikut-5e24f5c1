@@ -35,9 +35,8 @@ async function showBrowserNotification(title: string, body: string, url?: string
         body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        vibrate: [100, 50, 100],
         data: { url: url || '/notifications' },
-      });
+      } as NotificationOptions);
     } else {
       new Notification(title, { body, icon: '/favicon.ico' });
     }
