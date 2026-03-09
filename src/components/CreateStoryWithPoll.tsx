@@ -393,6 +393,34 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   <Input placeholder="Texto do botão (ex: Saiba mais)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
                 </div>
               )}
+
+              {/* Music input */}
+              {showMusic && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Selecione um áudio para tocar durante o story</p>
+                  <input ref={musicInputRef} type="file" accept="audio/*" onChange={handleMusicSelect} className="hidden" />
+                  <button
+                    onClick={() => musicInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-4 text-center hover:border-primary transition-colors"
+                  >
+                    <Music className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-muted-foreground text-sm">{musicFile ? musicFile.name : 'Toque para selecionar áudio'}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">MP3, WAV, M4A (máx 10MB)</p>
+                  </button>
+                  {musicPreviewUrl && (
+                    <div className="flex items-center gap-3 bg-muted rounded-lg p-3">
+                      <audio ref={musicAudioRef} src={musicPreviewUrl} loop />
+                      <button onClick={toggleMusicPreview} className="shrink-0">
+                        {isMusicPlaying ? <Pause className="w-5 h-5 text-primary" /> : <Play className="w-5 h-5 text-primary" />}
+                      </button>
+                      <span className="text-sm text-foreground truncate flex-1">{musicFile?.name}</span>
+                      <button onClick={() => { setMusicFile(null); if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl); setMusicPreviewUrl(null); setIsMusicPlaying(false); if (musicAudioRef.current) { musicAudioRef.current.pause(); } }}>
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
 
