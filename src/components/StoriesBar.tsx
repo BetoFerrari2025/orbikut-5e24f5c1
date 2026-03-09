@@ -66,7 +66,7 @@ export function StoriesBar() {
               </Avatar>
               <div className={cn(
                 "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-primary-foreground",
-                hasOwnStory ? "gradient-instagram" : "bg-primary"
+                hasOwnStory ? "gradient-brand" : "bg-primary"
               )}>
                 <Plus className="w-3 h-3" />
               </div>
