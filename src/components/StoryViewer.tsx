@@ -253,6 +253,14 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           />
         )}
 
+        {/* Link input overlay */}
+        {showLinkInput && user?.id === currentStory.user_id && (
+          <LinkInputOverlay
+            story={currentStory}
+            onClose={() => setShowLinkInput(false)}
+          />
+        )}
+
         {/* Viewers overlay (owner only) */}
         {showViewers && user?.id === currentStory.user_id && (
           <StoryViewersPanel
