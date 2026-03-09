@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { usePosts, useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
