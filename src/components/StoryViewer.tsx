@@ -307,7 +307,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           </div>
 
           {/* Emoji reactions bar */}
-          <StoryEmojiReactions storyId={currentStory.id} />
+          <StoryEmojiReactions storyId={currentStory.id} storyOwnerId={currentStory.user_id} />
 
           {/* Owner-only edit buttons */}
           <StoryOwnerControls
