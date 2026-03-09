@@ -237,6 +237,29 @@ export default function Profile() {
               </div>
             )}
           </TabsContent>
+
+          {isOwnProfile && (
+            <TabsContent value="saved">
+              {savedLoading ? (
+                <div className="grid grid-cols-3 gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="aspect-square" />
+                  ))}
+                </div>
+              ) : savedPosts && savedPosts.length > 0 ? (
+                <div className="space-y-6 max-w-lg mx-auto">
+                  {savedPosts.map((post: any) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Bookmark className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Nenhum post salvo ainda</p>
+                </div>
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
       <BottomNav />
