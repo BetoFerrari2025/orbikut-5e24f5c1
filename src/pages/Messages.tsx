@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 import { ArrowLeft, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Messages() {
   const { user } = useAuth();

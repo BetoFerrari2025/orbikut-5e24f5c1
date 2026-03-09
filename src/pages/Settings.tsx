@@ -11,6 +11,7 @@ import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Camera } from 'lucide-react';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Settings() {
   const navigate = useNavigate();

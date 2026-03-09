@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
