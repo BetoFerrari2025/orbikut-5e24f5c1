@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   useAdminUsers, useAdminStats, useAdminSignupStats,
-  useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost,
+  useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost, useAdminToggleRole,
 } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';

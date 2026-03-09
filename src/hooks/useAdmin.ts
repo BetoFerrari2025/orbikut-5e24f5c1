@@ -80,6 +80,21 @@ export function useAdminDeleteUser() {
   });
 }
 
+export function useAdminToggleRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, role, grant }: { userId: string; role: string; grant: boolean }) => {
+      const { error } = await supabase.rpc('admin_toggle_role', {
+        _user_id: userId,
+        _role: role,
+        _grant: grant,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+  });
+}
+
 export function useAdminDeletePost() {
   const queryClient = useQueryClient();
   return useMutation({
