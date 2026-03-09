@@ -130,6 +130,17 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       ? { question: pollQuestion, optionA, optionB }
       : undefined;
 
+    // Upload music if selected
+    let musicUrl: string | undefined;
+    if (showMusic && musicFile && user) {
+      const fileExt = musicFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('story-music').upload(fileName, musicFile, { contentType: musicFile.type });
+      if (uploadError) { toast.error('Erro ao enviar música'); return; }
+      const { data: { publicUrl } } = supabase.storage.from('story-music').getPublicUrl(fileName);
+      musicUrl = publicUrl;
+    }
+
     try {
       await createStory.mutateAsync({
         file: selectedFile,
@@ -137,6 +148,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         caption: showText && caption.trim() ? caption.trim() : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
+        musicUrl,
       });
       toast.success('Story publicado!');
       resetForm();
@@ -160,6 +172,29 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
+    setShowMusic(false);
+    setMusicFile(null);
+    if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl);
+    setMusicPreviewUrl(null);
+    setIsMusicPlaying(false);
+    if (musicAudioRef.current) { musicAudioRef.current.pause(); musicAudioRef.current.currentTime = 0; }
+  };
+
+  const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) { toast.error('Selecione um arquivo de áudio'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Arquivo muito grande (máx 10MB)'); return; }
+    setMusicFile(file);
+    if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl);
+    setMusicPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const toggleMusicPreview = () => {
+    const audio = musicAudioRef.current;
+    if (!audio) return;
+    if (isMusicPlaying) { audio.pause(); setIsMusicPlaying(false); }
+    else { audio.play().then(() => setIsMusicPlaying(true)).catch(() => {}); }
   };
 
   return (
