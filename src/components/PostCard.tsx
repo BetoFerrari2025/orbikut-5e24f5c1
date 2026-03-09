@@ -78,8 +78,9 @@ export function PostCard({ post }: PostCardProps) {
             <Heart
               className={cn(
                 'w-6 h-6 transition-colors',
-                likesData?.isLiked ? 'fill-red-500 text-red-500' : 'hover:text-muted-foreground'
+                likesData?.isLiked ? 'fill-primary text-primary' : 'hover:text-muted-foreground'
               )}
+            />
             />
           </button>
           <button onClick={() => setShowComments(!showComments)}>
