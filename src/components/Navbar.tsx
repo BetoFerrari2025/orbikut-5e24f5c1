@@ -16,7 +16,7 @@ export function Navbar() {
           <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center glow-primary">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-gradient-brand">Orbik</span>
+          <span className="text-2xl font-extrabold text-gradient-brand">Orbita</span>
         </Link>
 
         {/* Desktop navigation */}
