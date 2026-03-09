@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/hooks/useTheme";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -32,7 +33,6 @@ function AppRoutes() {
     );
   }
 
-  // Show landing page for unauthenticated users on root
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
@@ -61,17 +61,24 @@ function AppRoutes() {
   );
 }
 
+function AppShell() {
+  useTheme(); // applies dark/light class to <html>
+  return (
+    <>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="dark">
-            <AppRoutes />
-          </div>
-        </BrowserRouter>
+        <AppShell />
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Home, Search, User, LogOut, Sparkles, MessageCircle, Bell } from 'lucide-react';
+import { Home, Search, User, LogOut, Sparkles, MessageCircle, Bell, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUnreadCount } from '@/hooks/useNotifications';
+import { useTheme } from '@/hooks/useTheme';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const { data: unreadCount } = useUnreadCount();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
@@ -65,6 +67,10 @@ export function Navbar() {
               </Link>
             </Button>
           )}
+
+          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}>
+            {theme === 'dark' ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+          </Button>
 
           {user && (
             <Button variant="ghost" size="icon" onClick={signOut} className="hover:bg-destructive/10">

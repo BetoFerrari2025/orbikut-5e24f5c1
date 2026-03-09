@@ -5,13 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
+import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Camera } from 'lucide-react';
+import { Camera, Moon } from 'lucide-react';
 
 export default function Settings() {
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
@@ -151,6 +154,22 @@ export default function Settings() {
           {updateProfile.isPending ? 'Salvando...' : 'Salvar'}
         </Button>
       </form>
+
+      {/* Theme toggle */}
+      <div className="mt-8 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Aparência</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Moon className="w-5 h-5 text-foreground" />
+            <Label htmlFor="dark-mode" className="cursor-pointer">Modo escuro</Label>
+          </div>
+          <Switch
+            id="dark-mode"
+            checked={theme === 'dark'}
+            onCheckedChange={toggleTheme}
+          />
+        </div>
+      </div>
     </main>
   );
 }
