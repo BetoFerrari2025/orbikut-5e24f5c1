@@ -34,10 +34,12 @@ export function PwaInstallButton() {
 
   if (isStandalone || dismissed) return null;
 
-  // If no native prompt, show a subtle tip
+  // If no native prompt, show a tip for all mobile users
   if (!deferredPrompt) {
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (!isIos) return null;
+    const isMobile = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+    
+    if (!isMobile) return null;
 
     return (
       <div className="fixed bottom-20 right-4 z-50 md:bottom-6 animate-in slide-in-from-bottom fade-in">
@@ -46,7 +48,10 @@ export function PwaInstallButton() {
             <X className="w-4 h-4" />
           </button>
           <p className="text-xs text-foreground">
-            Toque em <strong>Compartilhar</strong> e depois em <strong>"Adicionar à Tela de Início"</strong> para instalar o app.
+            {isIos 
+              ? <>Toque em <strong>Compartilhar</strong> e depois em <strong>"Adicionar à Tela de Início"</strong> para instalar o app.</>
+              : <>Abra o menu do navegador (⋮) e toque em <strong>"Instalar app"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</>
+            }
           </p>
         </div>
       </div>

@@ -444,6 +444,61 @@ function StoryAudioPlayer({ musicUrl, storyId }: { musicUrl: string; storyId: st
   );
 }
 
+// ─── Emoji Reactions (Instagram-style) ───
+const STORY_EMOJIS = ['❤️', '😂', '😮', '😢', '👏', '🔥', '🎉', '😍'];
+
+function StoryEmojiReactions({ storyId }: { storyId: string }) {
+  const [sentEmoji, setSentEmoji] = useState<string | null>(null);
+  const [floatingEmojis, setFloatingEmojis] = useState<{ id: number; emoji: string }[]>([]);
+  const idCounter = useRef(0);
+
+  const handleReaction = (emoji: string) => {
+    setSentEmoji(emoji);
+    // Add floating emoji
+    idCounter.current += 1;
+    const id = idCounter.current;
+    setFloatingEmojis(prev => [...prev, { id, emoji }]);
+    setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 1500);
+    setTimeout(() => setSentEmoji(null), 1500);
+  };
+
+  return (
+    <div className="absolute bottom-4 left-0 right-0 z-10 px-4" onClick={(e) => e.stopPropagation()}>
+      {/* Floating emojis animation */}
+      <div className="relative h-0">
+        {floatingEmojis.map((fe) => (
+          <span
+            key={fe.id}
+            className="absolute text-4xl pointer-events-none"
+            style={{
+              left: '50%',
+              bottom: 0,
+              animation: 'float-up 1.5s ease-out forwards',
+            }}
+          >
+            {fe.emoji}
+          </span>
+        ))}
+      </div>
+      {/* Emoji bar */}
+      <div className="flex justify-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
+        {STORY_EMOJIS.map((emoji) => (
+          <button
+            key={emoji}
+            onClick={() => handleReaction(emoji)}
+            className={cn(
+              "text-2xl hover:scale-125 transition-transform active:scale-150",
+              sentEmoji === emoji && "scale-150"
+            )}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StoryLikeButton({ storyId }: { storyId: string }) {
   const { data: likeCount } = useStoryLikes(storyId);
   const { data: hasLiked } = useHasLikedStory(storyId);
