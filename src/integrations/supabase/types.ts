@@ -461,6 +461,7 @@ export type Database = {
           id: string
           is_blocked: boolean | null
           last_post_date: string | null
+          last_seen: string | null
           max_streak: number | null
           updated_at: string
           username: string
@@ -474,6 +475,7 @@ export type Database = {
           id: string
           is_blocked?: boolean | null
           last_post_date?: string | null
+          last_seen?: string | null
           max_streak?: number | null
           updated_at?: string
           username: string
@@ -487,6 +489,7 @@ export type Database = {
           id?: string
           is_blocked?: boolean | null
           last_post_date?: string | null
+          last_seen?: string | null
           max_streak?: number | null
           updated_at?: string
           username?: string

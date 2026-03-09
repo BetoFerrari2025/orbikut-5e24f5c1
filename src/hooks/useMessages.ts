@@ -14,6 +14,7 @@ export interface Conversation {
     username: string;
     avatar_url: string | null;
     full_name: string | null;
+    last_seen: string | null;
   };
   last_message?: Message;
 }
@@ -58,7 +59,7 @@ export function useConversations() {
           const otherUserId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
 
           const [profileRes, msgRes] = await Promise.all([
-            supabase.from('profiles').select('id, username, avatar_url, full_name').eq('id', otherUserId).single(),
+            supabase.from('profiles').select('id, username, avatar_url, full_name, last_seen').eq('id', otherUserId).single(),
             supabase.from('messages').select('*').eq('conversation_id', conv.id).order('created_at', { ascending: false }).limit(1),
           ]);
 

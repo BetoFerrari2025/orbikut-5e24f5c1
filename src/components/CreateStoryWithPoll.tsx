@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -117,6 +117,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
 
+  // Stickers
+  const [showStickers, setShowStickers] = useState(false);
+  const [stickers, setStickers] = useState<{ id: string; emoji: string }[]>([]);
+  const stickerIdCounter = useRef(0);
+
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -200,6 +205,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setBrightness(100);
     setContrast(100);
     setSaturation(100);
+    setShowStickers(false);
+    setStickers([]);
+    stickerIdCounter.current = 0;
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,6 +317,28 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </DraggablePreview>
               )}
 
+              {/* Draggable sticker overlays */}
+              {stickers.map((sticker, idx) => (
+                <DraggablePreview
+                  key={sticker.id}
+                  initialX={30 + (idx * 20) % 120}
+                  initialY={100 + (idx * 30) % 200}
+                >
+                  <div className="relative group">
+                    <span className="text-4xl select-none drop-shadow-lg">{sticker.emoji}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStickers(prev => prev.filter(s => s.id !== sticker.id));
+                      }}
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </DraggablePreview>
+              ))}
+
               {/* Poll overlay */}
               {showPoll && (
                 <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3 z-10">
@@ -385,6 +415,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 >
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
                   Filtros
+                </Button>
+                <Button
+                  variant={showStickers ? 'default' : 'outline'}
+                  onClick={() => setShowStickers(!showStickers)}
+                  className={cn(showStickers && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Smile className="w-4 h-4 mr-2" />
+                  Stickers
                 </Button>
               </div>
 
@@ -494,6 +533,37 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                       Resetar filtros
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {/* Sticker picker */}
+              {showStickers && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Toque em um emoji para adicionar ao story. Arraste para posicionar.</p>
+                  <div className="grid grid-cols-8 gap-2">
+                    {['😀','😂','🥰','😎','🤩','😜','🥳','😇',
+                      '❤️','🔥','⭐','🎉','👍','👏','💪','🙌',
+                      '🌈','🦋','🌸','🍕','🎵','💎','🏆','🎯',
+                      '🐶','🐱','🦊','🐻','🐼','🦁','🐸','🐵',
+                      '☀️','🌙','⚡','❄️','🌊','🍀','🌺','🎈'].map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          stickerIdCounter.current += 1;
+                          setStickers(prev => [...prev, { id: `sticker-${stickerIdCounter.current}`, emoji }]);
+                        }}
+                        className="text-2xl hover:scale-125 transition-transform p-1"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                  {stickers.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => setStickers([])}>
+                      Remover todos os stickers
+                    </Button>
+                  )}
                 </div>
               )}
             </>
