@@ -180,6 +180,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         captionSize: showText && caption.trim() ? textSize : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
+        linkX: showLink && linkUrl.trim() ? linkPosPercent.x : undefined,
+        linkY: showLink && linkUrl.trim() ? linkPosPercent.y : undefined,
         musicUrl,
         filterBrightness: brightness,
         filterContrast: contrast,
