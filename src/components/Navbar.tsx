@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
