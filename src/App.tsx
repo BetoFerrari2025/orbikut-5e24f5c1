@@ -32,6 +32,7 @@ const App = () => (
               <Route path="/search" element={<Search />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/discover" element={<Discover />} />
               <Route path="/post/:postId" element={<Post />} />
               <Route path="*" element={<NotFound />} />
