@@ -317,6 +317,28 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </DraggablePreview>
               )}
 
+              {/* Draggable sticker overlays */}
+              {stickers.map((sticker, idx) => (
+                <DraggablePreview
+                  key={sticker.id}
+                  initialX={30 + (idx * 20) % 120}
+                  initialY={100 + (idx * 30) % 200}
+                >
+                  <div className="relative group">
+                    <span className="text-4xl select-none drop-shadow-lg">{sticker.emoji}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStickers(prev => prev.filter(s => s.id !== sticker.id));
+                      }}
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </DraggablePreview>
+              ))
+
               {/* Poll overlay */}
               {showPoll && (
                 <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3 z-10">
