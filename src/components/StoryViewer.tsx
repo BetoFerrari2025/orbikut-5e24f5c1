@@ -447,10 +447,12 @@ function StoryAudioPlayer({ musicUrl, storyId }: { musicUrl: string; storyId: st
 // ─── Emoji Reactions (Instagram-style) ───
 const STORY_EMOJIS = ['❤️', '😂', '😮', '😢', '👏', '🔥', '🎉', '😍'];
 
-function StoryEmojiReactions({ storyId }: { storyId: string }) {
+function StoryEmojiReactions({ storyId, storyOwnerId }: { storyId: string; storyOwnerId: string }) {
   const [sentEmoji, setSentEmoji] = useState<string | null>(null);
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: number; emoji: string }[]>([]);
   const idCounter = useRef(0);
+  const { user } = useAuth();
+  const sendNotification = useSendNotification();
 
   const handleReaction = (emoji: string) => {
     setSentEmoji(emoji);
@@ -460,6 +462,16 @@ function StoryEmojiReactions({ storyId }: { storyId: string }) {
     setFloatingEmojis(prev => [...prev, { id, emoji }]);
     setTimeout(() => setFloatingEmojis(prev => prev.filter(e => e.id !== id)), 1500);
     setTimeout(() => setSentEmoji(null), 1500);
+
+    // Send notification to story owner
+    if (user && user.id !== storyOwnerId) {
+      sendNotification.mutate({
+        userId: storyOwnerId,
+        actorId: user.id,
+        type: 'like',
+        content: `reagiu com ${emoji} ao seu story`,
+      });
+    }
   };
 
   return (
