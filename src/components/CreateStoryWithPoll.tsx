@@ -245,11 +245,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               />
             </div>
           ) : (
-            <div className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
+            <div ref={previewContainerRef} className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
               {selectedFile?.type.startsWith('video') ? (
-                <video src={preview} className="w-full h-full object-cover" muted autoPlay loop />
+                <video src={preview} className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop />
               ) : (
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                <img src={preview} alt="Preview" className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} />
               )}
               <Button
                 variant="secondary"
@@ -263,9 +263,22 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 <X className="w-4 h-4" />
               </Button>
 
-              {/* Draggable text overlay - starts centered */}
+              {/* Draggable text overlay - percentage based */}
               {showText && caption && (
-                <DraggablePreview initialX={50} initialY={180}>
+                <DraggablePreview
+                  initialX={50}
+                  initialY={180}
+                  onPositionChange={(x, y) => {
+                    const container = previewContainerRef.current;
+                    if (container) {
+                      const rect = container.getBoundingClientRect();
+                      setTextPosPercent({
+                        x: Math.round((x / rect.width) * 100),
+                        y: Math.round((y / rect.height) * 100),
+                      });
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-1">
                     <GripVertical className="w-3 h-3 text-white/50" />
                     <p
@@ -278,7 +291,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </DraggablePreview>
               )}
 
-              {/* Draggable link CTA overlay - starts centered */}
+              {/* Draggable link CTA overlay */}
               {showLink && linkUrl && (
                 <DraggablePreview initialX={50} initialY={240}>
                   <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
