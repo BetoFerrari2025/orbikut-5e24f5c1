@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, X, Send, Heart, SmilePlus } from 'lucide-react';
+import { MessageCircle, X, Send, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useComments, useAddComment } from '@/hooks/usePosts';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useComments, useAddComment, useUpdateComment, useDeleteComment } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface CommentsDialogProps {
   postId: string;
@@ -21,10 +23,14 @@ interface CommentsDialogProps {
 export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: CommentsDialogProps) {
   const { data: comments } = useComments(postId);
   const addComment = useAddComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
   const { user } = useAuth();
   const sendNotification = useSendNotification();
   const [text, setText] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
 
   const handleSend = () => {
     if (!text.trim() || !user) return;
@@ -33,6 +39,24 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
     sendNotification.mutate({ userId: postOwnerId, actorId: user.id, type: 'comment', postId, content });
     setText('');
     setReplyTo(null);
+  };
+
+  const handleEdit = (commentId: string, currentContent: string) => {
+    setEditingId(commentId);
+    setEditText(currentContent);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editText.trim() || !editingId) return;
+    updateComment.mutate({ commentId: editingId, content: editText.trim(), postId });
+    setEditingId(null);
+    setEditText('');
+    toast.success('Comentário editado');
+  };
+
+  const handleDelete = (commentId: string) => {
+    deleteComment.mutate({ commentId, postId });
+    toast.success('Comentário excluído');
   };
 
   return (
@@ -67,8 +91,45 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
                   <span className="text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: ptBR })}
                   </span>
+                  {user?.id === c.user_id && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(c.id, c.content)} className="gap-2">
+                          <Pencil className="w-3.5 h-3.5" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(c.id)} className="gap-2 text-destructive focus:text-destructive">
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
-                <p className="text-sm text-foreground mt-0.5">{c.content}</p>
+                {editingId === c.id ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+                      className="flex-1 text-sm h-8"
+                      autoFocus
+                    />
+                    <Button size="sm" variant="ghost" onClick={handleSaveEdit} disabled={!editText.trim()} className="h-8 px-2 text-primary">
+                      Salvar
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8 px-2">
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-foreground mt-0.5">{c.content}</p>
+                )}
                 <button
                   onClick={() => setReplyTo(c.profiles.username)}
                   className="text-xs text-muted-foreground hover:text-primary mt-1 font-semibold"

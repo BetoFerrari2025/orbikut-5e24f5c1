@@ -36,7 +36,7 @@ export function BottomNav() {
             isActive('/discover') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <Compass className="w-6 h-6" />
+          <Rabbit className="w-6 h-6" />
         </Link>
 
         <div className="flex flex-col items-center justify-center w-full h-full">

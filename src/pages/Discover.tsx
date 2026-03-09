@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { usePosts, useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { usePosts, useLikes, useToggleLike, useComments, useAddComment, useUpdateComment, useDeleteComment } from '@/hooks/usePosts';
 import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';

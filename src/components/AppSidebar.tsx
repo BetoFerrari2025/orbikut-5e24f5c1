@@ -38,7 +38,7 @@ export function AppSidebar() {
   const mainItems = [
     { title: 'Início', url: '/', icon: Home },
     { title: 'Buscar', url: '/search', icon: Search },
-    { title: 'Explorar', url: '/discover', icon: Compass },
+    { title: 'Explorar', url: '/discover', icon: Rabbit },
     { title: 'Notificações', url: '/notifications', icon: Bell, badge: unreadCount },
     { title: 'Mensagens', url: '/messages', icon: MessageCircle },
     ...(profile ? [{ title: 'Perfil', url: `/profile/${profile.username}`, icon: User }] : []),
