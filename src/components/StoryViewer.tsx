@@ -395,6 +395,12 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onEditLink, onS
         </div>
         <span className="text-white text-[10px] mt-0.5">Música</span>
       </button>
+      <button onClick={onEditLink} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <Link2 className="w-5 h-5 text-white" />
+        </div>
+        <span className="text-white text-[10px] mt-0.5">Link</span>
+      </button>
       <button onClick={onShowViewers} className="flex flex-col items-center">
         <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
           <Eye className="w-5 h-5 text-white" />
