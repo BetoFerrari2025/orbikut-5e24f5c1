@@ -80,12 +80,12 @@ export function Navbar() {
         </div>
 
         {/* Mobile navigation */}
-        <div className="flex md:hidden items-center gap-0.5">
+        <div className="flex md:hidden items-center gap-1">
           {user ? (
             <>
               <Button variant="ghost" size="icon" asChild className="relative h-9 w-9">
                 <Link to="/notifications">
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-5 h-5 text-foreground" />
                   {(unreadCount ?? 0) > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
                       {unreadCount! > 9 ? '9+' : unreadCount}
@@ -95,15 +95,15 @@ export function Navbar() {
               </Button>
               <Button variant="ghost" size="icon" asChild className="h-9 w-9">
                 <Link to="/messages">
-                  <MessageCircle className="w-5 h-5" />
+                  <MessageCircle className="w-5 h-5 text-foreground" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" onClick={signOut} className="h-9 w-9">
-                <LogOut className="w-5 h-5" />
+              <Button variant="ghost" size="icon" onClick={signOut} className="h-9 w-9 hover:bg-destructive/10">
+                <LogOut className="w-5 h-5 text-foreground hover:text-destructive" />
               </Button>
             </>
           ) : (
-            <Button asChild size="sm" className="gradient-brand hover:opacity-90">
+            <Button asChild size="sm" className="gradient-brand hover:opacity-90 text-white font-semibold">
               <Link to="/auth">Entrar</Link>
             </Button>
           )}
