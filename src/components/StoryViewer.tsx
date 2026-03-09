@@ -189,13 +189,17 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
                 left: `${(currentStory as any).caption_x ?? 50}%`,
                 top: `${(currentStory as any).caption_y ?? 50}%`,
                 transform: 'translate(-50%, -50%)',
+                maxWidth: '80%',
               }}
             >
               <p
-                className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[80%] break-words"
+                className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2"
                 style={{
                   color: (currentStory as any).caption_color || '#ffffff',
                   fontSize: `${(currentStory as any).caption_size || 14}px`,
+                  overflowWrap: 'break-word',
+                  wordBreak: 'normal',
+                  whiteSpace: 'pre-wrap',
                 }}
               >
                 {currentStory.caption}
