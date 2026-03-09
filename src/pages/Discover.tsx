@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { usePosts, useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { usePosts, useLikes, useToggleLike, useComments, useAddComment, useUpdateComment, useDeleteComment } from '@/hooks/usePosts';
 import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -108,7 +108,11 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   const [isPlaying, setIsPlaying] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
   const addComment = useAddComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
 
   useEffect(() => {
     if (isActive && !viewRecorded.current) {
@@ -252,14 +256,34 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {comments && comments.length > 0 ? comments.map((comment: any) => (
-              <div key={comment.id} className="flex gap-2">
+              <div key={comment.id} className="flex gap-2 group">
                 <Avatar className="w-7 h-7 flex-shrink-0">
                   <AvatarImage src={comment.profiles?.avatar_url ?? undefined} />
                   <AvatarFallback className="text-xs">{comment.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <span className="text-white font-semibold text-xs mr-2">{comment.profiles?.username}</span>
-                  <span className="text-white/80 text-xs">{comment.content}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-white font-semibold text-xs">{comment.profiles?.username}</span>
+                    {user?.id === comment.user_id && (
+                      <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => { setEditingCommentId(comment.id); setEditCommentText(comment.content); }} className="text-white/60 hover:text-white">
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => { deleteComment.mutate({ commentId: comment.id, postId: post.id }); toast.success('Comentário excluído'); }} className="text-white/60 hover:text-destructive">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {editingCommentId === comment.id ? (
+                    <form onSubmit={(e) => { e.preventDefault(); if (!editCommentText.trim()) return; updateComment.mutate({ commentId: comment.id, content: editCommentText.trim(), postId: post.id }); setEditingCommentId(null); toast.success('Comentário editado'); }} className="flex gap-1 mt-1">
+                      <Input value={editCommentText} onChange={(e) => setEditCommentText(e.target.value)} className="bg-white/10 border-white/20 text-white text-xs h-7" autoFocus />
+                      <Button type="submit" size="sm" className="h-7 text-xs">OK</Button>
+                      <button type="button" onClick={() => setEditingCommentId(null)} className="text-white/60 text-xs">✕</button>
+                    </form>
+                  ) : (
+                    <span className="text-white/80 text-xs">{comment.content}</span>
+                  )}
                 </div>
               </div>
             )) : (
