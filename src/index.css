@@ -124,4 +124,27 @@
   .glow-primary {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  @keyframes float-up {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-150px) scale(0.5);
+    }
+  }
+
+  .animate-float-up {
+    animation: float-up 1.5s ease-out forwards;
+  }
 }
