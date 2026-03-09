@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, MessageCircle, User } from 'lucide-react';
+import { Home, Search, PlusSquare, Compass, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { CreatePost } from '@/components/CreatePost';
@@ -15,7 +15,7 @@ export function BottomNav() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t md:hidden">
       <div className="flex items-center justify-around h-14">
         <Link
           to="/"
@@ -28,13 +28,13 @@ export function BottomNav() {
         </Link>
 
         <Link
-          to="/search"
+          to="/discover"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full transition-colors",
-            isActive('/search') ? "text-primary" : "text-muted-foreground"
+            isActive('/discover') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <Search className="w-6 h-6" />
+          <Compass className="w-6 h-6" />
         </Link>
 
         <div className="flex flex-col items-center justify-center w-full h-full">
@@ -42,13 +42,13 @@ export function BottomNav() {
         </div>
 
         <Link
-          to="/messages"
+          to="/search"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full transition-colors",
-            isActive('/messages') ? "text-primary" : "text-muted-foreground"
+            isActive('/search') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <MessageCircle className="w-6 h-6" />
+          <Search className="w-6 h-6" />
         </Link>
 
         {profile && (

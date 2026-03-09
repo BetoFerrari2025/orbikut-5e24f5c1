@@ -86,7 +86,10 @@ export default function Profile() {
 
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold">{profile.username}</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{profile.username}</h1>
+              {(profile as any).current_streak > 0 && (
+                <StreakBadge streak={(profile as any).current_streak} />
+              )}
               {isOwnProfile ? (
                 <Button variant="secondary" size="sm" asChild>
                   <Link to="/settings">
