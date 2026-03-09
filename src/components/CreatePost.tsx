@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus, Video, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -64,23 +64,35 @@ export function CreatePost() {
               className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
-              <ImagePlus className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Clique para selecionar uma imagem</p>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <ImagePlus className="w-10 h-10 text-muted-foreground" />
+                <Video className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">Clique para selecionar uma imagem ou vídeo</p>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,video/mp4,video/webm,video/quicktime"
                 onChange={handleImageSelect}
                 className="hidden"
               />
             </div>
           ) : (
             <div className="relative">
-              <img
-                src={preview}
-                alt="Preview"
-                className="w-full aspect-square object-cover rounded-lg"
-              />
+              {selectedImage && /^video\//i.test(selectedImage.type) ? (
+                <video
+                  src={preview!}
+                  className="w-full aspect-square object-cover rounded-lg"
+                  controls
+                  muted
+                />
+              ) : (
+                <img
+                  src={preview!}
+                  alt="Preview"
+                  className="w-full aspect-square object-cover rounded-lg"
+                />
+              )}
               <Button
                 variant="secondary"
                 size="icon"
