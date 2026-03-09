@@ -214,19 +214,7 @@ export default function Profile() {
             ) : videoPosts.length > 0 ? (
               <div className="grid grid-cols-3 gap-1">
                 {videoPosts.map((post) => (
-                  <div key={post.id} className="aspect-[9/16] bg-muted relative group">
-                    <video
-                      src={post.image_url}
-                      className="w-full h-full object-cover cursor-pointer"
-                      muted
-                      playsInline
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none flex items-center justify-center">
-                      <Film className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
+                  <ProfileGridItem key={post.id} post={post} type="video" />
                 ))}
               </div>
             ) : (
