@@ -193,13 +193,7 @@ export default function Profile() {
             ) : photoPosts.length > 0 ? (
               <div className="grid grid-cols-3 gap-1">
                 {photoPosts.map((post) => (
-                  <div key={post.id} className="aspect-square bg-muted">
-                    <img
-                      src={post.image_url}
-                      alt={post.caption ?? 'Post'}
-                      className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
-                    />
-                  </div>
+                  <ProfileGridItem key={post.id} post={post} type="photo" />
                 ))}
               </div>
             ) : (
