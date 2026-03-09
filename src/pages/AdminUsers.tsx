@@ -129,6 +129,9 @@ export default function AdminUsers() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-foreground text-sm truncate">{u.username ?? 'Sem nome'}</p>
+                      {adminUserIds?.has(u.id) && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary">ADMIN</span>
+                      )}
                       {u.is_blocked && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/20 text-destructive">BLOQUEADO</span>
                       )}
