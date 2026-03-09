@@ -11,6 +11,7 @@ import Search from "./pages/Search";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
 import Discover from "./pages/Discover";
+import Post from "./pages/Post";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
