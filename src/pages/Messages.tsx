@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useConversations, useMessages, useSendMessage, useUploadChatMedia, Conversation } from '@/hooks/useMessages';
+import { useConversations, useMessages, useSendMessage, useUploadChatMedia, Conversation, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowLeft, Send, Image, Mic, Square, X } from 'lucide-react';
+import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/BottomNav';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -115,19 +116,89 @@ function ChatView({ conversation, onBack, currentUserId }: {
   const [pendingMedia, setPendingMedia] = useState<{ url: string; type: string } | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [otherTyping, setOtherTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Mark messages as read when viewing
+  useEffect(() => {
+    if (!messages) return;
+    const unread = messages.filter(m => m.sender_id !== currentUserId && !m.read_at);
+    if (unread.length > 0) {
+      supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() } as any)
+        .eq('conversation_id', conversation.id)
+        .neq('sender_id', currentUserId)
+        .is('read_at', null)
+        .then(() => {});
+    }
+  }, [messages, conversation.id, currentUserId]);
+
+  // Typing indicator via broadcast channel
+  useEffect(() => {
+    const channel = supabase.channel(`typing-${conversation.id}`);
+    
+    channel
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        if (payload.payload?.user_id !== currentUserId) {
+          setOtherTyping(true);
+          // Auto-hide after 3s
+          setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
+      .on('broadcast', { event: 'stop_typing' }, (payload) => {
+        if (payload.payload?.user_id !== currentUserId) {
+          setOtherTyping(false);
+        }
+      })
+      .subscribe();
+
+    channelRef.current = channel;
+    return () => { supabase.removeChannel(channel); };
+  }, [conversation.id, currentUserId]);
+
+  const broadcastTyping = useCallback(() => {
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { user_id: currentUserId },
+    });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'stop_typing',
+        payload: { user_id: currentUserId },
+      });
+    }, 2000);
+  }, [currentUserId]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    broadcastTyping();
+  };
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if ((!newMessage.trim() && !pendingMedia) || sendMessage.isPending) return;
+
+    // Stop typing broadcast
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'stop_typing',
+      payload: { user_id: currentUserId },
+    });
 
     sendMessage.mutate({
       conversationId: conversation.id,
@@ -236,48 +307,81 @@ function ChatView({ conversation, onBack, currentUserId }: {
           <AvatarImage src={conversation.other_user?.avatar_url ?? undefined} />
           <AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
         </Avatar>
-        <span className="font-semibold">{conversation.other_user?.username ?? 'Usuário'}</span>
+        <div>
+          <span className="font-semibold">{conversation.other_user?.username ?? 'Usuário'}</span>
+          {otherTyping && (
+            <p className="text-xs text-primary animate-pulse">digitando...</p>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages?.map((msg) => (
-          <div key={msg.id} className={cn("flex", msg.sender_id === currentUserId ? "justify-end" : "justify-start")}>
-            <div className={cn(
-              "max-w-[70%] rounded-2xl text-sm overflow-hidden",
-              msg.sender_id === currentUserId
-                ? "bg-primary text-primary-foreground rounded-br-md"
-                : "bg-muted rounded-bl-md"
-            )}>
-              {/* Image */}
-              {msg.media_url && msg.media_type?.startsWith('image/') && (
-                <img
-                  src={msg.media_url}
-                  alt="Imagem"
-                  className="max-w-full rounded-t-2xl cursor-pointer"
-                  onClick={() => window.open(msg.media_url!, '_blank')}
-                />
-              )}
+        {messages?.map((msg, idx) => {
+          const isMine = msg.sender_id === currentUserId;
+          const isLastMine = isMine && (
+            idx === messages.length - 1 || messages[idx + 1]?.sender_id !== currentUserId
+          );
 
-              {/* Audio */}
-              {msg.media_url && msg.media_type?.startsWith('audio/') && (
-                <div className="px-4 pt-3">
-                  <audio controls src={msg.media_url} className="max-w-full h-8" />
+          return (
+            <div key={msg.id} className={cn("flex", isMine ? "justify-end" : "justify-start")}>
+              <div className="flex flex-col items-end">
+                <div className={cn(
+                  "max-w-[70%] rounded-2xl text-sm overflow-hidden",
+                  isMine
+                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    : "bg-muted rounded-bl-md"
+                )}>
+                  {msg.media_url && msg.media_type?.startsWith('image/') && (
+                    <img
+                      src={msg.media_url}
+                      alt="Imagem"
+                      className="max-w-full rounded-t-2xl cursor-pointer"
+                      onClick={() => window.open(msg.media_url!, '_blank')}
+                    />
+                  )}
+
+                  {msg.media_url && msg.media_type?.startsWith('audio/') && (
+                    <div className="px-4 pt-3">
+                      <audio controls src={msg.media_url} className="max-w-full h-8" />
+                    </div>
+                  )}
+
+                  {msg.content && !(msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio')) && (
+                    <div className="px-4 py-2">{msg.content}</div>
+                  )}
+
+                  {msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio' || !msg.content) && (
+                    <div className="pb-1" />
+                  )}
                 </div>
-              )}
 
-              {/* Text content (hide default emoji labels for media-only) */}
-              {msg.content && !(msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio')) && (
-                <div className="px-4 py-2">{msg.content}</div>
-              )}
+                {/* Read receipt for own messages */}
+                {isMine && isLastMine && (
+                  <div className="flex items-center gap-0.5 mt-0.5 mr-1">
+                    {msg.read_at ? (
+                      <CheckCheck className="w-3.5 h-3.5 text-primary" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5 text-muted-foreground" />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
 
-              {/* If media without custom text, add small padding */}
-              {msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio' || !msg.content) && (
-                <div className="pb-1" />
-              )}
+        {/* Typing indicator bubble */}
+        {otherTyping && (
+          <div className="flex justify-start">
+            <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
-        ))}
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -339,7 +443,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           </Button>
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Mensagem..."
             className="flex-1"
           />
