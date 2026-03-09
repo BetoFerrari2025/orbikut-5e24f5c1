@@ -269,7 +269,7 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
                         <button onClick={() => { setEditingCommentId(comment.id); setEditCommentText(comment.content); }} className="text-white/60 hover:text-white">
                           <Pencil className="w-3 h-3" />
                         </button>
-                        <button onClick={() => { deleteComment.mutate({ commentId: comment.id, postId: post.id }); toast.success('Comentário excluído'); }} className="text-white/60 hover:text-red-400">
+                        <button onClick={() => { deleteComment.mutate({ commentId: comment.id, postId: post.id }); toast.success('Comentário excluído'); }} className="text-white/60 hover:text-destructive">
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
