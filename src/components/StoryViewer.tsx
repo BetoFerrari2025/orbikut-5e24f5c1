@@ -176,6 +176,20 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </div>
           )}
 
+          {/* Link overlay */}
+          {(currentStory as any).link_url && (
+            <a
+              href={(currentStory as any).link_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-16 left-4 right-4 z-10 flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-4 py-2.5 text-white text-sm font-medium hover:bg-white/30 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4 shrink-0" />
+              <span className="truncate">{new URL((currentStory as any).link_url).hostname}</span>
+            </a>
+          )}
+
           {/* Audio Player */}
           {currentStory.music_url && (
             <StoryAudioPlayer musicUrl={currentStory.music_url} storyId={currentStory.id} />
