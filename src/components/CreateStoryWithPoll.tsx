@@ -337,7 +337,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     </button>
                   </div>
                 </DraggablePreview>
-              ))
+              ))}
 
               {/* Poll overlay */}
               {showPoll && (
