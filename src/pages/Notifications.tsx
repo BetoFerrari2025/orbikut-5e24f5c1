@@ -20,12 +20,26 @@ const typeConfig = {
   follow: { icon: UserPlus, label: 'começou a seguir você', color: 'text-green-500' },
 };
 
+type FilterType = 'all' | 'like' | 'comment' | 'follow';
+
+const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
+  { value: 'all', label: 'Todas', icon: Bell },
+  { value: 'like', label: 'Curtidas', icon: Heart },
+  { value: 'comment', label: 'Comentários', icon: MessageCircle },
+  { value: 'follow', label: 'Seguidores', icon: UserPlus },
+];
+
 export default function Notifications() {
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
   const deleteOne = useDeleteNotification();
   const deleteAll = useDeleteAllNotifications();
+  const [filter, setFilter] = useState<FilterType>('all');
+
+  const filteredNotifications = notifications?.filter(
+    n => filter === 'all' || n.type === filter
+  );
 
   useEffect(() => {
     if (notifications && notifications.some(n => !n.read)) {
@@ -68,6 +82,28 @@ export default function Notifications() {
         )}
       </div>
 
+      {/* Filter tabs */}
+      <div className="flex gap-1 px-4 py-2 border-b overflow-x-auto">
+        {filters.map(f => {
+          const Icon = f.icon;
+          return (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                filter === f.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
       {isLoading && (
         <div className="space-y-0">
           {[1, 2, 3, 4, 5].map(i => (
@@ -82,7 +118,7 @@ export default function Notifications() {
         </div>
       )}
 
-      {!isLoading && (!notifications || notifications.length === 0) && (
+      {!isLoading && (!filteredNotifications || filteredNotifications.length === 0) && (
         <div className="text-center py-16">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
           <p className="text-muted-foreground">Nenhuma notificação ainda</p>
@@ -90,9 +126,9 @@ export default function Notifications() {
         </div>
       )}
 
-      {notifications && notifications.length > 0 && (
+      {filteredNotifications && filteredNotifications.length > 0 && (
         <div>
-          {notifications.map((notif) => (
+          {filteredNotifications.map((notif) => (
             <NotificationItem key={notif.id} notification={notif} onDelete={(id) => deleteOne.mutate(id)} />
           ))}
         </div>

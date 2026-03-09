@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
 import { ProfileHighlights } from '@/components/ProfileHighlights';
+import { ProfileLinks } from '@/components/ProfileLinks';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
@@ -128,7 +129,9 @@ export default function Profile() {
       </div>
 
       {profile.full_name && <p className="font-semibold text-foreground">{profile.full_name}</p>}
-      {profile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-4">{profile.bio}</p>}
+      {profile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-2">{profile.bio}</p>}
+
+      <ProfileLinks userId={profile.id} isOwnProfile={isOwnProfile} />
 
       <ProfileHighlights userId={profile.id} isOwnProfile={isOwnProfile} />
 
