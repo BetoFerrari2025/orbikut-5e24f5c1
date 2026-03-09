@@ -42,7 +42,16 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
-  const isPaused = showComments || showCaptionEdit || showMusicInput;
+  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers;
+
+  // Record view when story changes (not for own stories)
+  useEffect(() => {
+    if (!stories || !stories[currentIndex]) return;
+    const s = stories[currentIndex];
+    if (user && s.user_id !== user.id) {
+      recordView.mutate(s.id);
+    }
+  }, [currentIndex, stories]);
 
   // Auto-advance timer
   useEffect(() => {
