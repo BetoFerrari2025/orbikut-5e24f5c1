@@ -76,10 +76,13 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
           onClick={() => onSelect(conv)}
           className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-left border-b"
         >
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={conv.other_user?.avatar_url ?? undefined} />
-            <AvatarFallback>{conv.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="w-12 h-12">
+              <AvatarImage src={conv.other_user?.avatar_url ?? undefined} />
+              <AvatarFallback>{conv.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+            </Avatar>
+            <OnlineIndicator isOnline={isUserOnline((conv.other_user as any)?.last_seen)} size="sm" />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm">{conv.other_user?.username ?? 'Usuário'}</p>
             {conv.last_message && (
