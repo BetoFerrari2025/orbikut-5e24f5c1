@@ -15,6 +15,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
+import { ProfileHighlights } from '@/components/ProfileHighlights';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
@@ -154,6 +155,9 @@ export default function Profile() {
         {profile.bio && (
           <p className="text-sm whitespace-pre-wrap text-foreground mb-4">{profile.bio}</p>
         )}
+
+        {/* Story Highlights */}
+        <ProfileHighlights userId={profile.id} isOwnProfile={isOwnProfile} />
 
         {/* Tabs */}
         <Tabs defaultValue="photos" className="w-full">

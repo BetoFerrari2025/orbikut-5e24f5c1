@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye } from 'lucide-react';
+import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ import {
   useRecordStoryView,
   useStoryViewers,
 } from '@/hooks/useStoryInteractions';
+import { useUserHighlights, useCreateHighlight, useAddToHighlight } from '@/hooks/useHighlights';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -35,14 +36,16 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
+  const [showHighlightSave, setShowHighlightSave] = useState(false);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const { user } = useAuth();
   const recordView = useRecordStoryView();
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
-  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers;
+  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers || showHighlightSave;
 
   // Record view when story changes (not for own stories)
   useEffect(() => {
@@ -97,6 +100,30 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const isVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
 
+  // Swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || !stories) return;
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    // Only horizontal swipe (ignore vertical for scrolling overlays)
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+
+    if (dx < 0) {
+      // Swipe left → next
+      if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
+      else onClose();
+    } else {
+      // Swipe right → prev
+      if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   if (!stories || !stories[currentIndex]) return null;
 
   const currentStory = stories[currentIndex];
@@ -104,7 +131,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   return (
     <Dialog open={!!stories} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md p-0 bg-black border-none overflow-hidden [&>button]:text-white [&>button]:z-20">
-        <div className="relative" onClick={handleStoryNav}>
+        <div className="relative" onClick={handleStoryNav} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {/* Progress bars */}
           <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
             {stories.map((_, i) => (
@@ -178,6 +205,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
             onShowViewers={() => setShowViewers(true)}
+            onSaveHighlight={() => setShowHighlightSave(true)}
           />
 
           {/* Poll overlay */}
@@ -213,6 +241,15 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           <StoryViewersPanel
             storyId={currentStory.id}
             onClose={() => setShowViewers(false)}
+          />
+        )}
+
+        {/* Highlight save overlay (owner only) */}
+        {showHighlightSave && user?.id === currentStory.user_id && (
+          <HighlightSavePanel
+            storyId={currentStory.id}
+            userId={user.id}
+            onClose={() => setShowHighlightSave(false)}
           />
         )}
       </DialogContent>
@@ -320,8 +357,10 @@ function StoryLikeButton({ storyId }: { storyId: string }) {
   );
 }
 
-// ─── Owner Controls (caption + music + viewers) ───
-function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers }: { story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void }) {
+// ─── Owner Controls ───
+function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers, onSaveHighlight }: {
+  story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
+}) {
   const { user } = useAuth();
   if (user?.id !== story.user_id) return null;
 
@@ -344,6 +383,12 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers }
           <Eye className="w-5 h-5 text-white" />
         </div>
         <span className="text-white text-[10px] mt-0.5">Vistas</span>
+      </button>
+      <button onClick={onSaveHighlight} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <Star className="w-5 h-5 text-white" />
+        </div>
+        <span className="text-white text-[10px] mt-0.5">Destaque</span>
       </button>
     </div>
   );
@@ -635,6 +680,95 @@ function StoryPollOverlay({ storyId }: { storyId: string }) {
           </button>
         </div>
         {userVote && <p className="text-white/70 text-xs text-center">{poll.total} votos</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Highlight Save Panel ───
+function HighlightSavePanel({ storyId, userId, onClose }: { storyId: string; userId: string; onClose: () => void }) {
+  const { data: highlights } = useUserHighlights(userId);
+  const createHighlight = useCreateHighlight();
+  const addToHighlight = useAddToHighlight();
+  const [newName, setNewName] = useState('');
+  const [showNewInput, setShowNewInput] = useState(false);
+
+  const handleAddToExisting = async (highlightId: string) => {
+    try {
+      await addToHighlight.mutateAsync({ highlightId, storyId });
+      toast.success('Adicionado ao destaque!');
+      onClose();
+    } catch {
+      toast.error('Erro ao adicionar');
+    }
+  };
+
+  const handleCreateNew = async () => {
+    if (!newName.trim()) return;
+    try {
+      await createHighlight.mutateAsync({ name: newName.trim(), storyId });
+      toast.success('Destaque criado!');
+      onClose();
+    } catch {
+      toast.error('Erro ao criar destaque');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={onClose} />
+      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl max-h-[60%] flex flex-col animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="text-foreground font-semibold flex items-center gap-2">
+            <Star className="w-4 h-4" />
+            Salvar em Destaque
+          </h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {highlights && highlights.length > 0 && highlights.map((h: any) => (
+            <button
+              key={h.id}
+              onClick={() => handleAddToExisting(h.id)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+            >
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                {h.cover_url ? (
+                  <img src={h.cover_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Star className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+              <span className="text-foreground font-medium">{h.name}</span>
+            </button>
+          ))}
+
+          {showNewInput ? (
+            <div className="flex gap-2 pt-2">
+              <Input
+                placeholder="Nome do destaque..."
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateNew()}
+                className="flex-1"
+                autoFocus
+              />
+              <Button onClick={handleCreateNew} disabled={!newName.trim() || createHighlight.isPending} size="sm">
+                {createHighlight.isPending ? '...' : 'Criar'}
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowNewInput(true)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Plus className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-primary font-medium">Novo destaque</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
