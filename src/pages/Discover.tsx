@@ -15,7 +15,9 @@ const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 export default function Discover() {
   const { data: posts, isLoading } = usePosts();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showMuteIcon, setShowMuteIcon] = useState(false);
+  const muteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
