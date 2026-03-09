@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -141,7 +141,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const stickerIdCounter = useRef(0);
 
   // Controls panel
-  const [showControls, setShowControls] = useState(true);
+  
 
   const { user } = useAuth();
 
@@ -230,7 +230,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setShowStickers(false);
     setStickers([]);
     stickerIdCounter.current = 0;
-    setShowControls(true);
+    
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -387,21 +387,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </div>
               )}
 
-              {/* Bottom controls overlay inside the preview */}
+              {/* Bottom controls overlay - always visible */}
               <div className="absolute bottom-0 left-0 right-0 z-20">
-                {/* Toggle controls button */}
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => setShowControls(!showControls)}
-                    className="bg-black/60 backdrop-blur-sm text-white rounded-t-lg px-4 py-1 flex items-center gap-1 text-xs"
-                  >
-                    {showControls ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
-                    {showControls ? 'Ocultar' : 'Editar'}
-                  </button>
-                </div>
-
-                {showControls && (
-                  <div className="bg-black/70 backdrop-blur-md p-3 space-y-3 max-h-[40vh] overflow-y-auto">
+                <div className="bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-8 p-3 space-y-3 max-h-[45vh] overflow-y-auto">
                     {/* Tool buttons */}
                     <div className="flex gap-2 flex-wrap">
                       <Button
@@ -592,8 +580,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     >
                       {createStory.isPending ? 'Publicando...' : 'Publicar Story'}
                     </Button>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </>
