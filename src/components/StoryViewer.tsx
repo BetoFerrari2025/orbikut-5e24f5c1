@@ -25,7 +25,42 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface StoryViewerProps {
+const VideoWithUnmute = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttributes<HTMLVideoElement>>(
+  (props, ref) => {
+    const [isMuted, setIsMuted] = useState(true);
+    const localRef = useRef<HTMLVideoElement>(null);
+
+    // Merge refs
+    const setRefs = useCallback((node: HTMLVideoElement | null) => {
+      (localRef as any).current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) (ref as any).current = node;
+    }, [ref]);
+
+    const toggleMute = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (localRef.current) {
+        localRef.current.muted = !isMuted;
+        setIsMuted(!isMuted);
+      }
+    };
+
+    return (
+      <div className="relative">
+        <video ref={setRefs} {...props} autoPlay playsInline muted={isMuted} />
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center"
+        >
+          {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
+        </button>
+      </div>
+    );
+  }
+);
+VideoWithUnmute.displayName = 'VideoWithUnmute';
+
+
   stories: Story[] | null;
   currentIndex: number;
   setCurrentIndex: (i: number) => void;
