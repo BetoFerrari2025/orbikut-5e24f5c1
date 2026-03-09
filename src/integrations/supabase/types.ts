@@ -92,6 +92,48 @@ export type Database = {
           },
         ]
       }
+      engagement_signals: {
+        Row: {
+          created_at: string
+          dwell_seconds: number | null
+          id: string
+          post_id: string
+          signal_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dwell_seconds?: number | null
+          id?: string
+          post_id: string
+          signal_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dwell_seconds?: number | null
+          id?: string
+          post_id?: string
+          signal_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_signals_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
