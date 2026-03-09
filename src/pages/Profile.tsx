@@ -1,28 +1,39 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
-import { Grid3X3, Settings } from 'lucide-react';
+import { useGetOrCreateConversation } from '@/hooks/useMessages';
+import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useProfileByUsername(username);
   const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.id);
   const { data: followStatus } = useFollowStatus(profile?.id);
   const { data: followersCount } = useFollowersCount(profile?.id);
   const { data: followingCount } = useFollowingCount(profile?.id);
   const toggleFollow = useToggleFollow();
+  const getOrCreateConversation = useGetOrCreateConversation();
 
   const isOwnProfile = user?.id === profile?.id;
 
   const handleFollowToggle = () => {
     if (!profile || !followStatus) return;
     toggleFollow.mutate({ targetUserId: profile.id, isFollowing: followStatus.isFollowing });
+  };
+
+  const handleMessage = async () => {
+    if (!profile) return;
+    try {
+      await getOrCreateConversation.mutateAsync(profile.id);
+      navigate('/messages');
+    } catch { /* ignore */ }
   };
 
   if (profileLoading) {
@@ -82,14 +93,19 @@ export default function Profile() {
                   </Link>
                 </Button>
               ) : user ? (
-                <Button
-                  onClick={handleFollowToggle}
-                  disabled={toggleFollow.isPending}
-                  variant={followStatus?.isFollowing ? 'secondary' : 'default'}
-                  className={!followStatus?.isFollowing ? 'gradient-instagram hover:opacity-90' : ''}
-                >
-                  {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
-                </Button>
+                <>
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={toggleFollow.isPending}
+                    variant={followStatus?.isFollowing ? 'secondary' : 'default'}
+                    className={!followStatus?.isFollowing ? 'gradient-instagram hover:opacity-90' : ''}
+                  >
+                    {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
+                  </Button>
+                  <Button variant="secondary" size="icon" onClick={handleMessage} disabled={getOrCreateConversation.isPending}>
+                    <MessageCircle className="w-4 h-4" />
+                  </Button>
+                </>
               ) : null}
             </div>
 

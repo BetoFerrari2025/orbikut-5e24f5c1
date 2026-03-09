@@ -1,5 +1,6 @@
 import { Navbar } from '@/components/Navbar';
 import { PostCard } from '@/components/PostCard';
+import { StoriesBar } from '@/components/StoriesBar';
 import { usePosts } from '@/hooks/usePosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Camera } from 'lucide-react';
@@ -11,7 +12,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 py-2">
+        <StoriesBar />
         {isLoading && (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
