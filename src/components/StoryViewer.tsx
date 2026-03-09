@@ -205,6 +205,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
             onShowViewers={() => setShowViewers(true)}
+            onSaveHighlight={() => setShowHighlightSave(true)}
           />
 
           {/* Poll overlay */}
