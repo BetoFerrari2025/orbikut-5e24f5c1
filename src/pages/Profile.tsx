@@ -71,7 +71,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Profile header */}
