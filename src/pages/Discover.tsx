@@ -268,6 +268,58 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
           <p className="text-white text-sm mt-2 line-clamp-3">{post.caption}</p>
         )}
       </div>
+
+      {/* Comments overlay */}
+      {showComments && (
+        <div
+          className="absolute bottom-20 left-0 right-0 z-20 bg-black/80 backdrop-blur-sm max-h-[50vh] flex flex-col rounded-t-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between p-4 border-b border-white/20">
+            <span className="text-white font-semibold">Comentários ({comments?.length ?? 0})</span>
+            <button onClick={() => setShowComments(false)} className="text-white text-sm">Fechar</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {comments && comments.length > 0 ? (
+              comments.map((comment: any) => (
+                <div key={comment.id} className="flex gap-2">
+                  <Avatar className="w-7 h-7 flex-shrink-0">
+                    <AvatarImage src={comment.profiles?.avatar_url ?? undefined} />
+                    <AvatarFallback className="text-xs">{comment.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span className="text-white font-semibold text-xs mr-2">{comment.profiles?.username}</span>
+                    <span className="text-white/80 text-xs">{comment.content}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-white/50 text-sm text-center">Nenhum comentário ainda</p>
+            )}
+          </div>
+          {user && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newComment.trim()) return;
+                addComment.mutate({ postId: post.id, content: newComment });
+                setNewComment('');
+              }}
+              className="p-3 border-t border-white/20 flex gap-2"
+            >
+              <Input
+                placeholder="Adicione um comentário..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+              <Button type="submit" size="sm" disabled={!newComment.trim()} className="text-white">
+                Enviar
+              </Button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 }
