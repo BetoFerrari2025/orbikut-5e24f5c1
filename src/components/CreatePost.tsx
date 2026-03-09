@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus, Video, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
