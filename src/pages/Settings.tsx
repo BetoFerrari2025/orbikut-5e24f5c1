@@ -115,7 +115,7 @@ export default function Settings() {
               />
             </div>
             <div>
-              <p className="font-semibold">{profile.username}</p>
+              <p className="font-semibold text-foreground">{profile.username}</p>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
