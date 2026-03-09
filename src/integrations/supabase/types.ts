@@ -548,6 +548,8 @@ export type Database = {
           image_url: string
           link_label: string | null
           link_url: string | null
+          link_x: number | null
+          link_y: number | null
           music_url: string | null
           user_id: string
         }
@@ -566,6 +568,8 @@ export type Database = {
           image_url: string
           link_label?: string | null
           link_url?: string | null
+          link_x?: number | null
+          link_y?: number | null
           music_url?: string | null
           user_id: string
         }
@@ -584,6 +588,8 @@ export type Database = {
           image_url?: string
           link_label?: string | null
           link_url?: string | null
+          link_x?: number | null
+          link_y?: number | null
           music_url?: string | null
           user_id?: string
         }
