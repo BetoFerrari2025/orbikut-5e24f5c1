@@ -59,7 +59,7 @@ export function PostCard({ post }: PostCardProps) {
   const handleShare = async () => {
     const url = `${window.location.origin}/post/${post.id}`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'Orbik', url }); } catch {}
+      try { await navigator.share({ title: 'Orbita', url }); } catch {}
     } else {
       navigator.clipboard.writeText(url);
       toast.success('Link copiado!');
