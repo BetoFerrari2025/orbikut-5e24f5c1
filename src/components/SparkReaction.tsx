@@ -15,11 +15,12 @@ interface SparkReactionProps {
   isLiked: boolean;
   onLike: () => void;
   disabled?: boolean;
+  iconClassName?: string;
 }
 
 const emojis = ['❤️', '🔥', '💥', '⭐', '✨', '💫', '🎉', '💖'];
 
-export function SparkReaction({ isLiked, onLike, disabled }: SparkReactionProps) {
+export function SparkReaction({ isLiked, onLike, disabled, iconClassName }: SparkReactionProps) {
   const [floating, setFloating] = useState<FloatingEmoji[]>([]);
   const [isHolding, setIsHolding] = useState(false);
   const [holdTimer, setHoldTimer] = useState<NodeJS.Timeout | null>(null);
@@ -95,7 +96,7 @@ export function SparkReaction({ isLiked, onLike, disabled }: SparkReactionProps)
         <Heart
           className={cn(
             'w-7 h-7 transition-all duration-200',
-            isLiked ? 'fill-primary text-primary scale-110' : 'hover:text-muted-foreground',
+            isLiked ? 'fill-primary text-primary scale-110' : iconClassName || 'hover:text-muted-foreground',
             isHolding && 'animate-pulse'
           )}
         />
