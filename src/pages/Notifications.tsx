@@ -82,6 +82,28 @@ export default function Notifications() {
         )}
       </div>
 
+      {/* Filter tabs */}
+      <div className="flex gap-1 px-4 py-2 border-b overflow-x-auto">
+        {filters.map(f => {
+          const Icon = f.icon;
+          return (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                filter === f.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
       {isLoading && (
         <div className="space-y-0">
           {[1, 2, 3, 4, 5].map(i => (
