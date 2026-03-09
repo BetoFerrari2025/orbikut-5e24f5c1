@@ -15,6 +15,8 @@ import {
   useAddStoryComment,
   useUpdateStoryCaption,
   useUpdateStoryMusic,
+  useRecordStoryView,
+  useStoryViewers,
 } from '@/hooks/useStoryInteractions';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
