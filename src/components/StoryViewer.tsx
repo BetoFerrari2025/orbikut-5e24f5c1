@@ -53,13 +53,12 @@ const VideoWithAudio = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttribu
     }, [props.src]);
 
     const handleTapScreen = (e: React.MouseEvent) => {
-      e.stopPropagation();
+      // Don't stop propagation — let parent handle navigation
       if (localRef.current) {
         const newMuted = !isMuted;
         localRef.current.muted = newMuted;
         setIsMuted(newMuted);
       }
-      // Show icon in center
       setShowIcon(true);
       if (iconTimerRef.current) clearTimeout(iconTimerRef.current);
       iconTimerRef.current = setTimeout(() => setShowIcon(false), 1200);
