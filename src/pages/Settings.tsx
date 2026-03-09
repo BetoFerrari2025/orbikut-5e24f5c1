@@ -86,7 +86,7 @@ export default function Settings() {
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-lg mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">Editar perfil</h1>
+        <h1 className="text-2xl font-bold mb-6 text-foreground">Editar perfil</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar */}

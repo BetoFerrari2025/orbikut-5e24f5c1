@@ -114,7 +114,7 @@ export default function Profile() {
               ) : null}
             </div>
 
-            <div className="flex gap-6 mb-4 text-sm sm:text-base">
+            <div className="flex gap-6 mb-4 text-sm sm:text-base text-foreground">
               <div>
                 <span className="font-semibold">{posts?.length ?? 0}</span> publicações
               </div>
@@ -127,10 +127,10 @@ export default function Profile() {
             </div>
 
             {profile.full_name && (
-              <p className="font-semibold">{profile.full_name}</p>
+              <p className="font-semibold text-foreground">{profile.full_name}</p>
             )}
             {profile.bio && (
-              <p className="text-sm whitespace-pre-wrap">{profile.bio}</p>
+              <p className="text-sm whitespace-pre-wrap text-foreground">{profile.bio}</p>
             )}
           </div>
         </div>
