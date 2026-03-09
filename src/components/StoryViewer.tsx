@@ -243,6 +243,15 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             onClose={() => setShowViewers(false)}
           />
         )}
+
+        {/* Highlight save overlay (owner only) */}
+        {showHighlightSave && user?.id === currentStory.user_id && (
+          <HighlightSavePanel
+            storyId={currentStory.id}
+            userId={user.id}
+            onClose={() => setShowHighlightSave(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
