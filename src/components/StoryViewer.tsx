@@ -94,8 +94,14 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           {/* Progress bars */}
           <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
             {stories.map((_, i) => (
-              <div key={i} className="flex-1 h-0.5 rounded-full bg-white/30">
-                <div className={cn("h-full rounded-full bg-white transition-all", i <= currentIndex ? "w-full" : "w-0")} />
+              <div key={i} className="flex-1 h-0.5 rounded-full bg-white/30 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-white"
+                  style={{
+                    width: i < currentIndex ? '100%' : i === currentIndex ? `${progress}%` : '0%',
+                    transition: i === currentIndex ? 'width 50ms linear' : 'none',
+                  }}
+                />
               </div>
             ))}
           </div>
