@@ -461,16 +461,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                       </Button>
                     </div>
 
-                    {/* Text input */}
+                    {/* Text style controls (input moved to top) */}
                     {showText && (
                       <div className="space-y-2">
-                        <Input
-                          placeholder="Digite seu texto..."
-                          value={caption}
-                          onChange={(e) => setCaption(e.target.value)}
-                          maxLength={200}
-                          className="bg-white/20 border-0 text-white placeholder:text-white/70"
-                        />
                         <div className="flex gap-1.5 flex-wrap">
                           {TEXT_COLORS.map((c) => (
                             <button
