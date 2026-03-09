@@ -1,11 +1,12 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
-import { Grid3X3, Settings } from 'lucide-react';
+import { useGetOrCreateConversation } from '@/hooks/useMessages';
+import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Profile() {
