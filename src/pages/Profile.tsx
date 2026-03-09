@@ -253,3 +253,44 @@ export default function Profile() {
     </div>
   );
 }
+
+function ProfileGridItem({ post, type }: { post: any; type: 'photo' | 'video' }) {
+  const { data: viewCount } = usePostViews(post.id);
+
+  if (type === 'video') {
+    return (
+      <Link to={`/post/${post.id}`} className="aspect-[9/16] bg-muted relative group block">
+        <video
+          src={post.image_url}
+          className="w-full h-full object-cover cursor-pointer"
+          muted
+          playsInline
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
+        <div className="absolute bottom-1 left-1 flex items-center gap-1 text-white text-xs bg-black/50 rounded px-1.5 py-0.5">
+          <Eye className="w-3 h-3" />
+          <span>{viewCount ?? 0}</span>
+        </div>
+        <div className="absolute top-1 right-1">
+          <Film className="w-4 h-4 text-white drop-shadow" />
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link to={`/post/${post.id}`} className="aspect-square bg-muted relative group block">
+      <img
+        src={post.image_url}
+        alt={post.caption ?? 'Post'}
+        className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+      />
+      <div className="absolute bottom-1 left-1 flex items-center gap-1 text-white text-xs bg-black/50 rounded px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Eye className="w-3 h-3" />
+        <span>{viewCount ?? 0}</span>
+      </div>
+    </Link>
+  );
+}

@@ -44,16 +44,13 @@ export function BottomNav() {
         </div>
 
         <Link
-          to="/notifications"
+          to="/search"
           className={cn(
-            "flex flex-col items-center justify-center w-full h-full transition-colors relative",
-            isActive('/notifications') ? "text-primary" : "text-muted-foreground"
+            "flex flex-col items-center justify-center w-full h-full transition-colors",
+            isActive('/search') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <Bell className="w-6 h-6" />
-          {(unreadCount ?? 0) > 0 && (
-            <span className="absolute top-1 right-1/4 w-2 h-2 rounded-full bg-destructive" />
-          )}
+          <Search className="w-6 h-6" />
         </Link>
 
         <Link
