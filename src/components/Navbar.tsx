@@ -14,7 +14,7 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center glow-primary">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
@@ -79,34 +79,30 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Mobile - only show login button or logout */}
-        <div className="flex md:hidden items-center gap-1">
-          {user && (
-            <Button variant="ghost" size="icon" asChild className="relative">
-              <Link to="/notifications">
-                <Bell className="w-5 h-5" />
-                {(unreadCount ?? 0) > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
-                    {unreadCount! > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
-            </Button>
-          )}
-          {user && (
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/messages">
-                <MessageCircle className="w-5 h-5" />
-              </Link>
-            </Button>
-          )}
-          {user && (
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">
-              <LogOut className="w-5 h-5" />
-              <span className="text-xs">Sair</span>
-            </Button>
-          )}
-          {!user && (
+        {/* Mobile navigation */}
+        <div className="flex md:hidden items-center gap-0.5">
+          {user ? (
+            <>
+              <Button variant="ghost" size="icon" asChild className="relative h-9 w-9">
+                <Link to="/notifications">
+                  <Bell className="w-5 h-5" />
+                  {(unreadCount ?? 0) > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                      {unreadCount! > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+                <Link to="/messages">
+                  <MessageCircle className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" onClick={signOut} className="h-9 w-9">
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </>
+          ) : (
             <Button asChild size="sm" className="gradient-brand hover:opacity-90">
               <Link to="/auth">Entrar</Link>
             </Button>

@@ -29,6 +29,14 @@ export interface Message {
   read_at: string | null;
 }
 
+export interface MessageReaction {
+  id: string;
+  message_id: string;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+}
+
 export function useConversations() {
   const { user } = useAuth();
 
@@ -105,6 +113,80 @@ export function useMessages(conversationId: string | undefined) {
       return data as Message[];
     },
     enabled: !!conversationId,
+  });
+}
+
+export function useMessageReactions(conversationId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`reactions-${conversationId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'message_reactions',
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['message_reactions', conversationId] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [conversationId, queryClient]);
+
+  return useQuery({
+    queryKey: ['message_reactions', conversationId],
+    queryFn: async () => {
+      if (!conversationId) return [];
+
+      const { data, error } = await supabase
+        .from('message_reactions' as any)
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return (data as unknown) as MessageReaction[];
+    },
+    enabled: !!conversationId,
+  });
+}
+
+export function useToggleReaction() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ messageId, emoji, conversationId }: {
+      messageId: string;
+      emoji: string;
+      conversationId: string;
+    }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: existing } = await supabase
+        .from('message_reactions' as any)
+        .select('id')
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .eq('emoji', emoji)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from('message_reactions' as any).delete().eq('id', (existing as any).id);
+      } else {
+        await supabase.from('message_reactions' as any).insert({
+          message_id: messageId,
+          user_id: user.id,
+          emoji,
+        });
+      }
+      return conversationId;
+    },
+    onSuccess: (conversationId) => {
+      queryClient.invalidateQueries({ queryKey: ['message_reactions', conversationId] });
+    },
   });
 }
 

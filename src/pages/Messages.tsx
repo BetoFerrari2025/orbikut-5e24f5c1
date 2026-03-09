@@ -3,15 +3,17 @@ import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useConversations, useMessages, useSendMessage, useUploadChatMedia, Conversation, Message } from '@/hooks/useMessages';
+import { useConversations, useMessages, useSendMessage, useUploadChatMedia, useMessageReactions, useToggleReaction, Conversation, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck } from 'lucide-react';
+import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck, Smile } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/BottomNav';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+
+const QUICK_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
 
 export default function Messages() {
   const { user } = useAuth();
@@ -104,6 +106,143 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
   );
 }
 
+function MessageBubble({ msg, isMine, isLastMine, conversationId, currentUserId }: {
+  msg: Message;
+  isMine: boolean;
+  isLastMine: boolean;
+  conversationId: string;
+  currentUserId: string;
+}) {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { data: allReactions } = useMessageReactions(conversationId);
+  const toggleReaction = useToggleReaction();
+
+  const msgReactions = (allReactions || []).filter(r => r.message_id === msg.id);
+
+  // Group reactions by emoji
+  const grouped = msgReactions.reduce<Record<string, { count: number; mine: boolean }>>((acc, r) => {
+    if (!acc[r.emoji]) acc[r.emoji] = { count: 0, mine: false };
+    acc[r.emoji].count++;
+    if (r.user_id === currentUserId) acc[r.emoji].mine = true;
+    return acc;
+  }, {});
+
+  const handleReact = (emoji: string) => {
+    toggleReaction.mutate({ messageId: msg.id, emoji, conversationId });
+    setShowEmojiPicker(false);
+  };
+
+  return (
+    <div className={cn("flex group", isMine ? "justify-end" : "justify-start")}>
+      <div className={cn("flex flex-col", isMine ? "items-end" : "items-start")}>
+        <div className="relative flex items-end gap-1">
+          {/* Emoji picker trigger for own messages (left side) */}
+          {isMine && (
+            <div className="relative">
+              <button
+                onClick={() => setShowEmojiPicker(v => !v)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity mb-1 p-1 rounded-full hover:bg-muted"
+              >
+                <Smile className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-full right-0 mb-1 flex gap-1 bg-popover border rounded-full px-2 py-1 shadow-lg z-10">
+                  {QUICK_EMOJIS.map(e => (
+                    <button key={e} onClick={() => handleReact(e)} className="text-base hover:scale-125 transition-transform">
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className={cn(
+            "max-w-[70%] rounded-2xl text-sm overflow-hidden",
+            isMine
+              ? "bg-primary text-primary-foreground rounded-br-md"
+              : "bg-muted rounded-bl-md"
+          )}>
+            {msg.media_url && msg.media_type?.startsWith('image/') && (
+              <img
+                src={msg.media_url}
+                alt="Imagem"
+                className="max-w-full rounded-t-2xl cursor-pointer"
+                onClick={() => window.open(msg.media_url!, '_blank')}
+              />
+            )}
+
+            {msg.media_url && msg.media_type?.startsWith('audio/') && (
+              <div className="px-4 pt-3">
+                <audio controls src={msg.media_url} className="max-w-full h-8" />
+              </div>
+            )}
+
+            {msg.content && !(msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio')) && (
+              <div className="px-4 py-2">{msg.content}</div>
+            )}
+
+            {msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio' || !msg.content) && (
+              <div className="pb-1" />
+            )}
+          </div>
+
+          {/* Emoji picker trigger for other's messages (right side) */}
+          {!isMine && (
+            <div className="relative">
+              <button
+                onClick={() => setShowEmojiPicker(v => !v)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity mb-1 p-1 rounded-full hover:bg-muted"
+              >
+                <Smile className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-full left-0 mb-1 flex gap-1 bg-popover border rounded-full px-2 py-1 shadow-lg z-10">
+                  {QUICK_EMOJIS.map(e => (
+                    <button key={e} onClick={() => handleReact(e)} className="text-base hover:scale-125 transition-transform">
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Reactions display */}
+        {Object.keys(grouped).length > 0 && (
+          <div className="flex gap-1 mt-0.5 flex-wrap">
+            {Object.entries(grouped).map(([emoji, { count, mine }]) => (
+              <button
+                key={emoji}
+                onClick={() => handleReact(emoji)}
+                className={cn(
+                  "flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs border transition-colors",
+                  mine ? "bg-primary/10 border-primary/30" : "bg-muted border-border hover:bg-muted/80"
+                )}
+              >
+                <span>{emoji}</span>
+                {count > 1 && <span className="text-muted-foreground">{count}</span>}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Read receipt */}
+        {isMine && isLastMine && (
+          <div className="flex items-center gap-0.5 mt-0.5 mr-1">
+            {msg.read_at ? (
+              <CheckCheck className="w-3.5 h-3.5 text-primary" />
+            ) : (
+              <Check className="w-3.5 h-3.5 text-muted-foreground" />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ChatView({ conversation, onBack, currentUserId }: {
   conversation: Conversation;
   onBack: () => void;
@@ -152,7 +291,6 @@ function ChatView({ conversation, onBack, currentUserId }: {
       .on('broadcast', { event: 'typing' }, (payload) => {
         if (payload.payload?.user_id !== currentUserId) {
           setOtherTyping(true);
-          // Auto-hide after 3s
           setTimeout(() => setOtherTyping(false), 3000);
         }
       })
@@ -193,7 +331,6 @@ function ChatView({ conversation, onBack, currentUserId }: {
     e.preventDefault();
     if ((!newMessage.trim() && !pendingMedia) || sendMessage.isPending) return;
 
-    // Stop typing broadcast
     channelRef.current?.send({
       type: 'broadcast',
       event: 'stop_typing',
@@ -324,50 +461,14 @@ function ChatView({ conversation, onBack, currentUserId }: {
           );
 
           return (
-            <div key={msg.id} className={cn("flex", isMine ? "justify-end" : "justify-start")}>
-              <div className="flex flex-col items-end">
-                <div className={cn(
-                  "max-w-[70%] rounded-2xl text-sm overflow-hidden",
-                  isMine
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-muted rounded-bl-md"
-                )}>
-                  {msg.media_url && msg.media_type?.startsWith('image/') && (
-                    <img
-                      src={msg.media_url}
-                      alt="Imagem"
-                      className="max-w-full rounded-t-2xl cursor-pointer"
-                      onClick={() => window.open(msg.media_url!, '_blank')}
-                    />
-                  )}
-
-                  {msg.media_url && msg.media_type?.startsWith('audio/') && (
-                    <div className="px-4 pt-3">
-                      <audio controls src={msg.media_url} className="max-w-full h-8" />
-                    </div>
-                  )}
-
-                  {msg.content && !(msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio')) && (
-                    <div className="px-4 py-2">{msg.content}</div>
-                  )}
-
-                  {msg.media_url && (msg.content === '📷 Foto' || msg.content === '🎤 Áudio' || !msg.content) && (
-                    <div className="pb-1" />
-                  )}
-                </div>
-
-                {/* Read receipt for own messages */}
-                {isMine && isLastMine && (
-                  <div className="flex items-center gap-0.5 mt-0.5 mr-1">
-                    {msg.read_at ? (
-                      <CheckCheck className="w-3.5 h-3.5 text-primary" />
-                    ) : (
-                      <Check className="w-3.5 h-3.5 text-muted-foreground" />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <MessageBubble
+              key={msg.id}
+              msg={msg}
+              isMine={isMine}
+              isLastMine={isLastMine}
+              conversationId={conversation.id}
+              currentUserId={currentUserId}
+            />
           );
         })}
 
