@@ -134,6 +134,24 @@ export function useUpdateStoryMusic() {
   });
 }
 
+// ─── Story Link ───
+export function useUpdateStoryLink() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ storyId, linkUrl }: { storyId: string; linkUrl: string }) => {
+      const { error } = await supabase
+        .from('stories')
+        .update({ link_url: linkUrl } as any)
+        .eq('id', storyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+    },
+  });
+}
+
 // ─── Story Views ───
 export function useRecordStoryView() {
   const { user } = useAuth();

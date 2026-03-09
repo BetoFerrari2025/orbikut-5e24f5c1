@@ -105,3 +105,20 @@ export function useDeleteHighlight() {
     },
   });
 }
+
+export function useUpdateHighlightName() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ highlightId, name }: { highlightId: string; name: string }) => {
+      const { error } = await supabase
+        .from('story_highlights' as any)
+        .update({ name })
+        .eq('id', highlightId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['highlights'] });
+    },
+  });
+}

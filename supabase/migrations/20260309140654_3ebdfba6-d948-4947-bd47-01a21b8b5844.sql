@@ -1,0 +1,1 @@
+ALTER TABLE public.stories ADD COLUMN link_url text DEFAULT null;

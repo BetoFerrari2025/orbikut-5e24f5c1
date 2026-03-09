@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star } from 'lucide-react';
+import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star, Link2, ExternalLink } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import {
   useAddStoryComment,
   useUpdateStoryCaption,
   useUpdateStoryMusic,
+  useUpdateStoryLink,
   useRecordStoryView,
   useStoryViewers,
 } from '@/hooks/useStoryInteractions';
@@ -35,6 +36,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showComments, setShowComments] = useState(false);
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
   const [showHighlightSave, setShowHighlightSave] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -45,7 +47,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
-  const isPaused = showComments || showCaptionEdit || showMusicInput || showViewers || showHighlightSave;
+  const isPaused = showComments || showCaptionEdit || showMusicInput || showLinkInput || showViewers || showHighlightSave;
 
   // Record view when story changes (not for own stories)
   useEffect(() => {
@@ -174,6 +176,20 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </div>
           )}
 
+          {/* Link overlay */}
+          {(currentStory as any).link_url && (
+            <a
+              href={(currentStory as any).link_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-16 left-4 right-4 z-10 flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-4 py-2.5 text-white text-sm font-medium hover:bg-white/30 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4 shrink-0" />
+              <span className="truncate">{new URL((currentStory as any).link_url).hostname}</span>
+            </a>
+          )}
+
           {/* Audio Player */}
           {currentStory.music_url && (
             <StoryAudioPlayer musicUrl={currentStory.music_url} storyId={currentStory.id} />
@@ -204,6 +220,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             story={currentStory}
             onEditCaption={() => setShowCaptionEdit(true)}
             onEditMusic={() => setShowMusicInput(true)}
+            onEditLink={() => setShowLinkInput(true)}
             onShowViewers={() => setShowViewers(true)}
             onSaveHighlight={() => setShowHighlightSave(true)}
           />
@@ -233,6 +250,14 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           <MusicInputOverlay
             story={currentStory}
             onClose={() => setShowMusicInput(false)}
+          />
+        )}
+
+        {/* Link input overlay */}
+        {showLinkInput && user?.id === currentStory.user_id && (
+          <LinkInputOverlay
+            story={currentStory}
+            onClose={() => setShowLinkInput(false)}
           />
         )}
 
@@ -358,8 +383,8 @@ function StoryLikeButton({ storyId }: { storyId: string }) {
 }
 
 // ─── Owner Controls ───
-function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers, onSaveHighlight }: {
-  story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
+function StoryOwnerControls({ story, onEditCaption, onEditMusic, onEditLink, onShowViewers, onSaveHighlight }: {
+  story: Story; onEditCaption: () => void; onEditMusic: () => void; onEditLink: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
 }) {
   const { user } = useAuth();
   if (user?.id !== story.user_id) return null;
@@ -377,6 +402,12 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers, 
           <Music className="w-5 h-5 text-white" />
         </div>
         <span className="text-white text-[10px] mt-0.5">Música</span>
+      </button>
+      <button onClick={onEditLink} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <Link2 className="w-5 h-5 text-white" />
+        </div>
+        <span className="text-white text-[10px] mt-0.5">Link</span>
       </button>
       <button onClick={onShowViewers} className="flex flex-col items-center">
         <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
@@ -622,6 +653,50 @@ function MusicInputOverlay({ story, onClose }: { story: Story; onClose: () => vo
           </Button>
           {story.music_url && (
             <Button variant="destructive" onClick={handleRemove} disabled={uploading}>
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Link Input ───
+function LinkInputOverlay({ story, onClose }: { story: Story; onClose: () => void }) {
+  const [linkUrl, setLinkUrl] = useState((story as any).link_url ?? '');
+  const updateLink = useUpdateStoryLink();
+
+  const handleSave = async () => {
+    try {
+      await updateLink.mutateAsync({ storyId: story.id, linkUrl: linkUrl.trim() });
+      toast.success(linkUrl.trim() ? 'Link adicionado!' : 'Link removido!');
+      onClose();
+    } catch {
+      toast.error('Erro ao salvar link');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-20 flex items-end" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md rounded-t-2xl p-4 space-y-3 animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between">
+          <h3 className="text-foreground font-semibold">Adicionar Link</h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <Input
+          placeholder="https://exemplo.com"
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+          type="url"
+        />
+        <div className="flex gap-2">
+          <Button onClick={handleSave} disabled={updateLink.isPending} className="flex-1">
+            {updateLink.isPending ? 'Salvando...' : 'Salvar Link'}
+          </Button>
+          {(story as any).link_url && (
+            <Button variant="destructive" onClick={() => { setLinkUrl(''); handleSave(); }} disabled={updateLink.isPending}>
               Remover
             </Button>
           )}
