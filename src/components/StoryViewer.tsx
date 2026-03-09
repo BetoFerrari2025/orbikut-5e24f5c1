@@ -348,7 +348,17 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onEditLink, onS
   story: Story; onEditCaption: () => void; onEditMusic: () => void; onEditLink: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
 }) {
   const { user } = useAuth();
+  const deleteStory = useDeleteStory();
   if (user?.id !== story.user_id) return null;
+
+  const handleDelete = () => {
+    if (!confirm('Tem certeza que deseja excluir este story?')) return;
+    deleteStory.mutate(story.id, {
+      onSuccess: () => toast.success('Story excluído!'),
+      onError: () => toast.error('Erro ao excluir story'),
+    });
+  };
+
   return (
     <div className="absolute left-3 bottom-28 z-10 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
       <button onClick={onEditCaption} className="flex flex-col items-center">
@@ -370,6 +380,10 @@ function StoryOwnerControls({ story, onEditCaption, onEditMusic, onEditLink, onS
       <button onClick={onSaveHighlight} className="flex flex-col items-center">
         <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center"><Star className="w-5 h-5 text-white" /></div>
         <span className="text-white text-[10px] mt-0.5">Destaque</span>
+      </button>
+      <button onClick={handleDelete} className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-destructive/70 backdrop-blur-sm flex items-center justify-center"><Trash2 className="w-5 h-5 text-white" /></div>
+        <span className="text-white text-[10px] mt-0.5">Excluir</span>
       </button>
     </div>
   );
