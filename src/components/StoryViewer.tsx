@@ -153,7 +153,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     if (!video || !isCurrentVideo || !stories) return;
 
     const onTimeUpdate = () => {
-      if (video.duration) {
+      if (video.duration && video.duration !== Infinity) {
         setProgress((video.currentTime / video.duration) * 100);
       }
     };
@@ -162,11 +162,33 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
       else onClose();
     };
 
+    // Also use a fallback timer for mobile where ended may not fire
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+    const onLoadedMetadata = () => {
+      if (video.duration && video.duration !== Infinity) {
+        // Fallback: check every 500ms if video has finished
+        fallbackTimer = setInterval(() => {
+          if (video.currentTime >= video.duration - 0.3) {
+            if (fallbackTimer) clearInterval(fallbackTimer);
+            onEnded();
+          }
+        }, 500);
+      }
+    };
+
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
+    video.addEventListener('loadedmetadata', onLoadedMetadata);
+    // If metadata already loaded
+    if (video.readyState >= 1 && video.duration && video.duration !== Infinity) {
+      onLoadedMetadata();
+    }
+
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      if (fallbackTimer) clearInterval(fallbackTimer);
     };
   }, [currentIndex, stories, isCurrentVideo]);
 

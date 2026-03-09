@@ -25,7 +25,7 @@ export function useStories() {
         .from('stories')
         .select(`*, profiles (id, username, avatar_url)`)
         .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
 
