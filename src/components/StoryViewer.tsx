@@ -46,7 +46,8 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const { user } = useAuth();
   const recordView = useRecordStoryView();
 
-  const isCurrentVideo = stories?.[currentIndex] ? isVideo(stories[currentIndex].image_url) : false;
+  const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+  const isCurrentVideo = stories?.[currentIndex] ? checkIsVideo(stories[currentIndex].image_url) : false;
   const STORY_DURATION = isCurrentVideo ? 60000 : 5000;
   const TICK_INTERVAL = 50;
   const isPaused = showComments || showCaptionEdit || showMusicInput || showLinkInput || showViewers || showHighlightSave;
