@@ -48,9 +48,10 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
   const isCurrentVideo = stories?.[currentIndex] ? checkIsVideo(stories[currentIndex].image_url) : false;
-  const STORY_DURATION = isCurrentVideo ? 60000 : 5000;
+  const STORY_DURATION = 5000; // Only used for images
   const TICK_INTERVAL = 50;
   const isPaused = showComments || showCaptionEdit || showMusicInput || showLinkInput || showViewers || showHighlightSave;
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!stories || !stories[currentIndex]) return;
@@ -60,12 +61,21 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }
   }, [currentIndex, stories]);
 
+  // For images: use fixed timer. For videos: use video events.
   useEffect(() => {
     if (!stories || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
     setProgress(0);
+
+    if (isCurrentVideo) {
+      // For videos, progress is driven by video timeupdate, not a timer
+      // Advancement happens via the 'ended' event on the video element
+      return;
+    }
+
+    // Image timer
     const startTime = Date.now();
     timerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -79,6 +89,29 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }, TICK_INTERVAL);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [currentIndex, stories, isPaused]);
+
+  // Video progress and ended handler
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isCurrentVideo || !stories) return;
+
+    const onTimeUpdate = () => {
+      if (video.duration) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    const onEnded = () => {
+      if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
+      else onClose();
+    };
+
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('ended', onEnded);
+    return () => {
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('ended', onEnded);
+    };
+  }, [currentIndex, stories, isCurrentVideo]);
 
   const handleStoryNav = (e: React.MouseEvent) => {
     if (!stories) return;
@@ -142,7 +175,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <video src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} autoPlay playsInline loop />
+              <video ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} autoPlay playsInline />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
