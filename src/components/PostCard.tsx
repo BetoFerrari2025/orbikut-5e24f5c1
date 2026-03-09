@@ -68,7 +68,11 @@ export function PostCard({ post }: PostCardProps) {
 
   const handleLike = () => {
     if (!user) return;
-    toggleLike.mutate({ postId: post.id, isLiked: likesData?.isLiked ?? false });
+    const isLiked = likesData?.isLiked ?? false;
+    toggleLike.mutate({ postId: post.id, isLiked });
+    if (!isLiked) {
+      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+    }
   };
 
   const handleAddComment = (e: React.FormEvent) => {
