@@ -210,30 +210,23 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           {/* Link CTA button overlay - positioned at saved coordinates, clickable */}
           {(currentStory as any).link_url && (
             <div
-              className="absolute z-10 pointer-events-auto"
+              className="absolute z-30 pointer-events-none"
               style={{
                 left: `${(currentStory as any).link_x ?? 50}%`,
                 top: `${(currentStory as any).link_y ?? 50}%`,
                 transform: 'translate(-50%, -50%)',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
-              {user?.id !== currentStory.user_id ? (
-                <a
-                  href={(currentStory as any).link_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg hover:opacity-90 transition-opacity"
-                >
-                  <ExternalLink className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
-                </a>
-              ) : (
-                <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold opacity-70">
-                  <ExternalLink className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
-                </div>
-              )}
+              <a
+                href={(currentStory as any).link_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pointer-events-auto flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg hover:opacity-90 transition-opacity cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-4 h-4 shrink-0" />
+                <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
+              </a>
             </div>
           )}
 

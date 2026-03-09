@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -29,7 +29,7 @@ interface CreateStoryWithPollProps {
 function DraggablePreview({ children, className, onPositionChange }: {
   children: React.ReactNode;
   className?: string;
-  onPositionChange?: (x: number, y: number) => void;
+  onPositionChange?: (centerX: number, centerY: number, containerWidth: number, containerHeight: number) => void;
 }) {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const dragging = useRef(false);
@@ -46,7 +46,10 @@ function DraggablePreview({ children, className, onPositionChange }: {
         const cx = (parentRect.width - elRect.width) / 2;
         const cy = (parentRect.height - elRect.height) / 2;
         setPos({ x: cx, y: cy });
-        onPositionChange?.(cx, cy);
+        // Report center point
+        const centerX = cx + elRect.width / 2;
+        const centerY = cy + elRect.height / 2;
+        onPositionChange?.(centerX, centerY, parentRect.width, parentRect.height);
       }
     }
   });
@@ -71,7 +74,10 @@ function DraggablePreview({ children, className, onPositionChange }: {
     x = Math.max(0, Math.min(x, parentRect.width - elRect.width));
     y = Math.max(0, Math.min(y, parentRect.height - elRect.height));
     setPos({ x, y });
-    onPositionChange?.(x, y);
+    // Report center point of element
+    const centerX = x + elRect.width / 2;
+    const centerY = y + elRect.height / 2;
+    onPositionChange?.(centerX, centerY, parentRect.width, parentRect.height);
   }, [onPositionChange]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
@@ -106,7 +112,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [caption, setCaption] = useState('');
   const [textColor, setTextColor] = useState('#ffffff');
   const [textSize, setTextSize] = useState(14);
-  // Text position as percentage (0-100)
   const [textPosPercent, setTextPosPercent] = useState({ x: 50, y: 50 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
@@ -135,6 +140,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [stickers, setStickers] = useState<{ id: string; emoji: string }[]>([]);
   const stickerIdCounter = useRef(0);
 
+  // Controls panel
+  const [showControls, setShowControls] = useState(true);
+
   const { user } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +166,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       ? { question: pollQuestion, optionA, optionB }
       : undefined;
 
-    // Upload music if selected
     let musicUrl: string | undefined;
     if (showMusic && musicFile && user) {
       const fileExt = musicFile.name.split('.').pop();
@@ -223,6 +230,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setShowStickers(false);
     setStickers([]);
     stickerIdCounter.current = 0;
+    setShowControls(true);
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,12 +255,12 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       onOpenChange(isOpen);
       if (!isOpen) resetForm();
     }}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Criar Story</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {!preview ? (
+      <DialogContent className="sm:max-w-md p-0 max-h-[95vh] overflow-hidden flex flex-col border-none bg-black">
+        {!preview ? (
+          <div className="p-6 space-y-4 bg-background rounded-lg">
+            <DialogHeader>
+              <DialogTitle>Criar Story</DialogTitle>
+            </DialogHeader>
             <div
               className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
@@ -267,37 +275,35 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 className="hidden"
               />
             </div>
-          ) : (
-            <div ref={previewContainerRef} className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
+          </div>
+        ) : (
+          <>
+            {/* Fullscreen preview with overlays */}
+            <div ref={previewContainerRef} className="relative flex-1 min-h-0 overflow-hidden">
               {selectedFile?.type.startsWith('video') ? (
                 <video src={preview} className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} muted autoPlay loop />
               ) : (
                 <img src={preview} alt="Preview" className="w-full h-full object-cover" style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)` }} />
               )}
+
+              {/* Close / change media button */}
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-2 right-2 z-20"
-                onClick={() => {
-                  setSelectedFile(null);
-                  setPreview(null);
-                }}
+                className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white border-none"
+                onClick={() => { setSelectedFile(null); setPreview(null); }}
               >
                 <X className="w-4 h-4" />
               </Button>
 
-              {/* Draggable text overlay - percentage based */}
+              {/* Draggable text overlay */}
               {showText && (
                 <DraggablePreview
-                  onPositionChange={(x, y) => {
-                    const container = previewContainerRef.current;
-                    if (container) {
-                      const rect = container.getBoundingClientRect();
-                      setTextPosPercent({
-                        x: Math.round((x / rect.width) * 100),
-                        y: Math.round((y / rect.height) * 100),
-                      });
-                    }
+                  onPositionChange={(centerX, centerY, containerW, containerH) => {
+                    setTextPosPercent({
+                      x: Math.round((centerX / containerW) * 100),
+                      y: Math.round((centerY / containerH) * 100),
+                    });
                   }}
                 >
                   <div className="flex items-center gap-1" style={{ visibility: caption ? 'visible' : 'hidden' }}>
@@ -322,15 +328,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               {/* Draggable link CTA overlay */}
               {showLink && linkUrl && (
                 <DraggablePreview
-                  onPositionChange={(x, y) => {
-                    const container = previewContainerRef.current;
-                    if (container) {
-                      const rect = container.getBoundingClientRect();
-                      setLinkPosPercent({
-                        x: Math.round((x / rect.width) * 100),
-                        y: Math.round((y / rect.height) * 100),
-                      });
-                    }
+                  onPositionChange={(centerX, centerY, containerW, containerH) => {
+                    setLinkPosPercent({
+                      x: Math.round((centerX / containerW) * 100),
+                      y: Math.round((centerY / containerH) * 100),
+                    });
                   }}
                 >
                   <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
@@ -342,10 +344,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               )}
 
               {/* Draggable sticker overlays */}
-              {stickers.map((sticker, idx) => (
-                <DraggablePreview
-                  key={sticker.id}
-                >
+              {stickers.map((sticker) => (
+                <DraggablePreview key={sticker.id}>
                   <div className="relative group">
                     <span className="text-4xl select-none drop-shadow-lg">{sticker.emoji}</span>
                     <button
@@ -361,7 +361,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 </DraggablePreview>
               ))}
 
-              {/* Poll overlay */}
+              {/* Poll overlay inside preview */}
               {showPoll && (
                 <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3 z-10">
                   <Input
@@ -386,219 +386,218 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {preview && (
-            <>
-              {/* Tool buttons */}
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant={showText ? 'default' : 'outline'}
-                  onClick={() => setShowText(!showText)}
-                  className={cn(showText && 'gradient-brand')}
-                  size="sm"
-                >
-                  <Type className="w-4 h-4 mr-2" />
-                  Texto
-                </Button>
-                <Button
-                  variant={showLink ? 'default' : 'outline'}
-                  onClick={() => setShowLink(!showLink)}
-                  className={cn(showLink && 'gradient-brand')}
-                  size="sm"
-                >
-                  <Link2 className="w-4 h-4 mr-2" />
-                  Link
-                </Button>
-                <Button
-                  variant={showPoll ? 'default' : 'outline'}
-                  onClick={() => setShowPoll(!showPoll)}
-                  className={cn(showPoll && 'gradient-brand')}
-                  size="sm"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Enquete
-                </Button>
-                <Button
-                  variant={showMusic ? 'default' : 'outline'}
-                  onClick={() => setShowMusic(!showMusic)}
-                  className={cn(showMusic && 'gradient-brand')}
-                  size="sm"
-                >
-                  <Music className="w-4 h-4 mr-2" />
-                  Música
-                </Button>
-                <Button
-                  variant={showFilters ? 'default' : 'outline'}
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={cn(showFilters && 'gradient-brand')}
-                  size="sm"
-                >
-                  <SlidersHorizontal className="w-4 h-4 mr-2" />
-                  Filtros
-                </Button>
-                <Button
-                  variant={showStickers ? 'default' : 'outline'}
-                  onClick={() => setShowStickers(!showStickers)}
-                  className={cn(showStickers && 'gradient-brand')}
-                  size="sm"
-                >
-                  <Smile className="w-4 h-4 mr-2" />
-                  Stickers
-                </Button>
-              </div>
-
-              {/* Text input */}
-              {showText && (
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">Digite o texto e arraste na imagem para posicionar</p>
-                  <Input
-                    placeholder="Digite seu texto..."
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    maxLength={200}
-                  />
-                  {/* Color picker */}
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Cor</p>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {TEXT_COLORS.map((c) => (
-                        <button
-                          key={c.value}
-                          type="button"
-                          onClick={() => setTextColor(c.value)}
-                          className={cn(
-                            "w-7 h-7 rounded-full border-2 transition-transform",
-                            textColor === c.value ? "border-primary scale-110" : "border-muted"
-                          )}
-                          style={{ backgroundColor: c.value }}
-                          title={c.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {/* Font size slider */}
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Tamanho: {textSize}px</p>
-                    <div className="flex items-center gap-2">
-                      <Minus className="w-3 h-3 text-muted-foreground" />
-                      <Slider
-                        value={[textSize]}
-                        onValueChange={([v]) => setTextSize(v)}
-                        min={10}
-                        max={36}
-                        step={1}
-                        className="flex-1"
-                      />
-                      <Type className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Link inputs */}
-              {showLink && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Digite a URL e o texto do botão, depois arraste para posicionar</p>
-                  <Input placeholder="https://exemplo.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} type="url" />
-                  <Input placeholder="Texto do botão (ex: Saiba mais)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
-                </div>
-              )}
-
-              {/* Music input */}
-              {showMusic && (
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">Selecione um áudio para tocar durante o story</p>
-                  <input ref={musicInputRef} type="file" accept="audio/*" onChange={handleMusicSelect} className="hidden" />
+              {/* Bottom controls overlay inside the preview */}
+              <div className="absolute bottom-0 left-0 right-0 z-20">
+                {/* Toggle controls button */}
+                <div className="flex justify-center">
                   <button
-                    onClick={() => musicInputRef.current?.click()}
-                    className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-4 text-center hover:border-primary transition-colors"
+                    onClick={() => setShowControls(!showControls)}
+                    className="bg-black/60 backdrop-blur-sm text-white rounded-t-lg px-4 py-1 flex items-center gap-1 text-xs"
                   >
-                    <Music className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
-                    <p className="text-muted-foreground text-sm">{musicFile ? musicFile.name : 'Toque para selecionar áudio'}</p>
-                    <p className="text-muted-foreground text-xs mt-0.5">MP3, WAV, M4A (máx 10MB)</p>
+                    {showControls ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+                    {showControls ? 'Ocultar' : 'Editar'}
                   </button>
-                  {musicPreviewUrl && (
-                    <div className="flex items-center gap-3 bg-muted rounded-lg p-3">
-                      <audio ref={musicAudioRef} src={musicPreviewUrl} loop />
-                      <button onClick={toggleMusicPreview} className="shrink-0">
-                        {isMusicPlaying ? <Pause className="w-5 h-5 text-primary" /> : <Play className="w-5 h-5 text-primary" />}
-                      </button>
-                      <span className="text-sm text-foreground truncate flex-1">{musicFile?.name}</span>
-                      <button onClick={() => { setMusicFile(null); if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl); setMusicPreviewUrl(null); setIsMusicPlaying(false); if (musicAudioRef.current) { musicAudioRef.current.pause(); } }}>
-                        <X className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  )}
                 </div>
-              )}
 
-              {/* Filters */}
-              {showFilters && (
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">Ajuste os filtros visuais do story</p>
-                  <div className="space-y-2">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Sun className="w-3 h-3" /> Brilho: {brightness}%</p>
-                      <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={50} max={150} step={1} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Contrast className="w-3 h-3" /> Contraste: {contrast}%</p>
-                      <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">🎨 Saturação: {saturation}%</p>
-                      <Slider value={[saturation]} onValueChange={([v]) => setSaturation(v)} min={0} max={200} step={1} />
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => { setBrightness(100); setContrast(100); setSaturation(100); }}>
-                      Resetar filtros
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Sticker picker */}
-              {showStickers && (
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">Toque em um emoji para adicionar ao story. Arraste para posicionar.</p>
-                  <div className="grid grid-cols-8 gap-2">
-                    {['😀','😂','🥰','😎','🤩','😜','🥳','😇',
-                      '❤️','🔥','⭐','🎉','👍','👏','💪','🙌',
-                      '🌈','🦋','🌸','🍕','🎵','💎','🏆','🎯',
-                      '🐶','🐱','🦊','🐻','🐼','🦁','🐸','🐵',
-                      '☀️','🌙','⚡','❄️','🌊','🍀','🌺','🎈'].map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => {
-                          stickerIdCounter.current += 1;
-                          setStickers(prev => [...prev, { id: `sticker-${stickerIdCounter.current}`, emoji }]);
-                        }}
-                        className="text-2xl hover:scale-125 transition-transform p-1"
+                {showControls && (
+                  <div className="bg-black/70 backdrop-blur-md p-3 space-y-3 max-h-[40vh] overflow-y-auto">
+                    {/* Tool buttons */}
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        variant={showText ? 'default' : 'outline'}
+                        onClick={() => setShowText(!showText)}
+                        className={cn("border-white/30 text-white", showText && 'gradient-brand')}
+                        size="sm"
                       >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                  {stickers.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={() => setStickers([])}>
-                      Remover todos os stickers
-                    </Button>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                        <Type className="w-4 h-4 mr-1" />
+                        Texto
+                      </Button>
+                      <Button
+                        variant={showLink ? 'default' : 'outline'}
+                        onClick={() => setShowLink(!showLink)}
+                        className={cn("border-white/30 text-white", showLink && 'gradient-brand')}
+                        size="sm"
+                      >
+                        <Link2 className="w-4 h-4 mr-1" />
+                        Link
+                      </Button>
+                      <Button
+                        variant={showPoll ? 'default' : 'outline'}
+                        onClick={() => setShowPoll(!showPoll)}
+                        className={cn("border-white/30 text-white", showPoll && 'gradient-brand')}
+                        size="sm"
+                      >
+                        <BarChart3 className="w-4 h-4 mr-1" />
+                        Enquete
+                      </Button>
+                      <Button
+                        variant={showMusic ? 'default' : 'outline'}
+                        onClick={() => setShowMusic(!showMusic)}
+                        className={cn("border-white/30 text-white", showMusic && 'gradient-brand')}
+                        size="sm"
+                      >
+                        <Music className="w-4 h-4 mr-1" />
+                        Música
+                      </Button>
+                      <Button
+                        variant={showFilters ? 'default' : 'outline'}
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={cn("border-white/30 text-white", showFilters && 'gradient-brand')}
+                        size="sm"
+                      >
+                        <SlidersHorizontal className="w-4 h-4 mr-1" />
+                        Filtros
+                      </Button>
+                      <Button
+                        variant={showStickers ? 'default' : 'outline'}
+                        onClick={() => setShowStickers(!showStickers)}
+                        className={cn("border-white/30 text-white", showStickers && 'gradient-brand')}
+                        size="sm"
+                      >
+                        <Smile className="w-4 h-4 mr-1" />
+                        Stickers
+                      </Button>
+                    </div>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedFile || createStory.isPending}
-            className="w-full gradient-brand hover:opacity-90 glow-primary"
-          >
-            {createStory.isPending ? 'Publicando...' : 'Publicar Story'}
-          </Button>
-        </div>
+                    {/* Text input */}
+                    {showText && (
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Digite seu texto..."
+                          value={caption}
+                          onChange={(e) => setCaption(e.target.value)}
+                          maxLength={200}
+                          className="bg-white/20 border-0 text-white placeholder:text-white/70"
+                        />
+                        <div className="flex gap-1.5 flex-wrap">
+                          {TEXT_COLORS.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              onClick={() => setTextColor(c.value)}
+                              className={cn(
+                                "w-6 h-6 rounded-full border-2 transition-transform",
+                                textColor === c.value ? "border-white scale-110" : "border-white/30"
+                              )}
+                              style={{ backgroundColor: c.value }}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Minus className="w-3 h-3 text-white/70" />
+                          <Slider
+                            value={[textSize]}
+                            onValueChange={([v]) => setTextSize(v)}
+                            min={10}
+                            max={36}
+                            step={1}
+                            className="flex-1"
+                          />
+                          <Type className="w-4 h-4 text-white/70" />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Link inputs */}
+                    {showLink && (
+                      <div className="space-y-2">
+                        <Input placeholder="https://exemplo.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} type="url" className="bg-white/20 border-0 text-white placeholder:text-white/70" />
+                        <Input placeholder="Texto do botão (ex: Saiba mais)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} className="bg-white/20 border-0 text-white placeholder:text-white/70" />
+                      </div>
+                    )}
+
+                    {/* Music input */}
+                    {showMusic && (
+                      <div className="space-y-2">
+                        <input ref={musicInputRef} type="file" accept="audio/*" onChange={handleMusicSelect} className="hidden" />
+                        <button
+                          onClick={() => musicInputRef.current?.click()}
+                          className="w-full border border-dashed border-white/30 rounded-lg p-3 text-center hover:border-white/60 transition-colors"
+                        >
+                          <Music className="w-5 h-5 mx-auto text-white/70 mb-1" />
+                          <p className="text-white/70 text-xs">{musicFile ? musicFile.name : 'Selecionar áudio (máx 10MB)'}</p>
+                        </button>
+                        {musicPreviewUrl && (
+                          <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2">
+                            <audio ref={musicAudioRef} src={musicPreviewUrl} loop />
+                            <button onClick={toggleMusicPreview} className="shrink-0">
+                              {isMusicPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
+                            </button>
+                            <span className="text-xs text-white truncate flex-1">{musicFile?.name}</span>
+                            <button onClick={() => { setMusicFile(null); if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl); setMusicPreviewUrl(null); setIsMusicPlaying(false); if (musicAudioRef.current) { musicAudioRef.current.pause(); } }}>
+                              <X className="w-3 h-3 text-white/70" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Filters */}
+                    {showFilters && (
+                      <div className="space-y-2">
+                        <div className="space-y-1">
+                          <p className="text-xs text-white/70 flex items-center gap-1"><Sun className="w-3 h-3" /> Brilho: {brightness}%</p>
+                          <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={50} max={150} step={1} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-white/70 flex items-center gap-1"><Contrast className="w-3 h-3" /> Contraste: {contrast}%</p>
+                          <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={50} max={150} step={1} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-white/70">🎨 Saturação: {saturation}%</p>
+                          <Slider value={[saturation]} onValueChange={([v]) => setSaturation(v)} min={0} max={200} step={1} />
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-white/70" onClick={() => { setBrightness(100); setContrast(100); setSaturation(100); }}>
+                          Resetar filtros
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Sticker picker */}
+                    {showStickers && (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-8 gap-2">
+                          {['😀','😂','🥰','😎','🤩','😜','🥳','😇',
+                            '❤️','🔥','⭐','🎉','👍','👏','💪','🙌',
+                            '🌈','🦋','🌸','🍕','🎵','💎','🏆','🎯',
+                            '🐶','🐱','🦊','🐻','🐼','🦁','🐸','🐵',
+                            '☀️','🌙','⚡','❄️','🌊','🍀','🌺','🎈'].map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => {
+                                stickerIdCounter.current += 1;
+                                setStickers(prev => [...prev, { id: `sticker-${stickerIdCounter.current}`, emoji }]);
+                              }}
+                              className="text-2xl hover:scale-125 transition-transform p-1"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                        {stickers.length > 0 && (
+                          <Button variant="ghost" size="sm" className="text-white/70" onClick={() => setStickers([])}>
+                            Remover todos
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Submit button */}
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!selectedFile || createStory.isPending}
+                      className="w-full gradient-brand hover:opacity-90 glow-primary"
+                    >
+                      {createStory.isPending ? 'Publicando...' : 'Publicar Story'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
