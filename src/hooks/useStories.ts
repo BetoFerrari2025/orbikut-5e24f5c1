@@ -45,15 +45,15 @@ export function useCreateStory() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (imageFile: File) => {
+    mutationFn: async (file: File) => {
       if (!user) throw new Error('Not authenticated');
 
-      const fileExt = imageFile.name.split('.').pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('stories')
-        .upload(fileName, imageFile);
+        .upload(fileName, file, { contentType: file.type });
 
       if (uploadError) throw uploadError;
 
