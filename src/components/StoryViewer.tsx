@@ -103,7 +103,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const { user } = useAuth();
   const recordView = useRecordStoryView();
 
-  const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+  const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi|quicktime)$/i.test(url) || url.includes('video');
   const isCurrentVideo = stories?.[currentIndex] ? checkIsVideo(stories[currentIndex].image_url) : false;
   const STORY_DURATION = 5000; // Only used for images
   const TICK_INTERVAL = 50;
@@ -153,7 +153,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     if (!video || !isCurrentVideo || !stories) return;
 
     const onTimeUpdate = () => {
-      if (video.duration) {
+      if (video.duration && video.duration !== Infinity) {
         setProgress((video.currentTime / video.duration) * 100);
       }
     };
@@ -162,11 +162,33 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
       else onClose();
     };
 
+    // Also use a fallback timer for mobile where ended may not fire
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+    const onLoadedMetadata = () => {
+      if (video.duration && video.duration !== Infinity) {
+        // Fallback: check every 500ms if video has finished
+        fallbackTimer = setInterval(() => {
+          if (video.currentTime >= video.duration - 0.3) {
+            if (fallbackTimer) clearInterval(fallbackTimer);
+            onEnded();
+          }
+        }, 500);
+      }
+    };
+
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
+    video.addEventListener('loadedmetadata', onLoadedMetadata);
+    // If metadata already loaded
+    if (video.readyState >= 1 && video.duration && video.duration !== Infinity) {
+      onLoadedMetadata();
+    }
+
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      if (fallbackTimer) clearInterval(fallbackTimer);
     };
   }, [currentIndex, stories, isCurrentVideo]);
 
@@ -182,7 +204,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     }
   };
 
-  const isVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+  const isVideo = (url: string) => /\.(mp4|webm|mov|avi|quicktime)$/i.test(url) || url.includes('video');
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
