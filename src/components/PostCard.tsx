@@ -41,6 +41,7 @@ export function PostCard({ post }: PostCardProps) {
   const addComment = useAddComment();
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
+  const sendNotification = useSendNotification();
   const viewRecorded = useRef(false);
 
   useEffect(() => {
