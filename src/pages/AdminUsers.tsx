@@ -28,9 +28,23 @@ export default function AdminUsers() {
   const toggleBlock = useAdminToggleBlock();
   const deleteUser = useAdminDeleteUser();
   const deletePost = useAdminDeletePost();
+  const toggleRole = useAdminToggleRole();
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('30');
+
+  // Fetch admin user IDs
+  const { data: adminUserIds } = useQuery({
+    queryKey: ['admin-role-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+      if (error) throw error;
+      return new Set((data ?? []).map((r: any) => r.user_id));
+    },
+  });
 
   const startDate = format(
     dateRange === '7' ? subDays(new Date(), 7)
