@@ -28,18 +28,14 @@ export default function Post() {
   const { data: post, isLoading } = usePost(postId);
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
-      <main className="max-w-xl mx-auto px-4 py-8">
-        {isLoading ? (
-          <Skeleton className="w-full aspect-square rounded-lg" />
-        ) : post ? (
-          <PostCard post={post} />
-        ) : (
-          <p className="text-center text-muted-foreground">Post não encontrado</p>
-        )}
-      </main>
-      <BottomNav />
-    </div>
+    <main className="max-w-xl mx-auto px-4 py-8">
+      {isLoading ? (
+        <Skeleton className="w-full aspect-square rounded-lg" />
+      ) : post ? (
+        <PostCard post={post} />
+      ) : (
+        <p className="text-center text-muted-foreground">Post não encontrado</p>
+      )}
+    </main>
   );
 }

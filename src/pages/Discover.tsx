@@ -61,9 +61,8 @@ export default function Discover() {
 
   if (videoPosts.length === 0) {
     return (
-      <div className="h-screen bg-background flex flex-col items-center justify-center pb-16">
+      <div className="h-screen bg-background flex flex-col items-center justify-center">
         <p className="text-muted-foreground">Nenhum vídeo para descobrir</p>
-        <BottomNav />
       </div>
     );
   }
@@ -86,7 +85,6 @@ export default function Discover() {
           />
         ))}
       </div>
-      <BottomNav />
     </div>
   );
 }

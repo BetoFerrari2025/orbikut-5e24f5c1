@@ -22,32 +22,25 @@ export default function Messages() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="max-w-lg mx-auto px-4 py-12 text-center">
-          <p className="text-muted-foreground">Faça login para acessar suas mensagens.</p>
-        </main>
-      </div>
+      <main className="max-w-lg mx-auto px-4 py-12 text-center">
+        <p className="text-muted-foreground">Faça login para acessar suas mensagens.</p>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
-      <main className="max-w-2xl mx-auto border-x min-h-[calc(100vh-3.5rem)]">
-        {selectedConv ? (
-          <ChatView conversation={selectedConv} onBack={() => setSelectedConv(null)} currentUserId={user.id} />
-        ) : (
-          <ConversationList
-            conversations={conversations || []}
-            isLoading={isLoading}
-            onSelect={setSelectedConv}
-            currentUserId={user.id}
-          />
-        )}
-      </main>
-      <BottomNav />
-    </div>
+    <main className="max-w-2xl mx-auto border-x min-h-[calc(100vh-3.5rem)]">
+      {selectedConv ? (
+        <ChatView conversation={selectedConv} onBack={() => setSelectedConv(null)} currentUserId={user.id} />
+      ) : (
+        <ConversationList
+          conversations={conversations || []}
+          isLoading={isLoading}
+          onSelect={setSelectedConv}
+          currentUserId={user.id}
+        />
+      )}
+    </main>
   );
 }
 
