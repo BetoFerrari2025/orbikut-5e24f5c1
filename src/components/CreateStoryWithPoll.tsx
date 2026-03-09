@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Plus, X, BarChart3 } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,6 +12,61 @@ interface CreateStoryWithPollProps {
   onOpenChange: (open: boolean) => void;
 }
 
+function DraggablePreview({ children, className, initialX, initialY, onPositionChange }: {
+  children: React.ReactNode;
+  className?: string;
+  initialX: number;
+  initialY: number;
+  onPositionChange?: (x: number, y: number) => void;
+}) {
+  const [pos, setPos] = useState({ x: initialX, y: initialY });
+  const dragging = useRef(false);
+  const offset = useRef({ x: 0, y: 0 });
+  const elRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    dragging.current = true;
+    const rect = elRef.current!.getBoundingClientRect();
+    offset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    elRef.current!.setPointerCapture(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragging.current || !elRef.current) return;
+    e.stopPropagation();
+    const parent = elRef.current.parentElement!;
+    const parentRect = parent.getBoundingClientRect();
+    const elRect = elRef.current.getBoundingClientRect();
+    let x = e.clientX - parentRect.left - offset.current.x;
+    let y = e.clientY - parentRect.top - offset.current.y;
+    // Clamp within parent
+    x = Math.max(0, Math.min(x, parentRect.width - elRect.width));
+    y = Math.max(0, Math.min(y, parentRect.height - elRect.height));
+    setPos({ x, y });
+    onPositionChange?.(x, y);
+  }, [onPositionChange]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    dragging.current = false;
+    elRef.current?.releasePointerCapture(e.pointerId);
+  }, []);
+
+  return (
+    <div
+      ref={elRef}
+      className={cn("absolute cursor-grab active:cursor-grabbing touch-none select-none z-10", className)}
+      style={{ left: pos.x, top: pos.y }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -19,6 +74,16 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [pollQuestion, setPollQuestion] = useState('');
   const [optionA, setOptionA] = useState('');
   const [optionB, setOptionB] = useState('');
+
+  // Text overlay
+  const [showText, setShowText] = useState(false);
+  const [caption, setCaption] = useState('');
+
+  // Link overlay
+  const [showLink, setShowLink] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkLabel, setLinkLabel] = useState('');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createStory = useCreateStoryWithPoll();
 
@@ -41,7 +106,13 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       : undefined;
 
     try {
-      await createStory.mutateAsync({ file: selectedFile, poll });
+      await createStory.mutateAsync({
+        file: selectedFile,
+        poll,
+        caption: showText && caption.trim() ? caption.trim() : undefined,
+        linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
+        linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
+      });
       toast.success('Story publicado!');
       resetForm();
       onOpenChange(false);
@@ -57,6 +128,11 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setPollQuestion('');
     setOptionA('');
     setOptionB('');
+    setShowText(false);
+    setCaption('');
+    setShowLink(false);
+    setLinkUrl('');
+    setLinkLabel('');
   };
 
   return (
@@ -64,7 +140,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       onOpenChange(isOpen);
       if (!isOpen) resetForm();
     }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Story</DialogTitle>
         </DialogHeader>
@@ -85,7 +161,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               />
             </div>
           ) : (
-            <div className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden">
+            <div className="relative aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden bg-black">
               {selectedFile?.type.startsWith('video') ? (
                 <video src={preview} className="w-full h-full object-cover" muted autoPlay loop />
               ) : (
@@ -94,7 +170,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 z-20"
                 onClick={() => {
                   setSelectedFile(null);
                   setPreview(null);
@@ -103,9 +179,30 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                 <X className="w-4 h-4" />
               </Button>
 
+              {/* Draggable text overlay - starts centered */}
+              {showText && caption && (
+                <DraggablePreview initialX={50} initialY={180}>
+                  <div className="flex items-center gap-1">
+                    <GripVertical className="w-3 h-3 text-white/50" />
+                    <p className="text-white text-sm bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[200px] break-words">{caption}</p>
+                  </div>
+                </DraggablePreview>
+              )}
+
+              {/* Draggable link CTA overlay - starts centered */}
+              {showLink && linkUrl && (
+                <DraggablePreview initialX={50} initialY={240}>
+                  <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
+                    <GripVertical className="w-3 h-3 opacity-50" />
+                    <ExternalLink className="w-4 h-4 shrink-0" />
+                    <span>{linkLabel || 'Saiba mais'}</span>
+                  </div>
+                </DraggablePreview>
+              )}
+
               {/* Poll overlay */}
               {showPoll && (
-                <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3">
+                <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl p-4 space-y-3 z-10">
                   <Input
                     placeholder="Sua pergunta..."
                     value={pollQuestion}
@@ -132,16 +229,60 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
           )}
 
           {preview && (
-            <div className="flex gap-2">
-              <Button
-                variant={showPoll ? 'default' : 'outline'}
-                onClick={() => setShowPoll(!showPoll)}
-                className={cn(showPoll && 'gradient-brand')}
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Enquete
-              </Button>
-            </div>
+            <>
+              {/* Tool buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={showText ? 'default' : 'outline'}
+                  onClick={() => setShowText(!showText)}
+                  className={cn(showText && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Type className="w-4 h-4 mr-2" />
+                  Texto
+                </Button>
+                <Button
+                  variant={showLink ? 'default' : 'outline'}
+                  onClick={() => setShowLink(!showLink)}
+                  className={cn(showLink && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Link
+                </Button>
+                <Button
+                  variant={showPoll ? 'default' : 'outline'}
+                  onClick={() => setShowPoll(!showPoll)}
+                  className={cn(showPoll && 'gradient-brand')}
+                  size="sm"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Enquete
+                </Button>
+              </div>
+
+              {/* Text input */}
+              {showText && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Digite o texto e arraste na imagem para posicionar</p>
+                  <Input
+                    placeholder="Digite seu texto..."
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    maxLength={200}
+                  />
+                </div>
+              )}
+
+              {/* Link inputs */}
+              {showLink && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Digite a URL e o texto do botão, depois arraste para posicionar</p>
+                  <Input placeholder="https://exemplo.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} type="url" />
+                  <Input placeholder="Texto do botão (ex: Saiba mais)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
+                </div>
+              )}
+            </>
           )}
 
           <Button
