@@ -141,7 +141,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const stickerIdCounter = useRef(0);
 
   // Controls panel
-  const [showControls, setShowControls] = useState(true);
+  
 
   const { user } = useAuth();
 
