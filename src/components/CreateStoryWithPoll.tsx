@@ -114,6 +114,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [showLink, setShowLink] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [linkLabel, setLinkLabel] = useState('');
+  const [linkPosPercent, setLinkPosPercent] = useState({ x: 50, y: 50 });
 
   // Music
   const [showMusic, setShowMusic] = useState(false);
@@ -179,6 +180,8 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         captionSize: showText && caption.trim() ? textSize : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
+        linkX: showLink && linkUrl.trim() ? linkPosPercent.x : undefined,
+        linkY: showLink && linkUrl.trim() ? linkPosPercent.y : undefined,
         musicUrl,
         filterBrightness: brightness,
         filterContrast: contrast,
@@ -318,7 +321,18 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
 
               {/* Draggable link CTA overlay */}
               {showLink && linkUrl && (
-                <DraggablePreview>
+                <DraggablePreview
+                  onPositionChange={(x, y) => {
+                    const container = previewContainerRef.current;
+                    if (container) {
+                      const rect = container.getBoundingClientRect();
+                      setLinkPosPercent({
+                        x: Math.round((x / rect.width) * 100),
+                        y: Math.round((y / rect.height) * 100),
+                      });
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg">
                     <GripVertical className="w-3 h-3 opacity-50" />
                     <ExternalLink className="w-4 h-4 shrink-0" />

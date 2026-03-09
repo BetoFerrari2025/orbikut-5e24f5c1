@@ -207,29 +207,33 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </div>
           )}
 
-          {/* Link CTA button overlay - clickable by viewers */}
-          {(currentStory as any).link_url && user?.id !== currentStory.user_id && (
-            <DraggableOverlay className="z-10" defaultX={16} defaultY={-80} isDraggable={false}>
-              <a
-                href={(currentStory as any).link_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg hover:opacity-90 transition-opacity"
-              >
-                <ExternalLink className="w-4 h-4 shrink-0" />
-                <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
-              </a>
-            </DraggableOverlay>
-          )}
-
-          {/* Link CTA for owner view */}
-          {(currentStory as any).link_url && user?.id === currentStory.user_id && (
-            <div className="absolute bottom-16 left-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold opacity-70">
-                <ExternalLink className="w-4 h-4 shrink-0" />
-                <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
-              </div>
+          {/* Link CTA button overlay - positioned at saved coordinates, clickable */}
+          {(currentStory as any).link_url && (
+            <div
+              className="absolute z-10 pointer-events-auto"
+              style={{
+                left: `${(currentStory as any).link_x ?? 50}%`,
+                top: `${(currentStory as any).link_y ?? 50}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {user?.id !== currentStory.user_id ? (
+                <a
+                  href={(currentStory as any).link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold opacity-70">
+                  <ExternalLink className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{(currentStory as any).link_label || 'Saiba mais'}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -501,9 +505,34 @@ function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: ()
   const [mentionLoading, setMentionLoading] = useState(false);
   const { user } = useAuth();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim() || !user) return;
-    addComment.mutate({ storyId, content: text.trim() });
+    const content = text.trim();
+    addComment.mutate({ storyId, content });
+
+    // Send @mention notifications
+    const mentions = content.match(/@(\w+)/g);
+    if (mentions) {
+      const usernames = mentions.map(m => m.slice(1));
+      const { data: mentionedUsers } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('username', usernames);
+
+      if (mentionedUsers) {
+        for (const mentioned of mentionedUsers) {
+          if (mentioned.id !== user.id) {
+            await supabase.from('notifications').insert({
+              user_id: mentioned.id,
+              actor_id: user.id,
+              type: 'comment',
+              content: content.length > 100 ? content.slice(0, 100) + '...' : content,
+            } as any);
+          }
+        }
+      }
+    }
+
     setText('');
     setMentionQuery(null);
     setMentionResults([]);
