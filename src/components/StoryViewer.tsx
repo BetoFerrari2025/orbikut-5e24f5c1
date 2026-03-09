@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, MessageCircle, Plus, Music, Type, Send, X } from 'lucide-react';
+import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,12 +91,9 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </div>
           )}
 
-          {/* Music indicator */}
+          {/* Audio Player */}
           {currentStory.music_url && (
-            <div className="absolute top-6 right-12 z-10 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
-              <Music className="w-3 h-3 text-white animate-pulse" />
-              <span className="text-white text-[10px]">♪</span>
-            </div>
+            <StoryAudioPlayer musicUrl={currentStory.music_url} storyId={currentStory.id} />
           )}
 
           {/* Right-side action buttons */}
@@ -158,7 +155,91 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   );
 }
 
-// ─── Like Button ───
+// ─── Audio Player ───
+function StoryAudioPlayer({ musicUrl, storyId }: { musicUrl: string; storyId: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    // Auto-play when story changes
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    }
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
+  }, [storyId]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const update = () => {
+      if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+    };
+    audio.addEventListener('timeupdate', update);
+    return () => audio.removeEventListener('timeupdate', update);
+  }, []);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (audioRef.current) {
+      audioRef.current.muted = !muted;
+      setMuted(!muted);
+    }
+  };
+
+  return (
+    <>
+      <audio ref={audioRef} src={musicUrl} loop muted={muted} />
+      <div
+        className="absolute top-14 left-3 right-3 z-10 flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={togglePlay} className="shrink-0">
+          {isPlaying ? (
+            <Pause className="w-4 h-4 text-white" />
+          ) : (
+            <Play className="w-4 h-4 text-white" />
+          )}
+        </button>
+        <Music className="w-3 h-3 text-white/70 shrink-0 animate-pulse" />
+        <div className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-200"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <button onClick={toggleMute} className="shrink-0">
+          {muted ? (
+            <VolumeX className="w-4 h-4 text-white/70" />
+          ) : (
+            <Volume2 className="w-4 h-4 text-white/70" />
+          )}
+        </button>
+      </div>
+    </>
+  );
+}
+
 function StoryLikeButton({ storyId }: { storyId: string }) {
   const { data: likeCount } = useStoryLikes(storyId);
   const { data: hasLiked } = useHasLikedStory(storyId);
