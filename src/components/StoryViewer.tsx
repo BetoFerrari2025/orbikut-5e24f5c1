@@ -616,7 +616,7 @@ function renderCommentWithMentions(content: string) {
 }
 
 // ─── Comments Panel with @mention ───
-function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: () => void }) {
+function StoryCommentsPanel({ storyId, storyOwnerId, onClose }: { storyId: string; storyOwnerId: string; onClose: () => void }) {
   const { data: comments } = useStoryComments(storyId);
   const addComment = useAddStoryComment();
   const [text, setText] = useState('');
