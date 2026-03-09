@@ -68,6 +68,10 @@ export function Navbar() {
             </Button>
           )}
 
+          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}>
+            {theme === 'dark' ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+          </Button>
+
           {user && (
             <Button variant="ghost" size="icon" onClick={signOut} className="hover:bg-destructive/10">
               <LogOut className="w-6 h-6 text-foreground hover:text-destructive" />
