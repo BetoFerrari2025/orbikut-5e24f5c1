@@ -89,6 +89,8 @@ export function PostCard({ post }: PostCardProps) {
     setNewComment('');
   };
 
+  if (hidden) return null;
+
   return (
     <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
       {/* Header */}
