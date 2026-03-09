@@ -126,9 +126,9 @@ export default function Notifications() {
         </div>
       )}
 
-      {notifications && notifications.length > 0 && (
+      {filteredNotifications && filteredNotifications.length > 0 && (
         <div>
-          {notifications.map((notif) => (
+          {filteredNotifications.map((notif) => (
             <NotificationItem key={notif.id} notification={notif} onDelete={(id) => deleteOne.mutate(id)} />
           ))}
         </div>

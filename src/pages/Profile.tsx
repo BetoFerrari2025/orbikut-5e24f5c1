@@ -129,7 +129,9 @@ export default function Profile() {
       </div>
 
       {profile.full_name && <p className="font-semibold text-foreground">{profile.full_name}</p>}
-      {profile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-4">{profile.bio}</p>}
+      {profile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-2">{profile.bio}</p>}
+
+      <ProfileLinks userId={profile.id} isOwnProfile={isOwnProfile} />
 
       <ProfileHighlights userId={profile.id} isOwnProfile={isOwnProfile} />
 
