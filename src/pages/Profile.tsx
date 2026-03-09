@@ -29,6 +29,7 @@ export default function Profile() {
   const { data: followingCount } = useFollowingCount(profile?.id);
   const toggleFollow = useToggleFollow();
   const getOrCreateConversation = useGetOrCreateConversation();
+  const sendNotification = useSendNotification();
 
   const isOwnProfile = user?.id === profile?.id;
   const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
