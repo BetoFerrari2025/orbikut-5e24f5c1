@@ -31,12 +31,9 @@ export default function Profile() {
   const handleMessage = async () => {
     if (!profile) return;
     try {
-      const conversationId = await getOrCreateConversation.mutateAsync(profile.id);
-      navigate('/messages', { state: { conversationId, otherUser: profile } });
+      await getOrCreateConversation.mutateAsync(profile.id);
+      navigate('/messages');
     } catch { /* ignore */ }
-  };
-    if (!profile || !followStatus) return;
-    toggleFollow.mutate({ targetUserId: profile.id, isFollowing: followStatus.isFollowing });
   };
 
   if (profileLoading) {
