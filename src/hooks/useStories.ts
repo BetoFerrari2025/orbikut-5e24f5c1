@@ -6,6 +6,8 @@ export interface Story {
   id: string;
   user_id: string;
   image_url: string;
+  caption: string | null;
+  music_url: string | null;
   created_at: string;
   expires_at: string;
   profiles: {
