@@ -9,12 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   useAdminUsers, useAdminStats, useAdminSignupStats,
-  useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost,
+  useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost, useAdminToggleRole,
 } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert,
+  Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
   TrendingUp, UserPlus, FileText, Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,9 +28,23 @@ export default function AdminUsers() {
   const toggleBlock = useAdminToggleBlock();
   const deleteUser = useAdminDeleteUser();
   const deletePost = useAdminDeletePost();
+  const toggleRole = useAdminToggleRole();
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('30');
+
+  // Fetch admin user IDs
+  const { data: adminUserIds } = useQuery({
+    queryKey: ['admin-role-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+      if (error) throw error;
+      return new Set((data ?? []).map((r: any) => r.user_id));
+    },
+  });
 
   const startDate = format(
     dateRange === '7' ? subDays(new Date(), 7)
@@ -57,6 +71,17 @@ export default function AdminUsers() {
   const handleDeleteUser = (userId: string) => {
     if (!confirm('Tem certeza que deseja excluir este usuário? Esta ação é irreversível.')) return;
     deleteUser.mutate(userId, { onSuccess: () => toast.success('Usuário excluído') });
+  };
+
+  const handleToggleAdmin = (userId: string, isCurrentlyAdmin: boolean) => {
+    const action = isCurrentlyAdmin ? 'remover admin de' : 'tornar admin';
+    if (!confirm(`Tem certeza que deseja ${action} este usuário?`)) return;
+    toggleRole.mutate(
+      { userId, role: 'admin', grant: !isCurrentlyAdmin },
+      {
+        onSuccess: () => toast.success(isCurrentlyAdmin ? 'Admin removido' : 'Admin adicionado'),
+      }
+    );
   };
 
   return (
@@ -104,6 +129,9 @@ export default function AdminUsers() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-foreground text-sm truncate">{u.username ?? 'Sem nome'}</p>
+                      {adminUserIds?.has(u.id) && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary">ADMIN</span>
+                      )}
                       {u.is_blocked && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/20 text-destructive">BLOQUEADO</span>
                       )}
@@ -112,6 +140,15 @@ export default function AdminUsers() {
                     <p className="text-xs text-muted-foreground">{u.post_count} posts</p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={adminUserIds?.has(u.id) ? 'Remover admin' : 'Tornar admin'}
+                      onClick={() => handleToggleAdmin(u.id, adminUserIds?.has(u.id) ?? false)}
+                    >
+                      <ShieldCheck className={`w-4 h-4 ${adminUserIds?.has(u.id) ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedUserId(u.id)}>
                       <Eye className="w-4 h-4" />
                     </Button>

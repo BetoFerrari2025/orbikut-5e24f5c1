@@ -915,6 +915,14 @@ export type Database = {
         Args: { _blocked: boolean; _user_id: string }
         Returns: undefined
       }
+      admin_toggle_role: {
+        Args: {
+          _grant: boolean
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
