@@ -1,23 +1,24 @@
 import { Navbar } from '@/components/Navbar';
+import { BottomNav } from '@/components/BottomNav';
 import { PostCard } from '@/components/PostCard';
 import { StoriesBar } from '@/components/StoriesBar';
 import { usePosts } from '@/hooks/usePosts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Camera } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const Index = () => {
   const { data: posts, isLoading, error } = usePosts();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       
-      <main className="max-w-lg mx-auto px-4 py-2">
+      <main className="max-w-lg mx-auto px-4 md:px-4 py-2">
         <StoriesBar />
         {isLoading && (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-card border rounded-lg overflow-hidden">
+              <div key={i} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
                 <div className="flex items-center gap-3 p-3">
                   <Skeleton className="w-8 h-8 rounded-full" />
                   <Skeleton className="h-4 w-24" />
@@ -40,8 +41,8 @@ const Index = () => {
 
         {posts && posts.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-instagram flex items-center justify-center">
-              <Camera className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-brand flex items-center justify-center glow-primary">
+              <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Nenhum post ainda</h2>
             <p className="text-muted-foreground">
@@ -58,6 +59,8 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      <BottomNav />
     </div>
   );
 };

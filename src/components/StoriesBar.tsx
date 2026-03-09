@@ -88,7 +88,7 @@ export function StoriesBar() {
               onClick={() => openStories(stories)}
               className="flex flex-col items-center gap-1 min-w-[68px]"
             >
-              <div className="p-[2px] rounded-full gradient-instagram">
+              <div className="p-[2px] rounded-full gradient-brand">
                 <Avatar className="w-[60px] h-[60px] border-2 border-background">
                   <AvatarImage src={storyUser.avatar_url ?? undefined} />
                   <AvatarFallback>{storyUser.username[0].toUpperCase()}</AvatarFallback>
