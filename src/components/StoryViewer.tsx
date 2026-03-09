@@ -34,8 +34,11 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showComments, setShowComments] = useState(false);
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
+  const [showViewers, setShowViewers] = useState(false);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { user } = useAuth();
+  const recordView = useRecordStoryView();
 
   const STORY_DURATION = 5000; // 5 seconds
   const TICK_INTERVAL = 50;
