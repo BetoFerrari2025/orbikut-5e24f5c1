@@ -286,8 +286,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               {/* Draggable text overlay - percentage based */}
               {showText && (
                 <DraggablePreview
-                  initialX={20}
-                  initialY={180}
                   onPositionChange={(x, y) => {
                     const container = previewContainerRef.current;
                     if (container) {
