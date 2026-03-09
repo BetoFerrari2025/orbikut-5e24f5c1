@@ -186,6 +186,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setCaption('');
     setTextColor('#ffffff');
     setTextSize(14);
+    setTextPosPercent({ x: 50, y: 50 });
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
@@ -195,6 +196,10 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setMusicPreviewUrl(null);
     setIsMusicPlaying(false);
     if (musicAudioRef.current) { musicAudioRef.current.pause(); musicAudioRef.current.currentTime = 0; }
+    setShowFilters(false);
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
