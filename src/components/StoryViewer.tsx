@@ -209,7 +209,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <VideoWithAudio key={currentStory.id} ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
+              <VideoWithAudio key={currentStory.id} ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} onTimeUpdate={handleVideoTimeUpdate} onEnded={handleVideoEnded} />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
