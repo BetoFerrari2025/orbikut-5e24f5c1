@@ -53,13 +53,12 @@ const VideoWithAudio = React.forwardRef<HTMLVideoElement, React.VideoHTMLAttribu
     }, [props.src]);
 
     const handleTapScreen = (e: React.MouseEvent) => {
-      e.stopPropagation();
+      // Don't stop propagation — let parent handle navigation
       if (localRef.current) {
         const newMuted = !isMuted;
         localRef.current.muted = newMuted;
         setIsMuted(newMuted);
       }
-      // Show icon in center
       setShowIcon(true);
       if (iconTimerRef.current) clearTimeout(iconTimerRef.current);
       iconTimerRef.current = setTimeout(() => setShowIcon(false), 1200);
@@ -109,6 +108,12 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const TICK_INTERVAL = 50;
   const isPaused = showComments || showCaptionEdit || showMusicInput || showLinkInput || showViewers || showHighlightSave;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasAdvancedRef = useRef(false);
+
+  // Reset advance flag when index changes
+  useEffect(() => {
+    hasAdvancedRef.current = false;
+  }, [currentIndex]);
 
   useEffect(() => {
     if (!stories || !stories[currentIndex]) return;
@@ -152,25 +157,29 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     const video = videoRef.current;
     if (!video || !isCurrentVideo || !stories) return;
 
-    const onTimeUpdate = () => {
-      if (video.duration && video.duration !== Infinity) {
-        setProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-    const onEnded = () => {
+    const advanceToNext = () => {
+      if (hasAdvancedRef.current) return;
+      hasAdvancedRef.current = true;
       if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
       else onClose();
     };
 
-    // Also use a fallback timer for mobile where ended may not fire
+    const onTimeUpdate = () => {
+      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+
+    const onEnded = () => advanceToNext();
+
+    // Fallback timer for mobile where ended may not fire
     let fallbackTimer: ReturnType<typeof setInterval> | null = null;
-    const onLoadedMetadata = () => {
-      if (video.duration && video.duration !== Infinity) {
-        // Fallback: check every 500ms if video has finished
+    const startFallback = () => {
+      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
         fallbackTimer = setInterval(() => {
           if (video.currentTime >= video.duration - 0.3) {
             if (fallbackTimer) clearInterval(fallbackTimer);
-            onEnded();
+            advanceToNext();
           }
         }, 500);
       }
@@ -178,16 +187,15 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
-    video.addEventListener('loadedmetadata', onLoadedMetadata);
-    // If metadata already loaded
-    if (video.readyState >= 1 && video.duration && video.duration !== Infinity) {
-      onLoadedMetadata();
+    video.addEventListener('loadedmetadata', startFallback);
+    if (video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
+      startFallback();
     }
 
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
-      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      video.removeEventListener('loadedmetadata', startFallback);
       if (fallbackTimer) clearInterval(fallbackTimer);
     };
   }, [currentIndex, stories, isCurrentVideo]);
@@ -254,7 +262,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <VideoWithAudio ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
+              <VideoWithAudio key={currentStory.id} ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
