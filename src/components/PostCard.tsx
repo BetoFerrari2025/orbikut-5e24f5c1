@@ -135,7 +135,7 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <>
-      <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
+      <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
         {/* Header */}
         <div className="flex items-center justify-between p-3">
           <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
