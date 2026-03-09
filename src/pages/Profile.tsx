@@ -255,6 +255,7 @@ export default function Profile() {
         </Tabs>
       </main>
       <BottomNav />
+      <PwaInstallButton />
     </div>
   );
 }

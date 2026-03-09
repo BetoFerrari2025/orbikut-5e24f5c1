@@ -62,6 +62,7 @@ const Index = () => {
       </main>
 
       <BottomNav />
+      <PwaInstallButton />
     </div>
   );
 };

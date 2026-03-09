@@ -662,6 +662,50 @@ function MusicInputOverlay({ story, onClose }: { story: Story; onClose: () => vo
   );
 }
 
+// ─── Link Input ───
+function LinkInputOverlay({ story, onClose }: { story: Story; onClose: () => void }) {
+  const [linkUrl, setLinkUrl] = useState((story as any).link_url ?? '');
+  const updateLink = useUpdateStoryLink();
+
+  const handleSave = async () => {
+    try {
+      await updateLink.mutateAsync({ storyId: story.id, linkUrl: linkUrl.trim() });
+      toast.success(linkUrl.trim() ? 'Link adicionado!' : 'Link removido!');
+      onClose();
+    } catch {
+      toast.error('Erro ao salvar link');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-20 flex items-end" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md rounded-t-2xl p-4 space-y-3 animate-in slide-in-from-bottom">
+        <div className="flex items-center justify-between">
+          <h3 className="text-foreground font-semibold">Adicionar Link</h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <Input
+          placeholder="https://exemplo.com"
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+          type="url"
+        />
+        <div className="flex gap-2">
+          <Button onClick={handleSave} disabled={updateLink.isPending} className="flex-1">
+            {updateLink.isPending ? 'Salvando...' : 'Salvar Link'}
+          </Button>
+          {(story as any).link_url && (
+            <Button variant="destructive" onClick={() => { setLinkUrl(''); handleSave(); }} disabled={updateLink.isPending}>
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Poll Overlay ───
 function StoryPollOverlay({ storyId }: { storyId: string }) {
   const { data: poll } = useStoryPoll(storyId);
