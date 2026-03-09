@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AppLayout } from "@/components/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -13,9 +16,50 @@ import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
 import Discover from "./pages/Discover";
 import Post from "./pages/Post";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Show landing page for unauthenticated users on root
+  return (
+    <Routes>
+      <Route path="/auth" element={<Auth />} />
+      <Route
+        path="/"
+        element={
+          user ? (
+            <AppLayout>
+              <Index />
+            </AppLayout>
+          ) : (
+            <Landing />
+          )
+        }
+      />
+      <Route path="/profile/:username" element={<AppLayout><Profile /></AppLayout>} />
+      <Route path="/search" element={<AppLayout><Search /></AppLayout>} />
+      <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+      <Route path="/messages" element={<AppLayout><Messages /></AppLayout>} />
+      <Route path="/notifications" element={<AppLayout><Notifications /></AppLayout>} />
+      <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
+      <Route path="/post/:postId" element={<AppLayout><Post /></AppLayout>} />
+      <Route path="/admin/users" element={<AppLayout><AdminUsers /></AppLayout>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,18 +69,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <div className="dark">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile/:username" element={<Profile />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/post/:postId" element={<Post />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppRoutes />
           </div>
         </BrowserRouter>
       </TooltipProvider>

@@ -382,6 +382,7 @@ export type Database = {
           current_streak: number | null
           full_name: string | null
           id: string
+          is_blocked: boolean | null
           last_post_date: string | null
           max_streak: number | null
           updated_at: string
@@ -394,6 +395,7 @@ export type Database = {
           current_streak?: number | null
           full_name?: string | null
           id: string
+          is_blocked?: boolean | null
           last_post_date?: string | null
           max_streak?: number | null
           updated_at?: string
@@ -406,6 +408,7 @@ export type Database = {
           current_streak?: number | null
           full_name?: string | null
           id?: string
+          is_blocked?: boolean | null
           last_post_date?: string | null
           max_streak?: number | null
           updated_at?: string
@@ -743,15 +746,75 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_delete_post: { Args: { _post_id: string }; Returns: undefined }
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_get_signup_stats: {
+        Args: { _end_date: string; _start_date: string }
+        Returns: {
+          signup_date: string
+          user_count: number
+        }[]
+      }
+      admin_get_stats: {
+        Args: never
+        Returns: {
+          posts_today: number
+          total_posts: number
+          total_users: number
+          users_today: number
+        }[]
+      }
+      admin_get_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_blocked: boolean
+          last_sign_in_at: string
+          post_count: number
+          username: string
+        }[]
+      }
+      admin_toggle_block_user: {
+        Args: { _blocked: boolean; _user_id: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -878,6 +941,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

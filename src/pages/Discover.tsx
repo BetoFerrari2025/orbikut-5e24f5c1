@@ -8,7 +8,6 @@ import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
-import { BottomNav } from '@/components/BottomNav';
 import { toast } from 'sonner';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
@@ -61,9 +60,8 @@ export default function Discover() {
 
   if (videoPosts.length === 0) {
     return (
-      <div className="h-screen bg-background flex flex-col items-center justify-center pb-16">
+      <div className="h-screen bg-background flex flex-col items-center justify-center">
         <p className="text-muted-foreground">Nenhum vídeo para descobrir</p>
-        <BottomNav />
       </div>
     );
   }
@@ -86,7 +84,6 @@ export default function Discover() {
           />
         ))}
       </div>
-      <BottomNav />
     </div>
   );
 }

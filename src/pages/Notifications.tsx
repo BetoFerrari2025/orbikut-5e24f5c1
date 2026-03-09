@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
-import { BottomNav } from '@/components/BottomNav';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotifications, useMarkAsRead, Notification } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,55 +28,48 @@ export default function Notifications() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="max-w-lg mx-auto px-4 py-12 text-center">
-          <p className="text-muted-foreground">Faça login para ver suas notificações.</p>
-        </main>
-      </div>
+      <main className="max-w-lg mx-auto px-4 py-12 text-center">
+        <p className="text-muted-foreground">Faça login para ver suas notificações.</p>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
-      <main className="max-w-lg mx-auto">
-        <div className="p-4 border-b">
-          <h1 className="text-xl font-bold">Notificações</h1>
-        </div>
+    <main className="max-w-lg mx-auto">
+      <div className="p-4 border-b">
+        <h1 className="text-xl font-bold">Notificações</h1>
+      </div>
 
-        {isLoading && (
-          <div className="space-y-0">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="flex items-center gap-3 p-4 border-b">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <div className="flex-1 space-y-1">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/4" />
-                </div>
+      {isLoading && (
+        <div className="space-y-0">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="flex items-center gap-3 p-4 border-b">
+              <Skeleton className="w-10 h-10 rounded-full" />
+              <div className="flex-1 space-y-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
+      )}
 
-        {!isLoading && (!notifications || notifications.length === 0) && (
-          <div className="text-center py-16">
-            <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nenhuma notificação ainda</p>
-            <p className="text-sm text-muted-foreground mt-1">Quando alguém curtir, comentar ou seguir você, aparecerá aqui</p>
-          </div>
-        )}
+      {!isLoading && (!notifications || notifications.length === 0) && (
+        <div className="text-center py-16">
+          <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">Nenhuma notificação ainda</p>
+          <p className="text-sm text-muted-foreground mt-1">Quando alguém curtir, comentar ou seguir você, aparecerá aqui</p>
+        </div>
+      )}
 
-        {notifications && notifications.length > 0 && (
-          <div>
-            {notifications.map((notif) => (
-              <NotificationItem key={notif.id} notification={notif} />
-            ))}
-          </div>
-        )}
-      </main>
-      <BottomNav />
-    </div>
+      {notifications && notifications.length > 0 && (
+        <div>
+          {notifications.map((notif) => (
+            <NotificationItem key={notif.id} notification={notif} />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
 
