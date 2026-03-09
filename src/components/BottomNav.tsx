@@ -53,16 +53,6 @@ export function BottomNav() {
           <Search className="w-6 h-6" />
         </Link>
 
-        <Link
-          to="/search"
-          className={cn(
-            "flex flex-col items-center justify-center w-full h-full transition-colors",
-            isActive('/search') ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          <Search className="w-6 h-6" />
-        </Link>
-
         {profile && (
           <Link
             to={`/profile/${profile.username}`}

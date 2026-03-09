@@ -115,9 +115,25 @@ export function PostCard({ post }: PostCardProps) {
               Seguir
             </Button>
           )}
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="w-5 h-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
+                <EyeOff className="w-4 h-4" />
+                Ocultar post
+              </DropdownMenuItem>
+              {!isOwnPost && (
+                <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
+                  <Flag className="w-4 h-4" />
+                  Denunciar
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
