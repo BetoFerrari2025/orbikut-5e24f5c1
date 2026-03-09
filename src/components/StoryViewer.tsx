@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star } from 'lucide-react';
+import { Heart, MessageCircle, Plus, Music, Type, Send, X, Play, Pause, Volume2, VolumeX, Eye, Star, Link2, ExternalLink } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import {
   useAddStoryComment,
   useUpdateStoryCaption,
   useUpdateStoryMusic,
+  useUpdateStoryLink,
   useRecordStoryView,
   useStoryViewers,
 } from '@/hooks/useStoryInteractions';
