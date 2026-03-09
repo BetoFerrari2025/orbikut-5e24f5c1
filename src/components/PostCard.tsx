@@ -215,7 +215,7 @@ export function PostCard({ post }: PostCardProps) {
               <button onClick={handleCommentOpen}>
                 <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
-              <button onClick={handleShare}>
+              <button onClick={handleShareWithTracking}>
                 <Share2 className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
             </div>
