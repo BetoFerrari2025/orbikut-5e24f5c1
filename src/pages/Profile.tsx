@@ -30,6 +30,7 @@ export default function Profile() {
   const getOrCreateConversation = useGetOrCreateConversation();
 
   const isOwnProfile = user?.id === profile?.id;
+  const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
 
   const photoPosts = useMemo(() => posts?.filter(p => !isVideo(p.image_url)) ?? [], [posts]);
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
