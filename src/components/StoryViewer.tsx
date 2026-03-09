@@ -135,18 +135,38 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             <span className="text-white text-sm font-semibold">{currentStory.profiles.username}</span>
           </div>
 
-          {/* Media */}
-          {isVideo(currentStory.image_url) ? (
-            <video src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" autoPlay playsInline loop />
-          ) : (
-            <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" />
-          )}
+          {/* Media with filters */}
+          {(() => {
+            const filterStyle = {
+              filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
+            };
+            return isVideo(currentStory.image_url) ? (
+              <video src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} autoPlay playsInline loop />
+            ) : (
+              <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
+            );
+          })()}
 
-          {/* Caption overlay - draggable text */}
+          {/* Caption overlay at saved position with saved color/size */}
           {currentStory.caption && (
-            <DraggableOverlay className="z-10 pointer-events-auto" defaultX={16} defaultY={-120} containerSelector=".story-media-container">
-              <p className="text-white text-sm bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[80%]">{currentStory.caption}</p>
-            </DraggableOverlay>
+            <div
+              className="absolute z-10 pointer-events-none"
+              style={{
+                left: `${(currentStory as any).caption_x ?? 50}%`,
+                top: `${(currentStory as any).caption_y ?? 50}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <p
+                className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 max-w-[80%] break-words"
+                style={{
+                  color: (currentStory as any).caption_color || '#ffffff',
+                  fontSize: `${(currentStory as any).caption_size || 14}px`,
+                }}
+              >
+                {currentStory.caption}
+              </p>
+            </div>
           )}
 
           {/* Link CTA button overlay - clickable by viewers */}

@@ -13,7 +13,7 @@ export function useCreateStoryWithPoll() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ file, poll, caption, linkUrl, linkLabel, musicUrl }: { file: File; poll?: PollData; caption?: string; linkUrl?: string; linkLabel?: string; musicUrl?: string }) => {
+    mutationFn: async ({ file, poll, caption, linkUrl, linkLabel, musicUrl, captionX, captionY, captionColor, captionSize, filterBrightness, filterContrast, filterSaturation }: { file: File; poll?: PollData; caption?: string; linkUrl?: string; linkLabel?: string; musicUrl?: string; captionX?: number; captionY?: number; captionColor?: string; captionSize?: number; filterBrightness?: number; filterContrast?: number; filterSaturation?: number }) => {
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop();
@@ -29,11 +29,17 @@ export function useCreateStoryWithPoll() {
         .from('stories')
         .getPublicUrl(fileName);
 
-      // Create story with optional caption and link
       const insertData: any = { user_id: user.id, image_url: publicUrl };
       if (caption) insertData.caption = caption;
+      if (captionX !== undefined) insertData.caption_x = captionX;
+      if (captionY !== undefined) insertData.caption_y = captionY;
+      if (captionColor) insertData.caption_color = captionColor;
+      if (captionSize) insertData.caption_size = captionSize;
       if (musicUrl) insertData.music_url = musicUrl;
       if (linkUrl) { insertData.link_url = linkUrl; insertData.link_label = linkLabel || 'Saiba mais'; }
+      if (filterBrightness !== undefined && filterBrightness !== 100) insertData.filter_brightness = filterBrightness;
+      if (filterContrast !== undefined && filterContrast !== 100) insertData.filter_contrast = filterContrast;
+      if (filterSaturation !== undefined && filterSaturation !== 100) insertData.filter_saturation = filterSaturation;
 
       const { data: story, error: storyError } = await supabase
         .from('stories')
