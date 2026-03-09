@@ -32,6 +32,42 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const [showComments, setShowComments] = useState(false);
   const [showCaptionEdit, setShowCaptionEdit] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const STORY_DURATION = 5000; // 5 seconds
+  const TICK_INTERVAL = 50;
+  const isPaused = showComments || showCaptionEdit || showMusicInput;
+
+  // Auto-advance timer
+  useEffect(() => {
+    if (!stories || isPaused) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    setProgress(0);
+    const startTime = Date.now();
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / STORY_DURATION) * 100, 100);
+      setProgress(pct);
+
+      if (elapsed >= STORY_DURATION) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (currentIndex < stories.length - 1) {
+          setCurrentIndex(currentIndex + 1);
+        } else {
+          onClose();
+        }
+      }
+    }, TICK_INTERVAL);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [currentIndex, stories, isPaused]);
 
   const handleStoryNav = (e: React.MouseEvent) => {
     if (!stories) return;
