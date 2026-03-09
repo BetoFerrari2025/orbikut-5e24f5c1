@@ -100,6 +100,30 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
   const isVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
 
+  // Swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || !stories) return;
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    // Only horizontal swipe (ignore vertical for scrolling overlays)
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+
+    if (dx < 0) {
+      // Swipe left → next
+      if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
+      else onClose();
+    } else {
+      // Swipe right → prev
+      if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   if (!stories || !stories[currentIndex]) return null;
 
   const currentStory = stories[currentIndex];
