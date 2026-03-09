@@ -140,6 +140,15 @@ export default function AdminUsers() {
                     <p className="text-xs text-muted-foreground">{u.post_count} posts</p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={adminUserIds?.has(u.id) ? 'Remover admin' : 'Tornar admin'}
+                      onClick={() => handleToggleAdmin(u.id, adminUserIds?.has(u.id) ?? false)}
+                    >
+                      <ShieldCheck className={`w-4 h-4 ${adminUserIds?.has(u.id) ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedUserId(u.id)}>
                       <Eye className="w-4 h-4" />
                     </Button>
