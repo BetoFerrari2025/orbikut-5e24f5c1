@@ -34,8 +34,35 @@ export function PostCard({ post }: PostCardProps) {
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
+  const { data: savedData } = useSavedPost(post.id);
+  const { data: viewCount } = usePostViews(post.id);
   const toggleLike = useToggleLike();
   const addComment = useAddComment();
+  const toggleSave = useToggleSave();
+  const recordView = useRecordView();
+  const viewRecorded = useRef(false);
+
+  useEffect(() => {
+    if (!viewRecorded.current) {
+      viewRecorded.current = true;
+      recordView.mutate({ postId: post.id, userId: user?.id });
+    }
+  }, [post.id]);
+
+  const handleSave = () => {
+    if (!user) return;
+    toggleSave.mutate({ postId: post.id, isSaved: savedData?.isSaved ?? false });
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Orbik', url }); } catch {}
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copiado!');
+    }
+  };
 
   const handleLike = () => {
     if (!user) return;
