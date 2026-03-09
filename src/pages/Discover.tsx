@@ -15,7 +15,9 @@ const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 export default function Discover() {
   const { data: posts, isLoading } = usePosts();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showMuteIcon, setShowMuteIcon] = useState(false);
+  const muteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
@@ -79,7 +81,14 @@ export default function Discover() {
             post={post}
             isActive={index === currentIndex}
             isMuted={isMuted}
-            onToggleMute={() => setIsMuted(!isMuted)}
+            showMuteIcon={showMuteIcon}
+            onToggleMute={() => {
+              const newMuted = !isMuted;
+              setIsMuted(newMuted);
+              setShowMuteIcon(true);
+              if (muteTimeoutRef.current) clearTimeout(muteTimeoutRef.current);
+              muteTimeoutRef.current = setTimeout(() => setShowMuteIcon(false), 1500);
+            }}
             onShare={() => handleShare(post.id)}
           />
         ))}
@@ -92,11 +101,12 @@ interface DiscoverCardProps {
   post: any;
   isActive: boolean;
   isMuted: boolean;
+  showMuteIcon: boolean;
   onToggleMute: () => void;
   onShare: () => void;
 }
 
-function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: DiscoverCardProps) {
+function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onShare }: DiscoverCardProps) {
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
@@ -158,15 +168,23 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
 
   const [lastTap, setLastTap] = useState(0);
   const [showHeart, setShowHeart] = useState(false);
+  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleDoubleTap = () => {
+  const handleTap = () => {
     const now = Date.now();
     if (now - lastTap < 300) {
+      // Double tap → like
+      if (singleTapTimer.current) clearTimeout(singleTapTimer.current);
       if (!likesData?.isLiked && user) {
         toggleLike.mutate({ postId: post.id, isLiked: false });
       }
       setShowHeart(true);
       setTimeout(() => setShowHeart(false), 1000);
+    } else {
+      // Single tap → toggle mute (delayed to distinguish from double tap)
+      singleTapTimer.current = setTimeout(() => {
+        onToggleMute();
+      }, 300);
     }
     setLastTap(now);
   };
@@ -174,7 +192,7 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
   return (
     <div
       className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
-      onClick={handleDoubleTap}
+      onClick={handleTap}
     >
       <video
         ref={videoRef}
@@ -193,6 +211,14 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
         </div>
       )}
 
+      {showMuteIcon && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+          <div className="w-20 h-20 rounded-full bg-black/60 flex items-center justify-center animate-scale-in">
+            {isMuted ? <VolumeX className="w-10 h-10 text-white" /> : <Volume2 className="w-10 h-10 text-white" />}
+          </div>
+        </div>
+      )}
+
       {!isPlaying && (
         <button
           onClick={(e) => { e.stopPropagation(); togglePlay(); }}
@@ -203,13 +229,6 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
           </div>
         </button>
       )}
-
-      <button
-        onClick={(e) => { e.stopPropagation(); onToggleMute(); }}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center z-10"
-      >
-        {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
-      </button>
 
       <div className="absolute right-3 bottom-32 flex flex-col items-center gap-6 z-10">
         <Link to={`/profile/${post.profiles.username}`}>
