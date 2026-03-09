@@ -48,21 +48,6 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      // Google OAuth only works on *.lovable.app domains
-      if (!window.location.origin.includes('lovable.app')) {
-        toast.error('Login com Google disponível apenas pelo domínio oficial. Acesse: orbikut.lovable.app');
-        return;
-      }
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error('Não foi possível conectar com o Google. Tente novamente ou use e-mail e senha.');
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-start sm:items-center justify-center bg-background p-4 pt-8 sm:pt-4 overflow-y-auto">
