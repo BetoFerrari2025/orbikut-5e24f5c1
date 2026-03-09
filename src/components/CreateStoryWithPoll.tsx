@@ -114,6 +114,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [showLink, setShowLink] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [linkLabel, setLinkLabel] = useState('');
+  const [linkPosPercent, setLinkPosPercent] = useState({ x: 50, y: 50 });
 
   // Music
   const [showMusic, setShowMusic] = useState(false);
