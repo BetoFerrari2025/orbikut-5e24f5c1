@@ -154,7 +154,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           placeholder="Mensagem..."
           className="flex-1"
         />
-        <Button type="submit" size="icon" disabled={!newMessage.trim() || sendMessage.isPending} className="gradient-instagram hover:opacity-90">
+        <Button type="submit" size="icon" disabled={!newMessage.trim() || sendMessage.isPending} className="gradient-brand hover:opacity-90">
           <Send className="w-4 h-4" />
         </Button>
       </form>

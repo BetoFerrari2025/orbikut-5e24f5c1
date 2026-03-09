@@ -152,7 +152,7 @@ export default function Settings() {
           <Button
             type="submit"
             disabled={updateProfile.isPending}
-            className="w-full gradient-instagram hover:opacity-90"
+            className="w-full gradient-brand hover:opacity-90 glow-primary"
           >
             {updateProfile.isPending ? 'Salvando...' : 'Salvar'}
           </Button>

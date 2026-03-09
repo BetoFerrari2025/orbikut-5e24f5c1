@@ -113,7 +113,7 @@ export default function Auth() {
             </div>
             <Button 
               type="submit" 
-              className="w-full gradient-instagram hover:opacity-90"
+              className="w-full gradient-brand hover:opacity-90 glow-primary"
               disabled={loading}
             >
               {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
