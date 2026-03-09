@@ -331,8 +331,6 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               {stickers.map((sticker, idx) => (
                 <DraggablePreview
                   key={sticker.id}
-                  initialX={30 + (idx * 20) % 120}
-                  initialY={100 + (idx * 30) % 200}
                 >
                   <div className="relative group">
                     <span className="text-4xl select-none drop-shadow-lg">{sticker.emoji}</span>
