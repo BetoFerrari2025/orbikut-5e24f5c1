@@ -9,11 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { StreakBadge } from '@/components/StreakBadge';
-import { Grid3X3, Settings, MessageCircle, Film, Bookmark } from 'lucide-react';
+import { Grid3X3, Settings, MessageCircle, Film, Bookmark, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useSavedPosts } from '@/hooks/usePostExtras';
+import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
@@ -193,13 +193,7 @@ export default function Profile() {
             ) : photoPosts.length > 0 ? (
               <div className="grid grid-cols-3 gap-1">
                 {photoPosts.map((post) => (
-                  <div key={post.id} className="aspect-square bg-muted">
-                    <img
-                      src={post.image_url}
-                      alt={post.caption ?? 'Post'}
-                      className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
-                    />
-                  </div>
+                  <ProfileGridItem key={post.id} post={post} type="photo" />
                 ))}
               </div>
             ) : (
@@ -220,19 +214,7 @@ export default function Profile() {
             ) : videoPosts.length > 0 ? (
               <div className="grid grid-cols-3 gap-1">
                 {videoPosts.map((post) => (
-                  <div key={post.id} className="aspect-[9/16] bg-muted relative group">
-                    <video
-                      src={post.image_url}
-                      className="w-full h-full object-cover cursor-pointer"
-                      muted
-                      playsInline
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none flex items-center justify-center">
-                      <Film className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
+                  <ProfileGridItem key={post.id} post={post} type="video" />
                 ))}
               </div>
             ) : (
@@ -269,5 +251,46 @@ export default function Profile() {
       </main>
       <BottomNav />
     </div>
+  );
+}
+
+function ProfileGridItem({ post, type }: { post: any; type: 'photo' | 'video' }) {
+  const { data: viewCount } = usePostViews(post.id);
+
+  if (type === 'video') {
+    return (
+      <Link to={`/post/${post.id}`} className="aspect-[9/16] bg-muted relative group block">
+        <video
+          src={post.image_url}
+          className="w-full h-full object-cover cursor-pointer"
+          muted
+          playsInline
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
+        <div className="absolute bottom-1 left-1 flex items-center gap-1 text-white text-xs bg-black/50 rounded px-1.5 py-0.5">
+          <Eye className="w-3 h-3" />
+          <span>{viewCount ?? 0}</span>
+        </div>
+        <div className="absolute top-1 right-1">
+          <Film className="w-4 h-4 text-white drop-shadow" />
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link to={`/post/${post.id}`} className="aspect-square bg-muted relative group block">
+      <img
+        src={post.image_url}
+        alt={post.caption ?? 'Post'}
+        className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+      />
+      <div className="absolute bottom-1 left-1 flex items-center gap-1 text-white text-xs bg-black/50 rounded px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Eye className="w-3 h-3" />
+        <span>{viewCount ?? 0}</span>
+      </div>
+    </Link>
   );
 }
