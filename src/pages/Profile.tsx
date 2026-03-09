@@ -8,10 +8,12 @@ import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, u
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { StreakBadge } from '@/components/StreakBadge';
-import { Grid3X3, Settings, MessageCircle, Film } from 'lucide-react';
+import { Grid3X3, Settings, MessageCircle, Film, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useSavedPosts } from '@/hooks/usePostExtras';
+import { PostCard } from '@/components/PostCard';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
@@ -28,6 +30,7 @@ export default function Profile() {
   const getOrCreateConversation = useGetOrCreateConversation();
 
   const isOwnProfile = user?.id === profile?.id;
+  const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
 
   const photoPosts = useMemo(() => posts?.filter(p => !isVideo(p.image_url)) ?? [], [posts]);
   const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
@@ -164,6 +167,15 @@ export default function Profile() {
               <Film className="w-4 h-4" />
               <span className="text-sm font-semibold uppercase tracking-wide">Vídeos</span>
             </TabsTrigger>
+            {isOwnProfile && (
+              <TabsTrigger
+                value="saved"
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent -mt-px"
+              >
+                <Bookmark className="w-4 h-4" />
+                <span className="text-sm font-semibold uppercase tracking-wide">Salvos</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="photos">
@@ -225,6 +237,29 @@ export default function Profile() {
               </div>
             )}
           </TabsContent>
+
+          {isOwnProfile && (
+            <TabsContent value="saved">
+              {savedLoading ? (
+                <div className="grid grid-cols-3 gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="aspect-square" />
+                  ))}
+                </div>
+              ) : savedPosts && savedPosts.length > 0 ? (
+                <div className="space-y-6 max-w-lg mx-auto">
+                  {savedPosts.map((post: any) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Bookmark className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Nenhum post salvo ainda</p>
+                </div>
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
       <BottomNav />
