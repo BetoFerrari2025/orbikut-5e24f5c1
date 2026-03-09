@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,9 +8,12 @@ import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, u
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { StreakBadge } from '@/components/StreakBadge';
-import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
+import { Grid3X3, Settings, MessageCircle, Film } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
+const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
@@ -24,6 +28,9 @@ export default function Profile() {
   const getOrCreateConversation = useGetOrCreateConversation();
 
   const isOwnProfile = user?.id === profile?.id;
+
+  const photoPosts = useMemo(() => posts?.filter(p => !isVideo(p.image_url)) ?? [], [posts]);
+  const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
 
   const handleFollowToggle = () => {
     if (!profile || !followStatus) return;
@@ -43,17 +50,17 @@ export default function Profile() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-start gap-8 mb-8">
-            <Skeleton className="w-24 h-24 sm:w-36 sm:h-36 rounded-full" />
+          <div className="flex items-center gap-6 mb-4">
+            <Skeleton className="w-24 h-24 sm:w-36 sm:h-36 rounded-full flex-shrink-0" />
             <div className="flex-1 space-y-4">
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-10 w-24" />
-              <div className="flex gap-6">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-20" />
-              </div>
             </div>
+          </div>
+          <div className="flex gap-6 mb-4">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
           </div>
         </main>
       </div>
@@ -65,7 +72,7 @@ export default function Profile() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <h2 className="text-xl font-semibold">Usuário não encontrado</h2>
+          <h2 className="text-xl font-semibold text-foreground">Usuário não encontrado</h2>
         </main>
       </div>
     );
@@ -75,21 +82,23 @@ export default function Profile() {
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Profile header */}
-        <div className="flex items-start gap-6 sm:gap-12 mb-8">
-          <Avatar className="w-20 h-20 sm:w-36 sm:h-36">
+        {/* Profile header - top row: avatar + username + actions */}
+        <div className="flex items-center gap-4 sm:gap-6 mb-4">
+          <Avatar className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0">
             <AvatarImage src={profile.avatar_url ?? undefined} />
             <AvatarFallback className="text-2xl sm:text-4xl">
               {profile.username[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1">
-            <div className="flex items-center gap-4 mb-4 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{profile.username}</h1>
               {(profile as any).current_streak > 0 && (
                 <StreakBadge streak={(profile as any).current_streak} />
               )}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
               {isOwnProfile ? (
                 <Button variant="secondary" size="sm" asChild>
                   <Link to="/settings">
@@ -104,6 +113,7 @@ export default function Profile() {
                     disabled={toggleFollow.isPending}
                     variant={followStatus?.isFollowing ? 'secondary' : 'default'}
                     className={!followStatus?.isFollowing ? 'gradient-brand hover:opacity-90' : ''}
+                    size="sm"
                   >
                     {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
                   </Button>
@@ -113,63 +123,109 @@ export default function Profile() {
                 </>
               ) : null}
             </div>
-
-            <div className="flex gap-6 mb-4 text-sm sm:text-base text-foreground">
-              <div>
-                <span className="font-semibold">{posts?.length ?? 0}</span> publicações
-              </div>
-              <div>
-                <span className="font-semibold">{followersCount ?? 0}</span> seguidores
-              </div>
-              <div>
-                <span className="font-semibold">{followingCount ?? 0}</span> seguindo
-              </div>
-            </div>
-
-            {profile.full_name && (
-              <p className="font-semibold text-foreground">{profile.full_name}</p>
-            )}
-            {profile.bio && (
-              <p className="text-sm whitespace-pre-wrap text-foreground">{profile.bio}</p>
-            )}
           </div>
         </div>
+
+        {/* Stats row */}
+        <div className="flex gap-6 mb-4 text-sm sm:text-base text-foreground">
+          <div>
+            <span className="font-semibold">{posts?.length ?? 0}</span> publicações
+          </div>
+          <div>
+            <span className="font-semibold">{followersCount ?? 0}</span> seguidores
+          </div>
+          <div>
+            <span className="font-semibold">{followingCount ?? 0}</span> seguindo
+          </div>
+        </div>
+
+        {/* Bio - full width below */}
+        {profile.full_name && (
+          <p className="font-semibold text-foreground">{profile.full_name}</p>
+        )}
+        {profile.bio && (
+          <p className="text-sm whitespace-pre-wrap text-foreground mb-4">{profile.bio}</p>
+        )}
 
         {/* Tabs */}
-        <div className="border-t">
-          <div className="flex justify-center">
-            <button className="flex items-center gap-2 py-4 border-t border-foreground -mt-px">
+        <Tabs defaultValue="photos" className="w-full">
+          <TabsList className="w-full bg-transparent border-t rounded-none h-auto p-0">
+            <TabsTrigger
+              value="photos"
+              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent -mt-px"
+            >
               <Grid3X3 className="w-4 h-4" />
-              <span className="text-sm font-semibold uppercase tracking-wide">Publicações</span>
-            </button>
-          </div>
-        </div>
+              <span className="text-sm font-semibold uppercase tracking-wide">Fotos</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="videos"
+              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent -mt-px"
+            >
+              <Film className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wide">Vídeos</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Posts grid */}
-        {postsLoading ? (
-          <div className="grid grid-cols-3 gap-1">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="aspect-square" />
-            ))}
-          </div>
-        ) : posts && posts.length > 0 ? (
-          <div className="grid grid-cols-3 gap-1">
-            {posts.map((post) => (
-              <div key={post.id} className="aspect-square bg-muted">
-                <img
-                  src={post.image_url}
-                  alt={post.caption ?? 'Post'}
-                  className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
-                />
+          <TabsContent value="photos">
+            {postsLoading ? (
+              <div className="grid grid-cols-3 gap-1">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="aspect-square" />
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Grid3X3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nenhuma publicação ainda</p>
-          </div>
-        )}
+            ) : photoPosts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-1">
+                {photoPosts.map((post) => (
+                  <div key={post.id} className="aspect-square bg-muted">
+                    <img
+                      src={post.image_url}
+                      alt={post.caption ?? 'Post'}
+                      className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Grid3X3 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Nenhuma foto ainda</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="videos">
+            {postsLoading ? (
+              <div className="grid grid-cols-3 gap-1">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="aspect-[9/16]" />
+                ))}
+              </div>
+            ) : videoPosts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-1">
+                {videoPosts.map((post) => (
+                  <div key={post.id} className="aspect-[9/16] bg-muted relative group">
+                    <video
+                      src={post.image_url}
+                      className="w-full h-full object-cover cursor-pointer"
+                      muted
+                      playsInline
+                      onMouseEnter={(e) => e.currentTarget.play()}
+                      onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none flex items-center justify-center">
+                      <Film className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Film className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Nenhum vídeo ainda</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
       <BottomNav />
     </div>
