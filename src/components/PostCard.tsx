@@ -47,6 +47,32 @@ export function PostCard({ post }: PostCardProps) {
   const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
   const isOwnPost = user?.id === post.profiles.id;
+  const { trackSignal } = useTrackEngagement();
+  const { onVisible, onHidden } = useDwellTracker(post.id);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for dwell time tracking
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onVisible();
+        } else {
+          onHidden();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => {
+      onHidden(); // flush on unmount
+      observer.disconnect();
+    };
+  }, [onVisible, onHidden]);
 
   useEffect(() => {
     if (!viewRecorded.current) {
