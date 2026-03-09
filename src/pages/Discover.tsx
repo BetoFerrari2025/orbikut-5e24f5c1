@@ -145,6 +145,18 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   }, [isActive]);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onTimeUpdate = () => {
+      if (video.duration) {
+        setVideoProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    video.addEventListener('timeupdate', onTimeUpdate);
+    return () => video.removeEventListener('timeupdate', onTimeUpdate);
+  }, []);
+
+  useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
     }
