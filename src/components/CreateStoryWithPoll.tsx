@@ -156,9 +156,16 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         file: selectedFile,
         poll,
         caption: showText && caption.trim() ? caption.trim() : undefined,
+        captionX: showText && caption.trim() ? textPosPercent.x : undefined,
+        captionY: showText && caption.trim() ? textPosPercent.y : undefined,
+        captionColor: showText && caption.trim() ? textColor : undefined,
+        captionSize: showText && caption.trim() ? textSize : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
         musicUrl,
+        filterBrightness: brightness,
+        filterContrast: contrast,
+        filterSaturation: saturation,
       });
       toast.success('Story publicado!');
       resetForm();
