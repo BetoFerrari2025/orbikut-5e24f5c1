@@ -264,9 +264,9 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
               </Button>
 
               {/* Draggable text overlay - percentage based */}
-              {showText && caption && (
+              {showText && (
                 <DraggablePreview
-                  initialX={50}
+                  initialX={20}
                   initialY={180}
                   onPositionChange={(x, y) => {
                     const container = previewContainerRef.current;
@@ -279,14 +279,14 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                     }
                   }}
                 >
-                  <div className="flex items-center gap-1">
-                    <GripVertical className="w-3 h-3 text-white/50" />
+                  <div className="flex items-center gap-1" style={{ visibility: caption ? 'visible' : 'hidden' }}>
+                    <GripVertical className="w-3 h-3 text-white/50 shrink-0" />
                     <p
                       className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2"
                       style={{
                         color: textColor,
                         fontSize: `${textSize}px`,
-                        maxWidth: '200px',
+                        maxWidth: 'calc(100vw - 80px)',
                         overflowWrap: 'break-word',
                         wordBreak: 'normal',
                         whiteSpace: 'pre-wrap',
