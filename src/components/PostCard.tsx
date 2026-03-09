@@ -223,7 +223,7 @@ export function PostCard({ post }: PostCardProps) {
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Eye className="w-4 h-4" /> {viewCount ?? 0}
               </span>
-              <button onClick={handleSave} disabled={!user}>
+              <button onClick={handleSaveWithTracking} disabled={!user}>
                 {savedData?.isSaved ? (
                   <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
                 ) : (
