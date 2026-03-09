@@ -479,7 +479,7 @@ function StoryEmojiReactions({ storyId, storyOwnerId }: { storyId: string; story
   };
 
   return (
-    <div className="absolute bottom-4 left-0 right-0 z-10 px-4" onClick={(e) => e.stopPropagation()}>
+    <div className="absolute bottom-2 left-0 right-0 z-20 px-3" onClick={(e) => e.stopPropagation()}>
       {/* Floating emojis animation */}
       <div className="relative h-0">
         {floatingEmojis.map((fe) => (
