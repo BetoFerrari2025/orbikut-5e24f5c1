@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +11,7 @@ import { SparkReaction } from '@/components/SparkReaction';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { CommentsDialog } from '@/components/CommentsDialog';
+import { useDwellTracker, useTrackEngagement } from '@/hooks/useEngagement';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -46,6 +47,32 @@ export function PostCard({ post }: PostCardProps) {
   const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
   const isOwnPost = user?.id === post.profiles.id;
+  const { trackSignal } = useTrackEngagement();
+  const { onVisible, onHidden } = useDwellTracker(post.id);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for dwell time tracking
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onVisible();
+        } else {
+          onHidden();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => {
+      onHidden(); // flush on unmount
+      observer.disconnect();
+    };
+  }, [onVisible, onHidden]);
 
   useEffect(() => {
     if (!viewRecorded.current) {
@@ -54,12 +81,28 @@ export function PostCard({ post }: PostCardProps) {
     }
   }, [post.id]);
 
-  const handleSave = () => {
+
+  const handleLike = () => {
     if (!user) return;
-    toggleSave.mutate({ postId: post.id, isSaved: savedData?.isSaved ?? false });
+    const isLiked = likesData?.isLiked ?? false;
+    toggleLike.mutate({ postId: post.id, isLiked });
+    if (!isLiked) {
+      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+      trackSignal(post.id, 'like');
+    }
   };
 
-  const handleShare = async () => {
+  const handleSaveWithTracking = () => {
+    if (!user) return;
+    const isSaved = savedData?.isSaved ?? false;
+    toggleSave.mutate({ postId: post.id, isSaved });
+    if (!isSaved) {
+      trackSignal(post.id, 'save');
+    }
+  };
+
+  const handleShareWithTracking = async () => {
+    trackSignal(post.id, 'share');
     const url = `${window.location.origin}/post/${post.id}`;
     if (navigator.share) {
       try { await navigator.share({ title: 'Orbita', url }); } catch {}
@@ -69,20 +112,16 @@ export function PostCard({ post }: PostCardProps) {
     }
   };
 
-  const handleLike = () => {
-    if (!user) return;
-    const isLiked = likesData?.isLiked ?? false;
-    toggleLike.mutate({ postId: post.id, isLiked });
-    if (!isLiked) {
-      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
-    }
+  const handleCommentOpen = () => {
+    trackSignal(post.id, 'comment');
+    setShowComments(true);
   };
 
   if (hidden) return null;
 
   return (
     <>
-      <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
+      <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
         {/* Header */}
         <div className="flex items-center justify-between p-3">
           <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
@@ -159,10 +198,10 @@ export function PostCard({ post }: PostCardProps) {
                 disabled={!user}
                 iconClassName="text-foreground"
               />
-              <button onClick={() => setShowComments(true)}>
+              <button onClick={handleCommentOpen}>
                 <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
-              <button onClick={handleShare}>
+              <button onClick={handleShareWithTracking}>
                 <Share2 className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
             </div>
@@ -170,7 +209,7 @@ export function PostCard({ post }: PostCardProps) {
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Eye className="w-4 h-4" /> {viewCount ?? 0}
               </span>
-              <button onClick={handleSave} disabled={!user}>
+              <button onClick={handleSaveWithTracking} disabled={!user}>
                 {savedData?.isSaved ? (
                   <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
                 ) : (

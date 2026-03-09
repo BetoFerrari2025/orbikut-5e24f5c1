@@ -1,11 +1,11 @@
 import { PostCard } from '@/components/PostCard';
 import { StoriesBar } from '@/components/StoriesBar';
-import { usePosts } from '@/hooks/usePosts';
+import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles } from 'lucide-react';
 
 const Index = () => {
-  const { data: posts, isLoading, error } = usePosts();
+  const { data: posts, isLoading, error } = usePersonalizedFeed();
 
   return (
     <main className="max-w-lg mx-auto px-4 md:px-4 py-2">
