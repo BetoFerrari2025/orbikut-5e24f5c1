@@ -139,37 +139,23 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
     const onTimeUpdate = () => {
       if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
-        setProgress((video.currentTime / video.duration) * 100);
+        const pct = (video.currentTime / video.duration) * 100;
+        setProgress(pct);
+        // Auto-advance when video is near the end (fallback for mobile)
+        if (video.currentTime >= video.duration - 0.3) {
+          advanceToNext();
+        }
       }
     };
 
     const onEnded = () => advanceToNext();
 
-    // Fallback timer for mobile where ended may not fire
-    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
-    const startFallback = () => {
-      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
-        fallbackTimer = setInterval(() => {
-          if (video.currentTime >= video.duration - 0.3) {
-            if (fallbackTimer) clearInterval(fallbackTimer);
-            advanceToNext();
-          }
-        }, 500);
-      }
-    };
-
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
-    video.addEventListener('loadedmetadata', startFallback);
-    if (video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
-      startFallback();
-    }
 
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
-      video.removeEventListener('loadedmetadata', startFallback);
-      if (fallbackTimer) clearInterval(fallbackTimer);
     };
   }, [currentIndex, stories, isCurrentVideo]);
 
