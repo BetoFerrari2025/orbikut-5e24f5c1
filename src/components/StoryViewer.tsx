@@ -136,7 +136,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
 
           {/* Media */}
           {isVideo(currentStory.image_url) ? (
-            <video src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" autoPlay muted playsInline loop />
+            <video src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" autoPlay playsInline loop />
           ) : (
             <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" />
           )}
