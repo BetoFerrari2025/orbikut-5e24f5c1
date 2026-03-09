@@ -91,12 +91,9 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             </div>
           )}
 
-          {/* Music indicator */}
+          {/* Audio Player */}
           {currentStory.music_url && (
-            <div className="absolute top-6 right-12 z-10 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
-              <Music className="w-3 h-3 text-white animate-pulse" />
-              <span className="text-white text-[10px]">♪</span>
-            </div>
+            <StoryAudioPlayer musicUrl={currentStory.music_url} storyId={currentStory.id} />
           )}
 
           {/* Right-side action buttons */}
