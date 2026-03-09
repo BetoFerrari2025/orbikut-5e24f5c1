@@ -505,9 +505,34 @@ function StoryCommentsPanel({ storyId, onClose }: { storyId: string; onClose: ()
   const [mentionLoading, setMentionLoading] = useState(false);
   const { user } = useAuth();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim() || !user) return;
-    addComment.mutate({ storyId, content: text.trim() });
+    const content = text.trim();
+    addComment.mutate({ storyId, content });
+
+    // Send @mention notifications
+    const mentions = content.match(/@(\w+)/g);
+    if (mentions) {
+      const usernames = mentions.map(m => m.slice(1));
+      const { data: mentionedUsers } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('username', usernames);
+
+      if (mentionedUsers) {
+        for (const mentioned of mentionedUsers) {
+          if (mentioned.id !== user.id) {
+            await supabase.from('notifications').insert({
+              user_id: mentioned.id,
+              actor_id: user.id,
+              type: 'comment',
+              content: content.length > 100 ? content.slice(0, 100) + '...' : content,
+            } as any);
+          }
+        }
+      }
+    }
+
     setText('');
     setMentionQuery(null);
     setMentionResults([]);
