@@ -73,6 +73,17 @@ export default function AdminUsers() {
     deleteUser.mutate(userId, { onSuccess: () => toast.success('Usuário excluído') });
   };
 
+  const handleToggleAdmin = (userId: string, isCurrentlyAdmin: boolean) => {
+    const action = isCurrentlyAdmin ? 'remover admin de' : 'tornar admin';
+    if (!confirm(`Tem certeza que deseja ${action} este usuário?`)) return;
+    toggleRole.mutate(
+      { userId, role: 'admin', grant: !isCurrentlyAdmin },
+      {
+        onSuccess: () => toast.success(isCurrentlyAdmin ? 'Admin removido' : 'Admin adicionado'),
+      }
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
