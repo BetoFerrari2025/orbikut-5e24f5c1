@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 export function BottomNav() {
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
+  const { data: unreadCount } = useUnreadCount();
   const location = useLocation();
 
   if (!user) return null;
