@@ -1,10 +1,12 @@
-import { useState, useRef, useCallback } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import { useCreateStoryWithPoll } from '@/hooks/useStoryPolls';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -98,6 +100,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
   const [linkUrl, setLinkUrl] = useState('');
   const [linkLabel, setLinkLabel] = useState('');
 
+  // Music
+  const [showMusic, setShowMusic] = useState(false);
+  const [musicFile, setMusicFile] = useState<File | null>(null);
+  const [musicPreviewUrl, setMusicPreviewUrl] = useState<string | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const musicAudioRef = useRef<HTMLAudioElement>(null);
+  const musicInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createStory = useCreateStoryWithPoll();
 
@@ -119,6 +130,17 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
       ? { question: pollQuestion, optionA, optionB }
       : undefined;
 
+    // Upload music if selected
+    let musicUrl: string | undefined;
+    if (showMusic && musicFile && user) {
+      const fileExt = musicFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('story-music').upload(fileName, musicFile, { contentType: musicFile.type });
+      if (uploadError) { toast.error('Erro ao enviar música'); return; }
+      const { data: { publicUrl } } = supabase.storage.from('story-music').getPublicUrl(fileName);
+      musicUrl = publicUrl;
+    }
+
     try {
       await createStory.mutateAsync({
         file: selectedFile,
@@ -126,6 +148,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
         caption: showText && caption.trim() ? caption.trim() : undefined,
         linkUrl: showLink && linkUrl.trim() ? linkUrl.trim() : undefined,
         linkLabel: showLink && linkLabel.trim() ? linkLabel.trim() : undefined,
+        musicUrl,
       });
       toast.success('Story publicado!');
       resetForm();
@@ -149,6 +172,29 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setShowLink(false);
     setLinkUrl('');
     setLinkLabel('');
+    setShowMusic(false);
+    setMusicFile(null);
+    if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl);
+    setMusicPreviewUrl(null);
+    setIsMusicPlaying(false);
+    if (musicAudioRef.current) { musicAudioRef.current.pause(); musicAudioRef.current.currentTime = 0; }
+  };
+
+  const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) { toast.error('Selecione um arquivo de áudio'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Arquivo muito grande (máx 10MB)'); return; }
+    setMusicFile(file);
+    if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl);
+    setMusicPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const toggleMusicPreview = () => {
+    const audio = musicAudioRef.current;
+    if (!audio) return;
+    if (isMusicPlaying) { audio.pause(); setIsMusicPlaying(false); }
+    else { audio.play().then(() => setIsMusicPlaying(true)).catch(() => {}); }
   };
 
   return (
@@ -280,6 +326,15 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Enquete
                 </Button>
+                <Button
+                  variant={showMusic ? 'default' : 'outline'}
+                  onClick={() => setShowMusic(!showMusic)}
+                  className={cn(showMusic && 'gradient-brand')}
+                  size="sm"
+                >
+                  <Music className="w-4 h-4 mr-2" />
+                  Música
+                </Button>
               </div>
 
               {/* Text input */}
@@ -336,6 +391,34 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   <p className="text-xs text-muted-foreground">Digite a URL e o texto do botão, depois arraste para posicionar</p>
                   <Input placeholder="https://exemplo.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} type="url" />
                   <Input placeholder="Texto do botão (ex: Saiba mais)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
+                </div>
+              )}
+
+              {/* Music input */}
+              {showMusic && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Selecione um áudio para tocar durante o story</p>
+                  <input ref={musicInputRef} type="file" accept="audio/*" onChange={handleMusicSelect} className="hidden" />
+                  <button
+                    onClick={() => musicInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-4 text-center hover:border-primary transition-colors"
+                  >
+                    <Music className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-muted-foreground text-sm">{musicFile ? musicFile.name : 'Toque para selecionar áudio'}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">MP3, WAV, M4A (máx 10MB)</p>
+                  </button>
+                  {musicPreviewUrl && (
+                    <div className="flex items-center gap-3 bg-muted rounded-lg p-3">
+                      <audio ref={musicAudioRef} src={musicPreviewUrl} loop />
+                      <button onClick={toggleMusicPreview} className="shrink-0">
+                        {isMusicPlaying ? <Pause className="w-5 h-5 text-primary" /> : <Play className="w-5 h-5 text-primary" />}
+                      </button>
+                      <span className="text-sm text-foreground truncate flex-1">{musicFile?.name}</span>
+                      <button onClick={() => { setMusicFile(null); if (musicPreviewUrl) URL.revokeObjectURL(musicPreviewUrl); setMusicPreviewUrl(null); setIsMusicPlaying(false); if (musicAudioRef.current) { musicAudioRef.current.pause(); } }}>
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </>

@@ -90,6 +90,20 @@ export function useAddStoryComment() {
   });
 }
 
+// ─── Delete Story ───
+export function useDeleteStory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (storyId: string) => {
+      const { error } = await supabase.from('stories').delete().eq('id', storyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+    },
+  });
+}
+
 // ─── Caption ───
 export function useUpdateStoryCaption() {
   const queryClient = useQueryClient();
