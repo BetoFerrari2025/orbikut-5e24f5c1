@@ -34,6 +34,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [hidden, setHidden] = useState(false);
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
