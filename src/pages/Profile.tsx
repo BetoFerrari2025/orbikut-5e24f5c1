@@ -93,14 +93,19 @@ export default function Profile() {
                   </Link>
                 </Button>
               ) : user ? (
-                <Button
-                  onClick={handleFollowToggle}
-                  disabled={toggleFollow.isPending}
-                  variant={followStatus?.isFollowing ? 'secondary' : 'default'}
-                  className={!followStatus?.isFollowing ? 'gradient-instagram hover:opacity-90' : ''}
-                >
-                  {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
-                </Button>
+                <>
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={toggleFollow.isPending}
+                    variant={followStatus?.isFollowing ? 'secondary' : 'default'}
+                    className={!followStatus?.isFollowing ? 'gradient-instagram hover:opacity-90' : ''}
+                  >
+                    {followStatus?.isFollowing ? 'Seguindo' : 'Seguir'}
+                  </Button>
+                  <Button variant="secondary" size="icon" onClick={handleMessage} disabled={getOrCreateConversation.isPending}>
+                    <MessageCircle className="w-4 h-4" />
+                  </Button>
+                </>
               ) : null}
             </div>
 
