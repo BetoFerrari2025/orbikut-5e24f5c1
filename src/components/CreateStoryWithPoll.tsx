@@ -535,6 +535,37 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
                   </div>
                 </div>
               )}
+
+              {/* Sticker picker */}
+              {showStickers && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Toque em um emoji para adicionar ao story. Arraste para posicionar.</p>
+                  <div className="grid grid-cols-8 gap-2">
+                    {['😀','😂','🥰','😎','🤩','😜','🥳','😇',
+                      '❤️','🔥','⭐','🎉','👍','👏','💪','🙌',
+                      '🌈','🦋','🌸','🍕','🎵','💎','🏆','🎯',
+                      '🐶','🐱','🦊','🐻','🐼','🦁','🐸','🐵',
+                      '☀️','🌙','⚡','❄️','🌊','🍀','🌺','🎈'].map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          stickerIdCounter.current += 1;
+                          setStickers(prev => [...prev, { id: `sticker-${stickerIdCounter.current}`, emoji }]);
+                        }}
+                        className="text-2xl hover:scale-125 transition-transform p-1"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                  {stickers.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={() => setStickers([])}>
+                      Remover todos os stickers
+                    </Button>
+                  )}
+                </div>
+              )}
             </>
           )}
 
