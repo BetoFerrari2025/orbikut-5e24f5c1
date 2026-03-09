@@ -14,6 +14,7 @@ export interface Conversation {
     username: string;
     avatar_url: string | null;
     full_name: string | null;
+    last_seen: string | null;
   };
   last_message?: Message;
 }
