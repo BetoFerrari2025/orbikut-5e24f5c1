@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +11,7 @@ import { SparkReaction } from '@/components/SparkReaction';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { CommentsDialog } from '@/components/CommentsDialog';
+import { useDwellTracker, useTrackEngagement } from '@/hooks/useEngagement';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
