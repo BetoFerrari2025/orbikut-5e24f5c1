@@ -90,16 +90,13 @@ export function PostCard({ post }: PostCardProps) {
 
         {/* Caption */}
         {post.caption && (
-          <p className="text-sm">
+          <p className="text-sm text-foreground">
             <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
               {post.profiles.username}
             </Link>
             {post.caption}
           </p>
         )}
-
-        {/* Comments preview */}
-        {comments && comments.length > 0 && !showComments && (
           <button
             onClick={() => setShowComments(true)}
             className="text-sm text-muted-foreground"
