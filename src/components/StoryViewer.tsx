@@ -375,8 +375,8 @@ function StoryLikeButton({ storyId }: { storyId: string }) {
 }
 
 // ─── Owner Controls ───
-function StoryOwnerControls({ story, onEditCaption, onEditMusic, onShowViewers, onSaveHighlight }: {
-  story: Story; onEditCaption: () => void; onEditMusic: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
+function StoryOwnerControls({ story, onEditCaption, onEditMusic, onEditLink, onShowViewers, onSaveHighlight }: {
+  story: Story; onEditCaption: () => void; onEditMusic: () => void; onEditLink: () => void; onShowViewers: () => void; onSaveHighlight: () => void;
 }) {
   const { user } = useAuth();
   if (user?.id !== story.user_id) return null;
