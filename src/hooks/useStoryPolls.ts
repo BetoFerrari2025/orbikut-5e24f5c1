@@ -36,7 +36,7 @@ export function useCreateStoryWithPoll() {
       if (captionColor) insertData.caption_color = captionColor;
       if (captionSize) insertData.caption_size = captionSize;
       if (musicUrl) insertData.music_url = musicUrl;
-      if (linkUrl) { insertData.link_url = linkUrl; insertData.link_label = linkLabel || 'Saiba mais'; }
+      if (linkUrl) { insertData.link_url = linkUrl; insertData.link_label = linkLabel || 'Saiba mais'; if (linkX !== undefined) insertData.link_x = linkX; if (linkY !== undefined) insertData.link_y = linkY; }
       if (filterBrightness !== undefined && filterBrightness !== 100) insertData.filter_brightness = filterBrightness;
       if (filterContrast !== undefined && filterContrast !== 100) insertData.filter_contrast = filterContrast;
       if (filterSaturation !== undefined && filterSaturation !== 100) insertData.filter_saturation = filterSaturation;
