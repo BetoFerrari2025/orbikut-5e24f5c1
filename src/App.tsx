@@ -56,6 +56,7 @@ function AppRoutes() {
       <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
       <Route path="/post/:postId" element={<AppLayout><Post /></AppLayout>} />
       <Route path="/admin/users" element={<AppLayout><AdminUsers /></AppLayout>} />
+      <Route path="/~oauth/*" element={null} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
