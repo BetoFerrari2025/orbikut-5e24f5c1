@@ -19,6 +19,7 @@ import Discover from "./pages/Discover";
 import Post from "./pages/Post";
 import AdminUsers from "./pages/AdminUsers";
 import ResetPassword from "./pages/ResetPassword";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ function AppRoutes() {
       <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
       <Route path="/post/:postId" element={<AppLayout><Post /></AppLayout>} />
       <Route path="/admin/users" element={<AppLayout><AdminUsers /></AppLayout>} />
+      <Route path="/install" element={<Install />} />
       <Route path="/~oauth/*" element={null} />
       <Route path="*" element={<NotFound />} />
     </Routes>
