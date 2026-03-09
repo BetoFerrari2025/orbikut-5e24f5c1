@@ -207,6 +207,14 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
             onClose={() => setShowMusicInput(false)}
           />
         )}
+
+        {/* Viewers overlay (owner only) */}
+        {showViewers && user?.id === currentStory.user_id && (
+          <StoryViewersPanel
+            storyId={currentStory.id}
+            onClose={() => setShowViewers(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
