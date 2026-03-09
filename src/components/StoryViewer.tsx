@@ -125,39 +125,27 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [currentIndex, stories, isPaused]);
 
-  // Video progress and ended handler
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !isCurrentVideo || !stories) return;
+  const advanceToNext = useCallback(() => {
+    if (hasAdvancedRef.current || !stories) return;
+    hasAdvancedRef.current = true;
+    if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
+    else onClose();
+  }, [currentIndex, stories, setCurrentIndex, onClose]);
 
-    const advanceToNext = () => {
-      if (hasAdvancedRef.current) return;
-      hasAdvancedRef.current = true;
-      if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
-      else onClose();
-    };
-
-    const onTimeUpdate = () => {
-      if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
-        const pct = (video.currentTime / video.duration) * 100;
-        setProgress(pct);
-        // Auto-advance when video is near the end (fallback for mobile)
-        if (video.currentTime >= video.duration - 0.3) {
-          advanceToNext();
-        }
+  const handleVideoTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+      const pct = (video.currentTime / video.duration) * 100;
+      setProgress(pct);
+      if (video.currentTime >= video.duration - 0.3) {
+        advanceToNext();
       }
-    };
+    }
+  }, [advanceToNext]);
 
-    const onEnded = () => advanceToNext();
-
-    video.addEventListener('timeupdate', onTimeUpdate);
-    video.addEventListener('ended', onEnded);
-
-    return () => {
-      video.removeEventListener('timeupdate', onTimeUpdate);
-      video.removeEventListener('ended', onEnded);
-    };
-  }, [currentIndex, stories, isCurrentVideo]);
+  const handleVideoEnded = useCallback(() => {
+    advanceToNext();
+  }, [advanceToNext]);
 
   const handleStoryNav = (e: React.MouseEvent) => {
     if (!stories) return;
@@ -221,7 +209,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
               filter: `brightness(${(currentStory as any).filter_brightness ?? 100}%) contrast(${(currentStory as any).filter_contrast ?? 100}%) saturate(${(currentStory as any).filter_saturation ?? 100}%)`,
             };
             return isVideo(currentStory.image_url) ? (
-              <VideoWithAudio key={currentStory.id} ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} />
+              <VideoWithAudio key={currentStory.id} ref={videoRef} src={currentStory.image_url} className="w-full aspect-[9/16] object-cover" style={filterStyle} onTimeUpdate={handleVideoTimeUpdate} onEnded={handleVideoEnded} />
             ) : (
               <img src={currentStory.image_url} alt="Story" className="w-full aspect-[9/16] object-cover" style={filterStyle} />
             );
