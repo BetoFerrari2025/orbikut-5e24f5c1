@@ -114,19 +114,36 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Actions */}
       <div className="p-3 space-y-2">
-        <div className="flex items-center gap-4">
-          <SparkReaction
-            isLiked={likesData?.isLiked ?? false}
-            onLike={handleLike}
-            disabled={!user}
-          />
-          <button onClick={() => setShowComments(!showComments)}>
-            <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <SparkReaction
+              isLiked={likesData?.isLiked ?? false}
+              onLike={handleLike}
+              disabled={!user}
+            />
+            <button onClick={() => setShowComments(!showComments)}>
+              <MessageCircle className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            </button>
+            <button onClick={handleShare}>
+              <Share2 className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            </button>
+          </div>
+          <button onClick={handleSave} disabled={!user}>
+            {savedData?.isSaved ? (
+              <BookmarkCheck className="w-6 h-6 text-primary fill-primary" />
+            ) : (
+              <Bookmark className="w-6 h-6 hover:text-muted-foreground transition-colors" />
+            )}
           </button>
         </div>
 
-        {/* Likes count */}
-        <p className="font-semibold text-sm">{likesData?.count ?? 0} curtidas</p>
+        {/* Stats */}
+        <div className="flex items-center gap-3">
+          <p className="font-semibold text-sm">{likesData?.count ?? 0} curtidas</p>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Eye className="w-3.5 h-3.5" /> {viewCount ?? 0}
+          </span>
+        </div>
 
         {/* Caption */}
         {post.caption && (
