@@ -9,6 +9,7 @@ import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hook
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { useSendNotification } from '@/hooks/useNotifications';
+import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
