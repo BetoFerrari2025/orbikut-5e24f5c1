@@ -58,61 +58,66 @@ export default function Install() {
           <div className="bg-accent/50 rounded-xl p-4 max-w-sm">
             <p className="text-sm text-foreground font-medium">✅ App já está instalado!</p>
           </div>
-        ) : deferredPrompt ? (
-          <Button onClick={handleInstall} size="lg" className="rounded-full gap-2 px-8">
-            <Download className="w-5 h-5" />
-            Baixar App Agora
-          </Button>
         ) : (
-          <div className="bg-card border border-border rounded-xl p-5 max-w-sm space-y-4">
-            {isIos ? (
-              <>
-                <p className="text-sm text-foreground font-medium">Como instalar no iPhone/iPad:</p>
-                <div className="space-y-3 text-left">
-                  <div className="flex items-start gap-3">
-                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                    <p className="text-sm text-muted-foreground">
-                      Toque no ícone <Share className="w-4 h-4 inline text-primary" /> <strong className="text-foreground">Compartilhar</strong> na barra do Safari
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                    <p className="text-sm text-muted-foreground">
-                      Role para baixo e toque em <strong className="text-foreground">"Adicionar à Tela de Início"</strong>
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                    <p className="text-sm text-muted-foreground">
-                      Toque em <strong className="text-foreground">"Adicionar"</strong> para confirmar
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : isAndroid ? (
-              <>
-                <p className="text-sm text-foreground font-medium">Como instalar no Android:</p>
-                <div className="space-y-3 text-left">
-                  <div className="flex items-start gap-3">
-                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                    <p className="text-sm text-muted-foreground">
-                      Toque no menu <MoreVertical className="w-4 h-4 inline text-primary" /> do navegador (três pontinhos)
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                    <p className="text-sm text-muted-foreground">
-                      Toque em <strong className="text-foreground">"Instalar app"</strong> ou <strong className="text-foreground">"Adicionar à tela inicial"</strong>
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Abra este site no navegador do seu celular para instalar o app.
-              </p>
+          <>
+            <Button onClick={handleInstall} size="lg" className="rounded-full gap-2 px-8">
+              <Download className="w-5 h-5" />
+              Baixar App Agora
+            </Button>
+
+            {!deferredPrompt && (
+              <div className="bg-card border border-border rounded-xl p-5 max-w-sm space-y-4">
+                <p className="text-xs text-muted-foreground text-center">Se o botão acima não funcionar, siga as instruções abaixo:</p>
+                {isIos ? (
+                  <>
+                    <p className="text-sm text-foreground font-medium">Como instalar no iPhone/iPad:</p>
+                    <div className="space-y-3 text-left">
+                      <div className="flex items-start gap-3">
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                        <p className="text-sm text-muted-foreground">
+                          Toque no ícone <Share className="w-4 h-4 inline text-primary" /> <strong className="text-foreground">Compartilhar</strong> na barra do Safari
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                        <p className="text-sm text-muted-foreground">
+                          Role para baixo e toque em <strong className="text-foreground">"Adicionar à Tela de Início"</strong>
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                        <p className="text-sm text-muted-foreground">
+                          Toque em <strong className="text-foreground">"Adicionar"</strong> para confirmar
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : isAndroid ? (
+                  <>
+                    <p className="text-sm text-foreground font-medium">Como instalar no Android:</p>
+                    <div className="space-y-3 text-left">
+                      <div className="flex items-start gap-3">
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                        <p className="text-sm text-muted-foreground">
+                          Toque no menu <MoreVertical className="w-4 h-4 inline text-primary" /> do navegador (três pontinhos)
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                        <p className="text-sm text-muted-foreground">
+                          Toque em <strong className="text-foreground">"Instalar app"</strong> ou <strong className="text-foreground">"Adicionar à tela inicial"</strong>
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Abra este site no navegador do seu celular para instalar o app.
+                  </p>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
