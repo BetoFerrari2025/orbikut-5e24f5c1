@@ -25,20 +25,20 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-1">
           <Button variant="ghost" size="icon" asChild>
             <Link to="/">
-              <Home className="w-6 h-6" />
+              <Home className="w-6 h-6 text-foreground" />
             </Link>
           </Button>
           
           <Button variant="ghost" size="icon" asChild>
             <Link to="/search">
-              <Search className="w-6 h-6" />
+              <Search className="w-6 h-6 text-foreground" />
             </Link>
           </Button>
 
           {user && (
             <Button variant="ghost" size="icon" asChild className="relative">
               <Link to="/notifications">
-                <Bell className="w-6 h-6" />
+                <Bell className="w-6 h-6 text-foreground" />
                 {(unreadCount ?? 0) > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
                     {unreadCount! > 9 ? '9+' : unreadCount}
@@ -51,7 +51,7 @@ export function Navbar() {
           {user && (
             <Button variant="ghost" size="icon" asChild>
               <Link to="/messages">
-                <MessageCircle className="w-6 h-6" />
+                <MessageCircle className="w-6 h-6 text-foreground" />
               </Link>
             </Button>
           )}
@@ -61,19 +61,19 @@ export function Navbar() {
           {user && profile && (
             <Button variant="ghost" size="icon" asChild>
               <Link to={`/profile/${profile.username}`}>
-                <User className="w-6 h-6" />
+                <User className="w-6 h-6 text-foreground" />
               </Link>
             </Button>
           )}
 
           {user && (
-            <Button variant="ghost" size="icon" onClick={signOut}>
-              <LogOut className="w-6 h-6" />
+            <Button variant="ghost" size="icon" onClick={signOut} className="hover:bg-destructive/10">
+              <LogOut className="w-6 h-6 text-foreground hover:text-destructive" />
             </Button>
           )}
 
           {!user && (
-            <Button asChild className="gradient-brand hover:opacity-90 glow-primary">
+            <Button asChild className="gradient-brand hover:opacity-90 glow-primary text-white">
               <Link to="/auth">Entrar</Link>
             </Button>
           )}
