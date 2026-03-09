@@ -230,7 +230,7 @@ export function CreateStoryWithPoll({ open, onOpenChange }: CreateStoryWithPollP
     setShowStickers(false);
     setStickers([]);
     stickerIdCounter.current = 0;
-    setShowControls(true);
+    
   };
 
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
