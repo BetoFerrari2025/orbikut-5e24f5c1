@@ -324,7 +324,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
           <StoryPollOverlay storyId={currentStory.id} />
         </div>
 
-        {showComments && <StoryCommentsPanel storyId={currentStory.id} onClose={() => setShowComments(false)} />}
+        {showComments && <StoryCommentsPanel storyId={currentStory.id} storyOwnerId={currentStory.user_id} onClose={() => setShowComments(false)} />}
         {showCaptionEdit && <CaptionEditOverlay story={currentStory} onClose={() => setShowCaptionEdit(false)} />}
         {showMusicInput && <MusicInputOverlay story={currentStory} onClose={() => setShowMusicInput(false)} />}
         {showLinkInput && user?.id === currentStory.user_id && <LinkInputOverlay story={currentStory} onClose={() => setShowLinkInput(false)} />}
