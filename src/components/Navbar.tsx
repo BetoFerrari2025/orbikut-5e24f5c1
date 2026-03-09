@@ -32,6 +32,14 @@ export function Navbar() {
             </Link>
           </Button>
 
+          {user && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/messages">
+                <MessageCircle className="w-6 h-6" />
+              </Link>
+            </Button>
+          )}
+
           {user && <CreatePost />}
 
           {user && profile && (

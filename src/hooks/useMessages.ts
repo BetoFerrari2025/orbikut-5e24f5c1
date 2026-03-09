@@ -1,0 +1,167 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
+
+export interface Conversation {
+  id: string;
+  user1_id: string;
+  user2_id: string;
+  created_at: string;
+  updated_at: string;
+  other_user?: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+    full_name: string | null;
+  };
+  last_message?: Message;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+export function useConversations() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['conversations', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch other user profiles and last messages
+      const conversations: Conversation[] = await Promise.all(
+        (data || []).map(async (conv: any) => {
+          const otherUserId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
+
+          const [profileRes, msgRes] = await Promise.all([
+            supabase.from('profiles').select('id, username, avatar_url, full_name').eq('id', otherUserId).single(),
+            supabase.from('messages').select('*').eq('conversation_id', conv.id).order('created_at', { ascending: false }).limit(1),
+          ]);
+
+          return {
+            ...conv,
+            other_user: profileRes.data,
+            last_message: msgRes.data?.[0] || undefined,
+          };
+        })
+      );
+
+      return conversations;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useMessages(conversationId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`messages-${conversationId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [conversationId, queryClient]);
+
+  return useQuery({
+    queryKey: ['messages', conversationId],
+    queryFn: async () => {
+      if (!conversationId) return [];
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data as Message[];
+    },
+    enabled: !!conversationId,
+  });
+}
+
+export function useSendMessage() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ conversationId, content }: { conversationId: string; content: string }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('messages')
+        .insert({ conversation_id: conversationId, sender_id: user.id, content });
+
+      if (error) throw error;
+
+      // Update conversation timestamp
+      await supabase
+        .from('conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+    },
+    onSuccess: (_, { conversationId }) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+export function useGetOrCreateConversation() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (otherUserId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Check existing conversation in both directions
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select('*')
+        .or(`and(user1_id.eq.${user.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (existing) return existing.id as string;
+
+      const { data, error } = await supabase
+        .from('conversations')
+        .insert({ user1_id: user.id, user2_id: otherUserId })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      return data.id as string;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
