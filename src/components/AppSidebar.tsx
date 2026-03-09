@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import {
-  Home, Search, Compass, MessageCircle, Bell, User, Settings,
+  Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
   ShieldAlert, Sparkles, PlusSquare, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
