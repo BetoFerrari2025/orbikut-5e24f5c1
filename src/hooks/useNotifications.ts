@@ -19,11 +19,43 @@ export interface Notification {
   };
 }
 
+// Request browser push notification permission
+async function showBrowserNotification(title: string, body: string, url?: string) {
+  if (!('Notification' in window)) return;
+  
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+  
+  if (Notification.permission === 'granted') {
+    // Try service worker notification first for better experience
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      registration.showNotification(title, {
+        body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        vibrate: [100, 50, 100],
+        data: { url: url || '/notifications' },
+      });
+    } else {
+      new Notification(title, { body, icon: '/favicon.ico' });
+    }
+  }
+}
+
 export function useNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Realtime subscription
+  // Request notification permission on mount
+  useEffect(() => {
+    if (user && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, [user]);
+
+  // Realtime subscription with push notifications
   useEffect(() => {
     if (!user) return;
 
@@ -34,9 +66,30 @@ export function useNotifications() {
         schema: 'public',
         table: 'notifications',
         filter: `user_id=eq.${user.id}`,
-      }, () => {
+      }, async (payload) => {
         queryClient.invalidateQueries({ queryKey: ['notifications', user.id] });
         queryClient.invalidateQueries({ queryKey: ['unread-count', user.id] });
+
+        // Show browser push notification
+        const n = payload.new as any;
+        const typeLabels: Record<string, string> = {
+          like: 'curtiu seu post',
+          comment: 'comentou no seu post',
+          follow: 'começou a te seguir',
+        };
+
+        // Fetch actor name
+        const { data: actor } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', n.actor_id)
+          .single();
+
+        const actorName = actor?.username || 'Alguém';
+        const body = `${actorName} ${typeLabels[n.type] || 'interagiu com você'}`;
+        const url = n.post_id ? `/post/${n.post_id}` : '/notifications';
+
+        showBrowserNotification('Orbita', body, url);
       })
       .subscribe();
 
@@ -57,7 +110,6 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Fetch actor profiles
       const actorIds = [...new Set((data || []).map((n: any) => n.actor_id))];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -77,7 +129,6 @@ export function useNotifications() {
 
 export function useUnreadCount() {
   const { user } = useAuth();
-
   return useQuery({
     queryKey: ['unread-count', user?.id],
     queryFn: async () => {
@@ -97,7 +148,6 @@ export function useUnreadCount() {
 export function useMarkAsRead() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
   return useMutation({
     mutationFn: async () => {
       if (!user) return;
@@ -123,7 +173,7 @@ export function useSendNotification() {
       postId?: string;
       content?: string;
     }) => {
-      if (userId === actorId) return; // Don't notify self
+      if (userId === actorId) return;
       await supabase.from('notifications').insert({
         user_id: userId,
         actor_id: actorId,
