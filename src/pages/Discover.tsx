@@ -106,7 +106,7 @@ interface DiscoverCardProps {
   onShare: () => void;
 }
 
-function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: DiscoverCardProps) {
+function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onShare }: DiscoverCardProps) {
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
