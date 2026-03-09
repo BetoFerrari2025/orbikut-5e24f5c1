@@ -12,6 +12,8 @@ import { Grid3X3, Settings, MessageCircle, Film, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useSavedPosts } from '@/hooks/usePostExtras';
+import { PostCard } from '@/components/PostCard';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
