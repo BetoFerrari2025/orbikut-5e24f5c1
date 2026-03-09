@@ -101,8 +101,9 @@ export function Navbar() {
             </Button>
           )}
           {user && (
-            <Button variant="ghost" size="icon" onClick={signOut}>
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">
               <LogOut className="w-5 h-5" />
+              <span className="text-xs">Sair</span>
             </Button>
           )}
           {!user && (
