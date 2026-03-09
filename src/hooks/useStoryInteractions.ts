@@ -39,18 +39,11 @@ export function useHasLikedStory(storyId: string) {
 export function useToggleStoryLike() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
   return useMutation({
     mutationFn: async (storyId: string) => {
       if (!user) throw new Error('Not authenticated');
-
       const { data: existing } = await supabase
-        .from('story_likes')
-        .select('id')
-        .eq('story_id', storyId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
+        .from('story_likes').select('id').eq('story_id', storyId).eq('user_id', user.id).maybeSingle();
       if (existing) {
         await supabase.from('story_likes').delete().eq('id', existing.id);
       } else {
@@ -83,7 +76,6 @@ export function useStoryComments(storyId: string) {
 export function useAddStoryComment() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
   return useMutation({
     mutationFn: async ({ storyId, content }: { storyId: string; content: string }) => {
       if (!user) throw new Error('Not authenticated');
@@ -101,70 +93,51 @@ export function useAddStoryComment() {
 // ─── Caption ───
 export function useUpdateStoryCaption() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ storyId, caption }: { storyId: string; caption: string }) => {
-      const { error } = await supabase
-        .from('stories')
-        .update({ caption })
-        .eq('id', storyId);
+      const { error } = await supabase.from('stories').update({ caption }).eq('id', storyId);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['stories'] }); },
   });
 }
 
 // ─── Music URL ───
 export function useUpdateStoryMusic() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ storyId, musicUrl }: { storyId: string; musicUrl: string }) => {
-      const { error } = await supabase
-        .from('stories')
-        .update({ music_url: musicUrl })
-        .eq('id', storyId);
+      const { error } = await supabase.from('stories').update({ music_url: musicUrl }).eq('id', storyId);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['stories'] }); },
   });
 }
 
-// ─── Story Link ───
+// ─── Story Link with label ───
 export function useUpdateStoryLink() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async ({ storyId, linkUrl }: { storyId: string; linkUrl: string }) => {
+    mutationFn: async ({ storyId, linkUrl, linkLabel }: { storyId: string; linkUrl: string; linkLabel?: string }) => {
       const { error } = await supabase
         .from('stories')
-        .update({ link_url: linkUrl } as any)
+        .update({ link_url: linkUrl, link_label: linkLabel || 'Saiba mais' } as any)
         .eq('id', storyId);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['stories'] }); },
   });
 }
 
 // ─── Story Views ───
 export function useRecordStoryView() {
   const { user } = useAuth();
-
   return useMutation({
     mutationFn: async (storyId: string) => {
       if (!user) return;
       await supabase
         .from('story_views' as any)
-        .upsert(
-          { story_id: storyId, viewer_id: user.id },
-          { onConflict: 'story_id,viewer_id' }
-        );
+        .upsert({ story_id: storyId, viewer_id: user.id }, { onConflict: 'story_id,viewer_id' });
     },
   });
 }
