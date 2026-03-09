@@ -43,7 +43,10 @@ export function PostCard({ post }: PostCardProps) {
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
   const sendNotification = useSendNotification();
+  const { data: followStatus } = useFollowStatus(post.profiles.id);
+  const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
+  const isOwnPost = user?.id === post.profiles.id;
 
   useEffect(() => {
     if (!viewRecorded.current) {
