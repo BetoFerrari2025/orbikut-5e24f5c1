@@ -90,6 +90,7 @@ export default function Search() {
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }

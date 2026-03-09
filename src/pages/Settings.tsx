@@ -159,6 +159,7 @@ export default function Settings() {
           </Button>
         </form>
       </main>
+      <BottomNav />
     </div>
   );
 }

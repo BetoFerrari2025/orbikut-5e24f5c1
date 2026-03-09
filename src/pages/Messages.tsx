@@ -29,7 +29,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-2xl mx-auto border-x min-h-[calc(100vh-3.5rem)]">
         {selectedConv ? (
@@ -43,6 +43,7 @@ export default function Messages() {
           />
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }
