@@ -38,7 +38,8 @@ export default function Auth() {
         }
         const { error } = await signUp(email, password, username, fullName);
         if (error) throw error;
-        toast.success('Conta criada! Verifique seu e-mail para confirmar.');
+        toast.success('Conta criada com sucesso!');
+        navigate('/');
       }
     } catch (error: any) {
       toast.error(error.message || 'Ocorreu um erro');
