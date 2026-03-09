@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MoreHorizontal } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLikes, useToggleLike, useComments, useAddComment } from '@/hooks/usePosts';
+import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface PostCardProps {
   post: {
