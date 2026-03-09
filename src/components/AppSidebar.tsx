@@ -23,7 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const { data: isAdmin } = useIsAdmin();
   const { data: unreadCount } = useUnreadCount();
