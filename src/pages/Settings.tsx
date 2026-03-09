@@ -100,7 +100,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full gradient-instagram flex items-center justify-center"
+                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full gradient-brand flex items-center justify-center"
                 disabled={uploading}
               >
                 <Camera className="w-4 h-4 text-white" />
