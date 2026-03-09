@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search as SearchIcon } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { BottomNav } from '@/components/BottomNav';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +39,7 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-lg mx-auto px-4 py-6">
         <div className="relative mb-6">
@@ -89,6 +90,7 @@ export default function Search() {
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }

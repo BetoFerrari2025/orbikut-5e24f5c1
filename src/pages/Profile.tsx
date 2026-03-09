@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { Grid3X3, Settings, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
@@ -70,7 +71,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Profile header */}
@@ -166,6 +167,7 @@ export default function Profile() {
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }

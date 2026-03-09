@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 import { ArrowLeft, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -28,7 +29,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-2xl mx-auto border-x min-h-[calc(100vh-3.5rem)]">
         {selectedConv ? (
@@ -42,6 +43,7 @@ export default function Messages() {
           />
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Camera } from 'lucide-react';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <main className="max-w-lg mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-6">Editar perfil</h1>
@@ -158,6 +159,7 @@ export default function Settings() {
           </Button>
         </form>
       </main>
+      <BottomNav />
     </div>
   );
 }
