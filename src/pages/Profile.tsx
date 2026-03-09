@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSavedPosts, usePostViews } from '@/hooks/usePostExtras';
 import { PostCard } from '@/components/PostCard';
 import { ProfileHighlights } from '@/components/ProfileHighlights';
+import { PwaInstallButton } from '@/components/PwaInstallButton';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
