@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, X, BarChart3, Type, Link2, ExternalLink, GripVertical, Minus, Music, Play, Pause, SlidersHorizontal, Sun, Contrast, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
