@@ -103,7 +103,7 @@ export function StoryViewer({ stories, currentIndex, setCurrentIndex, onClose, o
   const { user } = useAuth();
   const recordView = useRecordStoryView();
 
-  const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi)$/i.test(url);
+  const checkIsVideo = (url: string) => /\.(mp4|webm|mov|avi|quicktime)$/i.test(url) || url.includes('video');
   const isCurrentVideo = stories?.[currentIndex] ? checkIsVideo(stories[currentIndex].image_url) : false;
   const STORY_DURATION = 5000; // Only used for images
   const TICK_INTERVAL = 50;
