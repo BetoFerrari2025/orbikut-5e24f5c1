@@ -13,7 +13,7 @@ export function useCreateStoryWithPoll() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ file, poll, caption, linkUrl, linkLabel }: { file: File; poll?: PollData; caption?: string; linkUrl?: string; linkLabel?: string }) => {
+    mutationFn: async ({ file, poll, caption, linkUrl, linkLabel, musicUrl }: { file: File; poll?: PollData; caption?: string; linkUrl?: string; linkLabel?: string; musicUrl?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop();
