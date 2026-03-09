@@ -122,54 +122,53 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <>
       <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
-        {/* Header */}
-        <div className="flex items-center justify-between p-3">
-          <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src={post.profiles.avatar_url ?? undefined} />
-              <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <span className="font-semibold text-sm text-foreground">{post.profiles.username}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-primary font-semibold text-sm h-auto py-1 px-2"
-                disabled={toggleFollow.isPending}
-                onClick={() => {
-                  toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
-                  sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
-                }}
-              >
-                Seguir
-              </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="w-5 h-5" />
+        {/* Image or Video with overlay header */}
+        <div className="relative aspect-[4/5] bg-muted">
+          {/* Overlay Header */}
+          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
+            <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
+              <Avatar className="w-8 h-8 ring-2 ring-white/30">
+                <AvatarImage src={post.profiles.avatar_url ?? undefined} />
+                <AvatarFallback className="text-white bg-white/20">{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className="font-semibold text-sm text-white drop-shadow-md">{post.profiles.username}</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white font-semibold text-sm h-auto py-1 px-2 hover:bg-white/20"
+                  disabled={toggleFollow.isPending}
+                  onClick={() => {
+                    toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
+                    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+                  }}
+                >
+                  Seguir
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
-                  <EyeOff className="w-4 h-4" />
-                  Ocultar post
-                </DropdownMenuItem>
-                {!isOwnPost && (
-                  <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
-                    <Flag className="w-4 h-4" />
-                    Denunciar
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <MoreHorizontal className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
+                    <EyeOff className="w-4 h-4" />
+                    Ocultar post
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {!isOwnPost && (
+                    <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
+                      <Flag className="w-4 h-4" />
+                      Denunciar
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </div>
-
-        {/* Image or Video */}
-        <div className="aspect-square bg-muted">
           {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
             <video
               src={post.image_url}
