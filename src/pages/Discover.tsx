@@ -235,12 +235,16 @@ function DiscoverCard({ post, isActive, isMuted, onToggleMute, onShare }: Discov
             isLiked={likesData?.isLiked ?? false}
             onLike={handleLike}
             disabled={!user}
+            iconClassName="text-white"
           />
           <span className="text-white text-xs font-semibold">{likesData?.count ?? 0}</span>
         </div>
 
         <div className="flex flex-col items-center gap-1">
-          <button className="w-10 h-10 flex items-center justify-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+            className="w-10 h-10 flex items-center justify-center"
+          >
             <MessageCircle className="w-7 h-7 text-white" />
           </button>
           <span className="text-white text-xs font-semibold">{comments?.length ?? 0}</span>
