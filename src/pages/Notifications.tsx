@@ -59,7 +59,7 @@ export default function Notifications() {
   return (
     <main className="max-w-lg mx-auto">
       <div className="p-4 border-b flex items-center justify-between">
-        <h1 className="text-xl font-bold">Notificações</h1>
+        <h1 className="text-xl font-bold">{t('notifications.title')}</h1>
         {notifications && notifications.length > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
