@@ -236,7 +236,24 @@ export function PostCard({ post }: PostCardProps) {
               decoding="async"
             />
           )}
-        </div>
+
+          {/* CTA Button overlay for links */}
+          {(() => {
+            const linkUrl = post.link_url || (isAdminPost && post.caption ? post.caption.match(/(https?:\/\/[^\s]+)/)?.[0] : null);
+            const linkLabel = post.link_label || 'Saiba mais';
+            if (!linkUrl) return null;
+            return (
+              <a
+                href={linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {linkLabel}
+              </a>
+            );
+          })()}
 
         {/* Actions */}
         <div className="p-3 space-y-2">
