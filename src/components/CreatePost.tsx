@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useCreatePost } from '@/hooks/usePosts';
 import { useIsAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export function CreatePost() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
