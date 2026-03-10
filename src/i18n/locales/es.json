@@ -82,7 +82,9 @@
     "profileUpdated": "¡Perfil actualizado!",
     "uploadError": "Error al subir",
     "updateError": "Error al actualizar perfil",
-    "loadingText": "Cargando..."
+    "loadingText": "Cargando...",
+    "language": "Idioma",
+    "languageDesc": "Elige el idioma de la interfaz"
   },
   "feed": {
     "noPostsYet": "Aún no hay publicaciones",

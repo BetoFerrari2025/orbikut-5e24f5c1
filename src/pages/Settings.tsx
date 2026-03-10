@@ -11,8 +11,18 @@ import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Camera, Moon } from 'lucide-react';
+import { Camera, Moon, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const LANGUAGES = [
+  { code: 'pt', label: 'Português' },
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+];
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
@@ -21,7 +31,7 @@ export default function Settings() {
   const { data: profile } = useProfile(user?.id);
   const updateProfile = useUpdateProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
@@ -153,7 +163,7 @@ export default function Settings() {
         </Button>
       </form>
 
-      <div className="mt-8 border-t border-border pt-6">
+      <div className="mt-8 border-t border-border pt-6 space-y-6">
         <h2 className="text-lg font-semibold text-foreground mb-4">{t('settings.appearance')}</h2>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -165,6 +175,31 @@ export default function Settings() {
             checked={theme === 'dark'}
             onCheckedChange={toggleTheme}
           />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Globe className="w-5 h-5 text-foreground" />
+            <div>
+              <Label className="cursor-pointer">{t('settings.language')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.languageDesc')}</p>
+            </div>
+          </div>
+          <Select
+            value={i18n.language?.substring(0, 2)}
+            onValueChange={(value) => i18n.changeLanguage(value)}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </main>
