@@ -1,11 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePosts } from '@/hooks/usePosts';
+import { useInfinitePosts, PostWithProfile } from '@/hooks/usePosts';
 
 export function usePersonalizedFeed() {
   const { user } = useAuth();
-  const { data: posts, isLoading: postsLoading, error: postsError } = usePosts();
+  const {
+    data: infiniteData,
+    isLoading: postsLoading,
+    error: postsError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfinitePosts();
 
   const { data: ranking } = useQuery({
     queryKey: ['personalized-feed', user?.id],
@@ -23,22 +30,27 @@ export function usePersonalizedFeed() {
     retry: false,
   });
 
-  // Sort posts by AI ranking if available
-  const sortedPosts = posts && ranking?.post_ids?.length
-    ? [...posts].sort((a, b) => {
+  // Flatten pages into single array
+  const allPosts = infiniteData?.pages.flatMap((page) => page.posts) ?? [];
+
+  // Sort posts by AI ranking if available (only first page for ranking relevance)
+  const sortedPosts = allPosts.length > 0 && ranking?.post_ids?.length
+    ? [...allPosts].sort((a, b) => {
         const indexA = ranking.post_ids.indexOf(a.id);
         const indexB = ranking.post_ids.indexOf(b.id);
-        // Posts not in ranking go to the end
         const scoreA = indexA === -1 ? 9999 : indexA;
         const scoreB = indexB === -1 ? 9999 : indexB;
         return scoreA - scoreB;
       })
-    : posts;
+    : allPosts;
 
   return {
-    data: sortedPosts,
+    data: sortedPosts.length > 0 ? sortedPosts : undefined,
     isLoading: postsLoading,
     error: postsError,
     topics: ranking?.topics,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }
