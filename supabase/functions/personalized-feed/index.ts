@@ -72,6 +72,14 @@ serve(async (req) => {
 
     const followedIds = (follows || []).map((f) => f.following_id);
 
+    // 3b. Get admin user IDs to boost their posts
+    const { data: adminRoles } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+
+    const adminIds = (adminRoles || []).map((r) => r.user_id);
+
     // 4. Build engagement score per post
     const postScores: Record<string, number> = {};
     for (const signal of signals || []) {
