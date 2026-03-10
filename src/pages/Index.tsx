@@ -15,6 +15,7 @@ const PULL_THRESHOLD = 80;
 
 const Index = () => {
   usePagePresence('home');
+  usePagePresence('feed');
 
   // Load GerenciarROI UTM script
   useEffect(() => {

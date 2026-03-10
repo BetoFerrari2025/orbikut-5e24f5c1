@@ -15,6 +15,7 @@ import { usePagePresence } from '@/hooks/usePagePresence';
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
 export default function Discover() {
+  usePagePresence('discover');
   const { data: posts, isLoading } = usePosts();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
