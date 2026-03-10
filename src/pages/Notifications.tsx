@@ -4,8 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotifications, useMarkAsRead, useDeleteNotification, useDeleteAllNotifications, Notification } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { Heart, MessageCircle, UserPlus, Bell, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,22 +14,23 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-const typeConfig = {
-  like: { icon: Heart, label: 'curtiu seu post', color: 'text-red-500' },
-  comment: { icon: MessageCircle, label: 'comentou no seu post', color: 'text-blue-500' },
-  follow: { icon: UserPlus, label: 'começou a seguir você', color: 'text-green-500' },
-};
-
 type FilterType = 'all' | 'like' | 'comment' | 'follow';
 
-const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
-  { value: 'all', label: 'Todas', icon: Bell },
-  { value: 'like', label: 'Curtidas', icon: Heart },
-  { value: 'comment', label: 'Comentários', icon: MessageCircle },
-  { value: 'follow', label: 'Seguidores', icon: UserPlus },
-];
-
 export default function Notifications() {
+  const { t } = useTranslation();
+
+  const typeConfig = {
+    like: { icon: Heart, label: t('notifications.likedPost'), color: 'text-red-500' },
+    comment: { icon: MessageCircle, label: t('notifications.commentedPost'), color: 'text-blue-500' },
+    follow: { icon: UserPlus, label: t('notifications.followedYou'), color: 'text-green-500' },
+  };
+
+  const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
+    { value: 'all', label: t('notifications.all'), icon: Bell },
+    { value: 'like', label: t('notifications.likesFilter'), icon: Heart },
+    { value: 'comment', label: t('notifications.commentsFilter'), icon: MessageCircle },
+    { value: 'follow', label: t('notifications.followersFilter'), icon: UserPlus },
+  ];
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
@@ -50,7 +51,7 @@ export default function Notifications() {
   if (!user) {
     return (
       <main className="max-w-lg mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Faça login para ver suas notificações.</p>
+        <p className="text-muted-foreground">{t('notifications.loginRequired')}</p>
       </main>
     );
   }
@@ -58,23 +59,23 @@ export default function Notifications() {
   return (
     <main className="max-w-lg mx-auto">
       <div className="p-4 border-b flex items-center justify-between">
-        <h1 className="text-xl font-bold">Notificações</h1>
+        <h1 className="text-xl font-bold">{t('notifications.title')}</h1>
         {notifications && notifications.length > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                <Trash2 className="w-4 h-4 mr-1" /> Excluir tudo
+                <Trash2 className="w-4 h-4 mr-1" /> {t('notifications.deleteAll')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Excluir todas as notificações?</AlertDialogTitle>
-                <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                <AlertDialogTitle>{t('notifications.deleteAllConfirm')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('notifications.deleteAllDesc')}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>{t('notifications.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={() => deleteAll.mutate()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Excluir tudo
+                  {t('notifications.deleteAll')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -121,8 +122,8 @@ export default function Notifications() {
       {!isLoading && (!filteredNotifications || filteredNotifications.length === 0) && (
         <div className="text-center py-16">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Nenhuma notificação ainda</p>
-          <p className="text-sm text-muted-foreground mt-1">Quando alguém curtir, comentar ou seguir você, aparecerá aqui</p>
+          <p className="text-muted-foreground">{t('notifications.noNotifications')}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('notifications.noNotificationsDesc')}</p>
         </div>
       )}
 
@@ -138,6 +139,12 @@ export default function Notifications() {
 }
 
 function NotificationItem({ notification, onDelete }: { notification: Notification; onDelete: (id: string) => void }) {
+  const { t } = useTranslation();
+  const typeConfig = {
+    like: { icon: Heart, label: t('notifications.likedPost'), color: 'text-red-500' },
+    comment: { icon: MessageCircle, label: t('notifications.commentedPost'), color: 'text-blue-500' },
+    follow: { icon: UserPlus, label: t('notifications.followedYou'), color: 'text-green-500' },
+  };
   const config = typeConfig[notification.type];
   const Icon = config.icon;
 
@@ -165,14 +172,14 @@ function NotificationItem({ notification, onDelete }: { notification: Notificati
 
         <div className="flex-1 min-w-0">
           <p className="text-sm">
-            <span className="font-semibold">{notification.actor?.username ?? 'Alguém'}</span>
+            <span className="font-semibold">{notification.actor?.username ?? t('notifications.someone')}</span>
             {' '}{config.label}
             {notification.content && (
               <span className="text-muted-foreground">: "{notification.content}"</span>
             )}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {formatDistanceToNow(new Date(notification.created_at), { locale: ptBR, addSuffix: true })}
+            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
           </p>
         </div>
       </Link>

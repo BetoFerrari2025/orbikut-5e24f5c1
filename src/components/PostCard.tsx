@@ -16,13 +16,12 @@ import { useDwellTracker, useTrackEngagement } from '@/hooks/useEngagement';
 import { useAdminUserIds } from '@/hooks/useAdminUsers';
 import { useIsAdmin } from '@/hooks/useAdmin';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 function SafeCaption({ text, allowLinks }: { text: string; allowLinks: boolean }) {
   try {
     if (!allowLinks) return <>{text}</>;
-    // Extract URLs and render remaining text without them (URLs go to CTA button)
     const cleanText = text.replace(/(https?:\/\/[^\s]+)/g, '').trim();
     return <>{cleanText || text}</>;
   } catch {
@@ -48,6 +47,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const { t, i18n } = useTranslation();
   const profile = post.profiles;
   const [showComments, setShowComments] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -76,27 +76,23 @@ export function PostCard({ post }: PostCardProps) {
   const adminDeletePost = useAdminDeletePost();
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for dwell time tracking
+  // Get date-fns locale dynamically
+  const getDateLocale = () => {
+    const lang = i18n.language?.substring(0, 2);
+    // Return undefined to use default (English) for non-PT languages
+    // date-fns will handle formatting
+    return undefined;
+  };
+
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          onVisible();
-        } else {
-          onHidden();
-        }
-      },
+      ([entry]) => { entry.isIntersecting ? onVisible() : onHidden(); },
       { threshold: 0.5 }
     );
-
     observer.observe(el);
-    return () => {
-      onHidden();
-      observer.disconnect();
-    };
+    return () => { onHidden(); observer.disconnect(); };
   }, [onVisible, onHidden]);
 
   useEffect(() => {
@@ -106,12 +102,10 @@ export function PostCard({ post }: PostCardProps) {
     }
   }, [post.id]);
 
-  // Guard against missing profile data (after all hooks)
   if (!profile?.username) {
     console.warn('[PostCard] Missing profile data for post', post.id);
     return null;
   }
-
 
   const handleLike = () => {
     if (!user) return;
@@ -127,9 +121,7 @@ export function PostCard({ post }: PostCardProps) {
     if (!user) return;
     const isSaved = savedData?.isSaved ?? false;
     toggleSave.mutate({ postId: post.id, isSaved });
-    if (!isSaved) {
-      trackSignal(post.id, 'save');
-    }
+    if (!isSaved) trackSignal(post.id, 'save');
   };
 
   const handleShareWithTracking = async () => {
@@ -139,7 +131,7 @@ export function PostCard({ post }: PostCardProps) {
       try { await navigator.share({ title: 'Orbikut', url }); } catch {}
     } else {
       navigator.clipboard.writeText(url);
-      toast.success('Link copiado!');
+      toast.success(t('feed.linkCopied'));
     }
   };
 
@@ -153,9 +145,7 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <>
       <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0 w-[calc(100%+2rem)] md:w-full">
-        {/* Image or Video with overlay header */}
         <div className="relative aspect-[4/5] bg-muted w-full">
-          {/* Overlay Header */}
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
             <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
               <Avatar className="w-8 h-8 ring-2 ring-white/30">
@@ -176,7 +166,7 @@ export function PostCard({ post }: PostCardProps) {
                     sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
                   }}
                 >
-                  Seguir
+                  {t('post.follow')}
                 </Button>
               )}
               <DropdownMenu>
@@ -189,29 +179,29 @@ export function PostCard({ post }: PostCardProps) {
                   {isOwnPost && (
                     <DropdownMenuItem onClick={() => { setIsEditing(true); setEditCaption(post.caption ?? ''); }} className="gap-2">
                       <Pencil className="w-4 h-4" />
-                      Editar legenda
+                      {t('post.editCaption')}
                     </DropdownMenuItem>
                   )}
                   {isOwnPost && (
-                    <DropdownMenuItem onClick={() => { if (confirm('Tem certeza que deseja excluir este post?')) { deletePost.mutate(post.id); toast.success('Post excluído!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                    <DropdownMenuItem onClick={() => { if (confirm(t('post.deletePostConfirm'))) { deletePost.mutate(post.id); toast.success(t('post.postDeleted')); } }} className="gap-2 text-destructive focus:text-destructive">
                       <Trash2 className="w-4 h-4" />
-                      Excluir post
+                      {t('post.deletePost')}
                     </DropdownMenuItem>
                   )}
                   {!isOwnPost && isAdmin && (
-                    <DropdownMenuItem onClick={() => { if (confirm('Excluir este post como administrador?')) { adminDeletePost.mutate(post.id); toast.success('Post excluído pelo admin!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                    <DropdownMenuItem onClick={() => { if (confirm(t('post.adminDeleteConfirm'))) { adminDeletePost.mutate(post.id); toast.success(t('post.adminDeleteDone')); } }} className="gap-2 text-destructive focus:text-destructive">
                       <Trash2 className="w-4 h-4" />
-                      Excluir (Admin)
+                      {t('post.adminDelete')}
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
                     <EyeOff className="w-4 h-4" />
-                    Ocultar post
+                    {t('post.hidePost')}
                   </DropdownMenuItem>
                   {!isOwnPost && (
-                    <DropdownMenuItem onClick={() => toast.success('Denúncia enviada. Obrigado!')} className="gap-2 text-destructive focus:text-destructive">
+                    <DropdownMenuItem onClick={() => toast.success(t('post.reportDone'))} className="gap-2 text-destructive focus:text-destructive">
                       <Flag className="w-4 h-4" />
-                      Denunciar
+                      {t('post.report')}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -219,36 +209,16 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
           {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
-            <video
-              src={post.image_url}
-              className="w-full h-full object-cover"
-              controls
-              playsInline
-              muted
-              loop
-            />
+            <video src={post.image_url} className="w-full h-full object-cover" controls playsInline muted loop />
           ) : (
-            <img
-              src={post.image_url}
-              alt={post.caption ?? 'Post image'}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
+            <img src={post.image_url} alt={post.caption ?? 'Post image'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           )}
-
-          {/* CTA Button overlay for links */}
           {(() => {
             const linkUrl = post.link_url || (isAdminPost && post.caption ? post.caption.match(/(https?:\/\/[^\s]+)/)?.[0] : null);
-            const linkLabel = post.link_label || 'Saiba mais';
+            const linkLabel = post.link_label || t('post.learnMore');
             if (!linkUrl) return null;
             return (
-              <a
-                href={linkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105"
-              >
+              <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105">
                 <ExternalLink className="w-4 h-4" />
                 {linkLabel}
               </a>
@@ -256,16 +226,10 @@ export function PostCard({ post }: PostCardProps) {
           })()}
         </div>
 
-        {/* Actions */}
         <div className="p-3 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <SparkReaction
-                isLiked={likesData?.isLiked ?? false}
-                onLike={handleLike}
-                disabled={!user}
-                iconClassName="text-foreground"
-              />
+              <SparkReaction isLiked={likesData?.isLiked ?? false} onLike={handleLike} disabled={!user} iconClassName="text-foreground" />
               <button onClick={handleCommentOpen}>
                 <MessageCircle className="w-6 h-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
@@ -287,51 +251,36 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="flex items-center gap-3">
-            <p className="font-semibold text-sm text-foreground">{likesData?.count ?? 0} curtidas</p>
+            <p className="font-semibold text-sm text-foreground">{likesData?.count ?? 0} {t('post.likes')}</p>
           </div>
 
-          {/* Caption */}
           {isEditing ? (
-            <form onSubmit={(e) => { e.preventDefault(); updatePost.mutate({ postId: post.id, caption: editCaption }); setIsEditing(false); toast.success('Legenda atualizada!'); }} className="flex gap-2 items-center">
+            <form onSubmit={(e) => { e.preventDefault(); updatePost.mutate({ postId: post.id, caption: editCaption }); setIsEditing(false); toast.success(t('post.captionUpdated')); }} className="flex gap-2 items-center">
               <Input value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className="text-sm flex-1" autoFocus />
-              <Button type="submit" size="sm" disabled={updatePost.isPending}>Salvar</Button>
-              <button type="button" onClick={() => setIsEditing(false)} className="text-muted-foreground text-sm">Cancelar</button>
+              <Button type="submit" size="sm" disabled={updatePost.isPending}>{t('post.save')}</Button>
+              <button type="button" onClick={() => setIsEditing(false)} className="text-muted-foreground text-sm">{t('post.cancel')}</button>
             </form>
           ) : post.caption ? (
             <p className="text-sm text-foreground">
-              <Link to={`/profile/${profile.username}`} className="font-semibold mr-2">
-                {profile.username}
-              </Link>
+              <Link to={`/profile/${profile.username}`} className="font-semibold mr-2">{profile.username}</Link>
               <SafeCaption text={post.caption} allowLinks={isAdminPost} />
             </p>
           ) : null}
 
-          {/* Comments preview */}
           {comments && comments.length > 0 && (
-            <button
-              onClick={() => setShowComments(true)}
-              className="text-sm text-muted-foreground"
-            >
-              Ver todos os {comments.length} comentários
+            <button onClick={() => setShowComments(true)} className="text-sm text-muted-foreground">
+              {t('post.viewAll', { count: comments.length })}
             </button>
           )}
 
-          {/* Timestamp */}
           <p className="text-xs text-muted-foreground uppercase">
-            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR })}
+            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
           </p>
         </div>
       </div>
 
-      {/* Comments Dialog */}
-      <CommentsDialog
-        postId={post.id}
-        postOwnerId={profile.id}
-        open={showComments}
-        onOpenChange={setShowComments}
-      />
+      <CommentsDialog postId={post.id} postOwnerId={profile.id} open={showComments} onOpenChange={setShowComments} />
     </>
   );
 }

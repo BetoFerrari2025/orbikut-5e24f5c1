@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { useConversations, useMessages, useSendMessage, useUploadChatMedia, useMessageReactions, useToggleReaction, Conversation, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { ArrowLeft, Send, Image, Mic, Square, X, Check, CheckCheck, Smile } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +16,7 @@ import { isUserOnline } from '@/hooks/useOnlineStatus';
 const QUICK_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
 
 export default function Messages() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: conversations, isLoading } = useConversations();
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -23,7 +24,7 @@ export default function Messages() {
   if (!user) {
     return (
       <main className="max-w-lg mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Faça login para acessar suas mensagens.</p>
+        <p className="text-muted-foreground">{t('messages.loginRequired')}</p>
       </main>
     );
   }
@@ -50,24 +51,25 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
   onSelect: (c: Conversation) => void;
   currentUserId: string;
 }) {
+  const { t } = useTranslation();
   const getLastMessagePreview = (conv: Conversation) => {
     if (!conv.last_message) return '';
-    const prefix = conv.last_message.sender_id === currentUserId ? 'Você: ' : '';
-    if (conv.last_message.media_type?.startsWith('image/')) return `${prefix}📷 Foto`;
-    if (conv.last_message.media_type?.startsWith('audio/')) return `${prefix}🎤 Áudio`;
+    const prefix = conv.last_message.sender_id === currentUserId ? `${t('messages.you')}: ` : '';
+    if (conv.last_message.media_type?.startsWith('image/')) return `${prefix}📷 ${t('messages.photo')}`;
+    if (conv.last_message.media_type?.startsWith('audio/')) return `${prefix}🎤 ${t('messages.audio')}`;
     return `${prefix}${conv.last_message.content}`;
   };
 
   return (
     <div>
       <div className="p-4 border-b">
-        <h1 className="text-xl font-bold">Mensagens</h1>
+        <h1 className="text-xl font-bold">{t('messages.title')}</h1>
       </div>
-      {isLoading && <div className="p-4 text-center text-muted-foreground">Carregando...</div>}
+      {isLoading && <div className="p-4 text-center text-muted-foreground">{t('auth.loading')}</div>}
       {!isLoading && conversations.length === 0 && (
         <div className="p-8 text-center text-muted-foreground">
-          <p>Nenhuma conversa ainda</p>
-          <p className="text-sm mt-1">Inicie uma conversa pelo perfil de alguém</p>
+          <p>{t('messages.noConversations')}</p>
+          <p className="text-sm mt-1">{t('messages.startConversation')}</p>
         </div>
       )}
       {conversations.map((conv) => (
@@ -84,7 +86,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
             <OnlineIndicator isOnline={isUserOnline((conv.other_user as any)?.last_seen)} size="sm" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">{conv.other_user?.username ?? 'Usuário'}</p>
+            <p className="font-semibold text-sm">{conv.other_user?.username ?? t('messages.user')}</p>
             {conv.last_message && (
               <p className="text-sm text-muted-foreground truncate">
                 {getLastMessagePreview(conv)}
@@ -93,7 +95,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
           </div>
           {conv.last_message && (
             <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(conv.last_message.created_at), { locale: ptBR, addSuffix: false })}
+              {formatDistanceToNow(new Date(conv.last_message.created_at), { addSuffix: false })}
             </span>
           )}
         </button>
@@ -348,12 +350,12 @@ function ChatView({ conversation, onBack, currentUserId }: {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Selecione uma imagem válida');
+      toast.error(t('messages.selectValidImage'));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máx. 10MB)');
+      toast.error(t('messages.imageTooLarge'));
       return;
     }
 
@@ -361,7 +363,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
       const result = await uploadMedia.mutateAsync(file);
       setPendingMedia(result);
     } catch {
-      toast.error('Erro ao enviar imagem');
+      toast.error(t('messages.imageUploadError'));
     }
 
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -392,7 +394,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
             mediaType: result.type,
           });
         } catch {
-          toast.error('Erro ao enviar áudio');
+          toast.error(t('messages.audioUploadError'));
         }
       };
 
@@ -401,7 +403,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
       setRecordingTime(0);
       timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
     } catch {
-      toast.error('Não foi possível acessar o microfone');
+      toast.error(t('messages.micError'));
     }
   };
 
@@ -429,27 +431,23 @@ function ChatView({ conversation, onBack, currentUserId }: {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
         <div className="relative">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={conversation.other_user?.avatar_url ?? undefined} />
-            <AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-          </Avatar>
+          <Avatar className="w-8 h-8"><AvatarImage src={conversation.other_user?.avatar_url ?? undefined} /><AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback></Avatar>
           <OnlineIndicator isOnline={isUserOnline((conversation.other_user as any)?.last_seen)} size="sm" />
         </div>
         <div>
-          <span className="font-semibold">{conversation.other_user?.username ?? 'Usuário'}</span>
+          <span className="font-semibold">{conversation.other_user?.username ?? t('messages.user')}</span>
           {isUserOnline((conversation.other_user as any)?.last_seen) && !otherTyping && (
-            <p className="text-xs text-green-500">online</p>
+            <p className="text-xs text-green-500">{t('messages.online')}</p>
           )}
           {otherTyping && (
-            <p className="text-xs text-primary animate-pulse">digitando...</p>
+            <p className="text-xs text-primary animate-pulse">{t('messages.typing')}</p>
           )}
         </div>
       </div>
@@ -495,7 +493,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
             <img src={pendingMedia.url} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
           )}
           <span className="text-sm text-muted-foreground flex-1">
-            {pendingMedia.type.startsWith('image/') ? 'Imagem pronta para enviar' : 'Áudio pronto para enviar'}
+            {pendingMedia.type.startsWith('image/') ? t('messages.imageReady') : t('messages.audioReady')}
           </span>
           <Button variant="ghost" size="icon" onClick={() => setPendingMedia(null)}>
             <X className="w-4 h-4" />
@@ -512,7 +510,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           <div className="flex-1 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
             <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
-            <span className="text-sm text-muted-foreground">Gravando...</span>
+            <span className="text-sm text-muted-foreground">{t('messages.recording')}</span>
           </div>
           <Button size="icon" onClick={stopRecording} className="gradient-brand hover:opacity-90">
             <Square className="w-4 h-4" />
@@ -547,7 +545,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           <Input
             value={newMessage}
             onChange={handleInputChange}
-            placeholder="Mensagem..."
+            placeholder={t('messages.messagePlaceholder')}
             className="flex-1"
           />
           <Button

@@ -8,6 +8,7 @@ import { UserPlus } from 'lucide-react';
 import { useToggleFollow } from '@/hooks/useProfile';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 function useSuggestedUsers() {
   const { user } = useAuth();
@@ -47,6 +48,7 @@ function useSuggestedUsers() {
 }
 
 export function FriendSuggestions() {
+  const { t } = useTranslation();
   const { data: suggestions, isLoading } = useSuggestedUsers();
   const { user } = useAuth();
   const toggleFollow = useToggleFollow();
@@ -66,7 +68,7 @@ export function FriendSuggestions() {
 
   return (
     <div className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0 w-[calc(100%+2rem)] md:w-full p-4">
-      <p className="text-sm font-semibold text-foreground mb-3">Sugestões para você</p>
+      <p className="text-sm font-semibold text-foreground mb-3">{t('suggestions.title')}</p>
       <div className="flex gap-3 overflow-x-auto pb-1">
         {visibleSuggestions.map((profile) => (
           <div
@@ -96,7 +98,7 @@ export function FriendSuggestions() {
               disabled={toggleFollow.isPending}
             >
               <UserPlus className="w-3 h-3" />
-              Seguir
+              {t('suggestions.follow')}
             </Button>
           </div>
         ))}
