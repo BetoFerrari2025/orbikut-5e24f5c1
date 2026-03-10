@@ -125,6 +125,10 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const addComment = useAddComment();
   const updateComment = useUpdateComment();
   const deleteComment = useDeleteComment();
+  const deletePost = useDeletePost();
+  const adminDeletePost = useAdminDeletePost();
+  const { data: isAdmin } = useIsAdmin();
+  const isOwnPost = user?.id === post.profiles?.id;
 
   useEffect(() => {
     if (isActive && !viewRecorded.current) {
