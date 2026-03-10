@@ -6,7 +6,6 @@ import logoImg from '@/assets/logo.png';
 
 const Index = () => {
   const { data: posts, isLoading, error } = usePersonalizedFeed();
-  console.log('[Index] render — isLoading:', isLoading, 'error:', error?.message, 'posts:', posts?.length);
 
   return (
     <main className="max-w-lg mx-auto px-4 md:px-4 py-2">
@@ -14,15 +13,15 @@ const Index = () => {
       {isLoading && (
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
+            <div key={i} className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="flex items-center gap-3 p-3">
-                <Skeleton className="w-8 h-8 rounded-full" />
-                <Skeleton className="h-4 w-24" />
+                <Skeleton className="w-8 h-8 rounded-full bg-muted-foreground/20" />
+                <Skeleton className="h-4 w-24 bg-muted-foreground/20" />
               </div>
-              <Skeleton className="aspect-square" />
+              <Skeleton className="aspect-square bg-muted-foreground/20" />
               <div className="p-3 space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-20 bg-muted-foreground/20" />
+                <Skeleton className="h-4 w-full bg-muted-foreground/20" />
               </div>
             </div>
           ))}
