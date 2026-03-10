@@ -10,8 +10,10 @@ import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 export default function Auth() {
+  usePagePresence('auth');
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

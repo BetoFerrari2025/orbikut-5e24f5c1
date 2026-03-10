@@ -9,10 +9,12 @@ import { Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 const PULL_THRESHOLD = 80;
 
 const Index = () => {
+  usePagePresence('home');
   const { t } = useTranslation();
   const {
     data: posts,

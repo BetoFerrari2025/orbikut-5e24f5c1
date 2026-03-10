@@ -173,6 +173,9 @@ export default function AdminUsers() {
 
         {/* ── Dashboard Tab ── */}
         <TabsContent value="dashboard" className="space-y-6 mt-4">
+          {/* Realtime Presence Cards */}
+          <RealtimePresenceCards />
+
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
