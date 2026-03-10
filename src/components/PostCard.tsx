@@ -271,14 +271,20 @@ export function PostCard({ post }: PostCardProps) {
           </div>
 
           {/* Caption */}
-          {post.caption && (
+          {isEditing ? (
+            <form onSubmit={(e) => { e.preventDefault(); updatePost.mutate({ postId: post.id, caption: editCaption }); setIsEditing(false); toast.success('Legenda atualizada!'); }} className="flex gap-2 items-center">
+              <Input value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className="text-sm flex-1" autoFocus />
+              <Button type="submit" size="sm" disabled={updatePost.isPending}>Salvar</Button>
+              <button type="button" onClick={() => setIsEditing(false)} className="text-muted-foreground text-sm">Cancelar</button>
+            </form>
+          ) : post.caption ? (
             <p className="text-sm text-foreground">
               <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
                 {post.profiles.username}
               </Link>
               <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
             </p>
-          )}
+          ) : null}
 
           {/* Comments preview */}
           {comments && comments.length > 0 && (
