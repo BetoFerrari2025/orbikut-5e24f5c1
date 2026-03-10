@@ -2,8 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import {
   Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
-  ShieldAlert, Sparkles, PlusSquare, LogOut,
+  ShieldAlert, PlusSquare, LogOut,
 } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsAdmin } from '@/hooks/useAdmin';
@@ -50,9 +51,7 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Brand */}
         <div className={cn("px-4 py-4 flex items-center gap-2", collapsed && "justify-center px-2")}>
-          <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="Orbita" className="w-8 h-8 rounded-lg object-cover shrink-0" />
           {!collapsed && <span className="text-xl font-extrabold text-gradient-brand">Orbita</span>}
         </div>
 
