@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Home, Search, User, LogOut, Sparkles, MessageCircle, Bell, Sun, Moon } from 'lucide-react';
+import { Home, Search, User, LogOut, MessageCircle, Bell, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useTheme } from '@/hooks/useTheme';
+import logoImg from '@/assets/logo.png';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -17,9 +18,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center glow-primary">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="Orbita" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-2xl font-extrabold text-gradient-brand">Orbita</span>
         </Link>
 
