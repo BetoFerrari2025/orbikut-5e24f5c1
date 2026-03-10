@@ -177,8 +177,8 @@ export function PostCard({ post }: PostCardProps) {
                   className="text-white font-semibold text-sm h-auto py-1 px-2 hover:bg-white/20"
                   disabled={toggleFollow.isPending}
                   onClick={() => {
-                    toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
-                    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+                    toggleFollow.mutate({ targetUserId: profile.id, isFollowing: false });
+                    sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
                   }}
                 >
                   Seguir
