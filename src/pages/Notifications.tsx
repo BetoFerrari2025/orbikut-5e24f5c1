@@ -172,7 +172,7 @@ function NotificationItem({ notification, onDelete }: { notification: Notificati
 
         <div className="flex-1 min-w-0">
           <p className="text-sm">
-            <span className="font-semibold">{notification.actor?.username ?? 'Alguém'}</span>
+            <span className="font-semibold">{notification.actor?.username ?? t('notifications.someone')}</span>
             {' '}{config.label}
             {notification.content && (
               <span className="text-muted-foreground">: "{notification.content}"</span>
