@@ -1,7 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Post } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
+
+const PAGE_SIZE = 10;
+
+export type PostWithProfile = Post & {
+  profiles: { id: string; username: string; full_name: string | null; avatar_url: string | null };
+};
 
 export function usePosts() {
   return useQuery({
@@ -16,8 +22,35 @@ export function usePosts() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as (Post & { profiles: { id: string; username: string; full_name: string | null; avatar_url: string | null } })[];
+      return data as PostWithProfile[];
     },
+  });
+}
+
+export function useInfinitePosts() {
+  return useInfiniteQuery({
+    queryKey: ['posts-infinite'],
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = pageParam * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles (id, username, full_name, avatar_url)
+        `)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      return {
+        posts: data as PostWithProfile[],
+        nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
   });
 }
 
@@ -29,7 +62,6 @@ export function useCreatePost() {
     mutationFn: async ({ imageFile, caption }: { imageFile: File; caption: string }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Upload image
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
@@ -43,7 +75,6 @@ export function useCreatePost() {
         .from('posts')
         .getPublicUrl(fileName);
 
-      // Create post
       const { error: postError } = await supabase
         .from('posts')
         .insert({
@@ -56,6 +87,7 @@ export function useCreatePost() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
     },
   });
 }
@@ -74,6 +106,7 @@ export function useDeletePost() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
     },
   });
 }

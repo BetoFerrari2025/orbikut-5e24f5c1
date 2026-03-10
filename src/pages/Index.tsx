@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, TouchEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, TouchEvent } from 'react';
 import { PostCard } from '@/components/PostCard';
 import { StoriesBar } from '@/components/StoriesBar';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
@@ -10,14 +10,43 @@ import logoImg from '@/assets/logo.png';
 const PULL_THRESHOLD = 80;
 
 const Index = () => {
-  const { data: posts, isLoading, error } = usePersonalizedFeed();
+  const {
+    data: posts,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePersonalizedFeed();
   const queryClient = useQueryClient();
 
+  // Pull-to-refresh state
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Pull-to-refresh handlers
   const onTouchStart = useCallback((e: TouchEvent) => {
     if (containerRef.current && containerRef.current.scrollTop <= 0) {
       touchStartY.current = e.touches[0].clientY;
@@ -38,7 +67,7 @@ const Index = () => {
     if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
       setIsRefreshing(true);
       setPullDistance(PULL_THRESHOLD);
-      await queryClient.invalidateQueries({ queryKey: ['posts'] });
+      await queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
       await queryClient.invalidateQueries({ queryKey: ['personalized-feed'] });
       await queryClient.invalidateQueries({ queryKey: ['stories'] });
       setIsRefreshing(false);
@@ -82,6 +111,7 @@ const Index = () => {
 
       <main className="max-w-lg mx-auto px-4 md:px-4 py-2">
         <StoriesBar />
+
         {isLoading && (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -121,6 +151,21 @@ const Index = () => {
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-1" />
+
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            )}
+
+            {!hasNextPage && posts.length > 10 && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                Você viu todos os posts 🎉
+              </p>
+            )}
           </div>
         )}
       </main>
