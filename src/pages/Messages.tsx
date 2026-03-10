@@ -51,11 +51,12 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
   onSelect: (c: Conversation) => void;
   currentUserId: string;
 }) {
+  const { t } = useTranslation();
   const getLastMessagePreview = (conv: Conversation) => {
     if (!conv.last_message) return '';
-    const prefix = conv.last_message.sender_id === currentUserId ? 'Você: ' : '';
-    if (conv.last_message.media_type?.startsWith('image/')) return `${prefix}📷 Foto`;
-    if (conv.last_message.media_type?.startsWith('audio/')) return `${prefix}🎤 Áudio`;
+    const prefix = conv.last_message.sender_id === currentUserId ? `${t('messages.you')}: ` : '';
+    if (conv.last_message.media_type?.startsWith('image/')) return `${prefix}📷 ${t('messages.photo')}`;
+    if (conv.last_message.media_type?.startsWith('audio/')) return `${prefix}🎤 ${t('messages.audio')}`;
     return `${prefix}${conv.last_message.content}`;
   };
 
