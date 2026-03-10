@@ -2,7 +2,7 @@ import { PostCard } from '@/components/PostCard';
 import { StoriesBar } from '@/components/StoriesBar';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 const Index = () => {
   const { data: posts, isLoading, error } = usePersonalizedFeed();
