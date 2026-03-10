@@ -73,9 +73,9 @@ export default function Notifications() {
                 <AlertDialogDescription>{t('notifications.deleteAllDesc')}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>{t('notifications.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={() => deleteAll.mutate()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Excluir tudo
+                  {t('notifications.deleteAll')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
