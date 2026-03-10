@@ -18,9 +18,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center glow-primary">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="Orbita" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-2xl font-extrabold text-gradient-brand">Orbita</span>
         </Link>
 
