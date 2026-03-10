@@ -254,6 +254,7 @@ export function PostCard({ post }: PostCardProps) {
               </a>
             );
           })()}
+        </div>
 
         {/* Actions */}
         <div className="p-3 space-y-2">
