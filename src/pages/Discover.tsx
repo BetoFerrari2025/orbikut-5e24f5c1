@@ -276,6 +276,17 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
           <Eye className="w-6 h-6 text-white/70" />
           <span className="text-white text-xs font-semibold">{viewCount ?? 0}</span>
         </div>
+
+        {isOwnPost && (
+          <button onClick={(e) => { e.stopPropagation(); if (confirm('Excluir este post?')) { deletePost.mutate(post.id); toast.success('Post excluído!'); } }} className="w-10 h-10 flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-white/70 hover:text-destructive" />
+          </button>
+        )}
+        {!isOwnPost && isAdmin && (
+          <button onClick={(e) => { e.stopPropagation(); if (confirm('Excluir como admin?')) { adminDeletePost.mutate(post.id); toast.success('Post excluído pelo admin!'); } }} className="w-10 h-10 flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-400 hover:text-red-300" />
+          </button>
+        )}
       </div>
 
       {/* Video progress bar */}
