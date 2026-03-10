@@ -55,6 +55,8 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editCaption, setEditCaption] = useState(post.caption ?? '');
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
@@ -72,6 +74,10 @@ export function PostCard({ post }: PostCardProps) {
   const { onVisible, onHidden } = useDwellTracker(post.id);
   const { data: adminIds } = useAdminUserIds();
   const isAdminPost = adminIds?.includes(post.profiles.id) ?? false;
+  const { data: isAdmin } = useIsAdmin();
+  const updatePost = useUpdatePost();
+  const deletePost = useDeletePost();
+  const adminDeletePost = useAdminDeletePost();
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for dwell time tracking
