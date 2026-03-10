@@ -363,7 +363,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
       const result = await uploadMedia.mutateAsync(file);
       setPendingMedia(result);
     } catch {
-      toast.error('Erro ao enviar imagem');
+      toast.error(t('messages.imageUploadError'));
     }
 
     if (fileInputRef.current) fileInputRef.current.value = '';
