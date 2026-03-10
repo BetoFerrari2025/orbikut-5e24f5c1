@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Camera, Users, Heart, MessageCircle, Zap } from 'lucide-react';
+import { Camera, Users, Heart, MessageCircle, Zap, Sparkles } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function Landing() {
   return (
