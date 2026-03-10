@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Home, Search, User, LogOut, Sparkles, MessageCircle, Bell, Sun, Moon } from 'lucide-react';
+import { Home, Search, User, LogOut, MessageCircle, Bell, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreatePost } from '@/components/CreatePost';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useTheme } from '@/hooks/useTheme';
+import logoImg from '@/assets/logo.png';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
