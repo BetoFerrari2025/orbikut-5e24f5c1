@@ -95,7 +95,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
           </div>
           {conv.last_message && (
             <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(conv.last_message.created_at), { locale: ptBR, addSuffix: false })}
+              {formatDistanceToNow(new Date(conv.last_message.created_at), { addSuffix: false })}
             </span>
           )}
         </button>
