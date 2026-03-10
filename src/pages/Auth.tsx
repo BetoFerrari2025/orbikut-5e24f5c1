@@ -55,9 +55,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center glow-primary">
-              <Sparkles className="w-8 h-8 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="Orbita" className="w-16 h-16 rounded-2xl object-cover" />
           </div>
           <CardTitle className="text-3xl font-bold text-gradient-brand">
             Orbita
