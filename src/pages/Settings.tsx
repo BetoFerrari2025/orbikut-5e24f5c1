@@ -163,7 +163,7 @@ export default function Settings() {
         </Button>
       </form>
 
-      <div className="mt-8 border-t border-border pt-6">
+      <div className="mt-8 border-t border-border pt-6 space-y-6">
         <h2 className="text-lg font-semibold text-foreground mb-4">{t('settings.appearance')}</h2>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -175,6 +175,31 @@ export default function Settings() {
             checked={theme === 'dark'}
             onCheckedChange={toggleTheme}
           />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Globe className="w-5 h-5 text-foreground" />
+            <div>
+              <Label className="cursor-pointer">{t('settings.language')}</Label>
+              <p className="text-xs text-muted-foreground">{t('settings.languageDesc')}</p>
+            </div>
+          </div>
+          <Select
+            value={i18n.language?.substring(0, 2)}
+            onValueChange={(value) => i18n.changeLanguage(value)}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </main>
