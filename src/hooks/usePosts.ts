@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const PAGE_SIZE = 10;
 
-export type PostWithProfile = Post & {
+export type PostWithProfile = Omit<Post, 'profiles'> & {
   profiles: { id: string; username: string; full_name: string | null; avatar_url: string | null };
 };
 
