@@ -15,8 +15,8 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
+      // No auth — return empty ranking (client will use chronological order)
+      return new Response(JSON.stringify({ post_ids: [], topics: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -35,8 +35,8 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
+      // Invalid/expired session — return empty ranking gracefully
+      return new Response(JSON.stringify({ post_ids: [], topics: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
