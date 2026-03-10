@@ -118,6 +118,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const recordView = useRecordView();
   const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [showComments, setShowComments] = useState(false);
