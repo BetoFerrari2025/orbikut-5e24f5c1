@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, TouchEvent } from 'react';
 import { PostCard } from '@/components/PostCard';
 import { PostCardErrorBoundary } from '@/components/PostCardErrorBoundary';
 import { StoriesBar } from '@/components/StoriesBar';
+import { FriendSuggestions } from '@/components/FriendSuggestions';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
@@ -149,9 +150,12 @@ const Index = () => {
 
         {posts && posts.length > 0 && (
           <div className="space-y-6">
-            {posts.map((post) => (
+            {posts.map((post, index) => (
               <PostCardErrorBoundary key={post.id} postId={post.id}>
-                <PostCard post={post} />
+                <>
+                  <PostCard post={post} />
+                  {index === 2 && <FriendSuggestions />}
+                </>
               </PostCardErrorBoundary>
             ))}
 
