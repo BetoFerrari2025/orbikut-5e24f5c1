@@ -129,7 +129,7 @@ export default function Landing() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <img src={logoImg} alt="Orbita" className="w-5 h-5 rounded object-cover" />
             <span className="font-bold">Orbita</span>
           </div>
           <p>© {new Date().getFullYear()} Orbita. Todos os direitos reservados.</p>
