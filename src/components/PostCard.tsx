@@ -150,9 +150,9 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <>
-      <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0">
+      <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0 w-[calc(100%+2rem)] md:w-full">
         {/* Image or Video with overlay header */}
-        <div className="relative aspect-[4/5] bg-muted">
+        <div className="relative aspect-[4/5] bg-muted w-full">
           {/* Overlay Header */}
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
             <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
