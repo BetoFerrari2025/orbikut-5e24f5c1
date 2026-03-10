@@ -153,7 +153,7 @@ export function CreatePost() {
             disabled={!selectedImage || createPost.isPending}
             className="w-full gradient-brand hover:opacity-90 glow-primary"
           >
-            {createPost.isPending ? 'Publicando...' : 'Compartilhar'}
+            {createPost.isPending ? t('createPost.publishing') : t('createPost.share')}
           </Button>
         </div>
       </DialogContent>

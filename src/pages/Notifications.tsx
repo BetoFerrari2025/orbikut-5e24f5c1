@@ -179,7 +179,7 @@ function NotificationItem({ notification, onDelete }: { notification: Notificati
             )}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {formatDistanceToNow(new Date(notification.created_at), { locale: ptBR, addSuffix: true })}
+            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
           </p>
         </div>
       </Link>
