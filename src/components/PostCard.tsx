@@ -184,6 +184,24 @@ export function PostCard({ post }: PostCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isOwnPost && (
+                    <DropdownMenuItem onClick={() => { setIsEditing(true); setEditCaption(post.caption ?? ''); }} className="gap-2">
+                      <Pencil className="w-4 h-4" />
+                      Editar legenda
+                    </DropdownMenuItem>
+                  )}
+                  {isOwnPost && (
+                    <DropdownMenuItem onClick={() => { if (confirm('Tem certeza que deseja excluir este post?')) { deletePost.mutate(post.id); toast.success('Post excluído!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Excluir post
+                    </DropdownMenuItem>
+                  )}
+                  {!isOwnPost && isAdmin && (
+                    <DropdownMenuItem onClick={() => { if (confirm('Excluir este post como administrador?')) { adminDeletePost.mutate(post.id); toast.success('Post excluído pelo admin!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Excluir (Admin)
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
                     <EyeOff className="w-4 h-4" />
                     Ocultar post
