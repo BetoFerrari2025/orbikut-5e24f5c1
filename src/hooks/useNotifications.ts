@@ -88,7 +88,7 @@ export function useNotifications() {
         const body = `${actorName} ${typeLabels[n.type] || 'interagiu com você'}`;
         const url = n.post_id ? `/post/${n.post_id}` : '/notifications';
 
-        showBrowserNotification('Orbita', body, url);
+        showBrowserNotification('Orbikut', body, url);
       })
       .subscribe();
 

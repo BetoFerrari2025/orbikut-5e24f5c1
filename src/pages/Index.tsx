@@ -7,11 +7,13 @@ import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 
 const PULL_THRESHOLD = 80;
 
 const Index = () => {
+  const { t } = useTranslation();
   const {
     data: posts,
     isLoading,
@@ -140,10 +142,10 @@ const Index = () => {
 
         {posts && posts.length === 0 && (
           <div className="text-center py-12">
-            <img src={logoImg} alt="Orbita" className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
-            <h2 className="text-xl font-semibold mb-2">Nenhum post ainda</h2>
+            <img src={logoImg} alt="Orbikut" className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
+            <h2 className="text-xl font-semibold mb-2">{t('feed.noPostsYet')}</h2>
             <p className="text-muted-foreground">
-              Seja o primeiro a compartilhar uma foto!
+              {t('feed.beFirst')}
             </p>
           </div>
         )}
