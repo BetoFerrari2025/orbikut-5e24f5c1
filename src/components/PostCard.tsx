@@ -304,7 +304,7 @@ export function PostCard({ post }: PostCardProps) {
               <Link to={`/profile/${profile.username}`} className="font-semibold mr-2">
                 {profile.username}
               </Link>
-              <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
+              <SafeCaption text={post.caption} allowLinks={isAdminPost} />
             </p>
           ) : null}
 
