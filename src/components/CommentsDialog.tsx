@@ -10,10 +10,10 @@ import { useComments, useAddComment, useUpdateComment, useDeleteComment } from '
 import { useAuth } from '@/contexts/AuthContext';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { OnlineIndicator } from '@/components/OnlineIndicator';
 import { isUserOnline } from '@/hooks/useOnlineStatus';
+import { useTranslation } from 'react-i18next';
 
 interface CommentsDialogProps {
   postId: string;
@@ -23,6 +23,7 @@ interface CommentsDialogProps {
 }
 
 export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: CommentsDialogProps) {
+  const { t } = useTranslation();
   const { data: comments } = useComments(postId);
   const addComment = useAddComment();
   const updateComment = useUpdateComment();
@@ -53,27 +54,27 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
     updateComment.mutate({ commentId: editingId, content: editText.trim(), postId });
     setEditingId(null);
     setEditText('');
-    toast.success('Comentário editado');
+    toast.success(t('comments.commentEdited'));
   };
 
   const handleDelete = (commentId: string) => {
     deleteComment.mutate({ commentId, postId });
-    toast.success('Comentário excluído');
+    toast.success(t('comments.commentDeleted'));
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] flex flex-col p-0">
         <DialogHeader className="p-4 pb-2 border-b border-border">
-          <DialogTitle className="text-center">Comentários</DialogTitle>
+          <DialogTitle className="text-center">{t('comments.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
           {(!comments || comments.length === 0) && (
             <div className="text-center py-8">
               <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground text-sm">Nenhum comentário ainda</p>
-              <p className="text-muted-foreground text-xs">Seja o primeiro a comentar!</p>
+              <p className="text-muted-foreground text-sm">{t('comments.noComments')}</p>
+              <p className="text-muted-foreground text-xs">{t('comments.beFirst')}</p>
             </div>
           )}
 
@@ -92,7 +93,7 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
                     {c.profiles.username}
                   </Link>
                   <span className="text-[10px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: ptBR })}
+                    {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
                   </span>
                   {user?.id === c.user_id && (
                     <DropdownMenu>
@@ -104,11 +105,11 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEdit(c.id, c.content)} className="gap-2">
                           <Pencil className="w-3.5 h-3.5" />
-                          Editar
+                          {t('comments.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDelete(c.id)} className="gap-2 text-destructive focus:text-destructive">
                           <Trash2 className="w-3.5 h-3.5" />
-                          Excluir
+                          {t('comments.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -116,28 +117,15 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
                 </div>
                 {editingId === c.id ? (
                   <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
-                      className="flex-1 text-sm h-8"
-                      autoFocus
-                    />
-                    <Button size="sm" variant="ghost" onClick={handleSaveEdit} disabled={!editText.trim()} className="h-8 px-2 text-primary">
-                      Salvar
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8 px-2">
-                      <X className="w-3.5 h-3.5" />
-                    </Button>
+                    <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()} className="flex-1 text-sm h-8" autoFocus />
+                    <Button size="sm" variant="ghost" onClick={handleSaveEdit} disabled={!editText.trim()} className="h-8 px-2 text-primary">{t('post.save')}</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8 px-2"><X className="w-3.5 h-3.5" /></Button>
                   </div>
                 ) : (
                   <p className="text-sm text-foreground mt-0.5">{c.content}</p>
                 )}
-                <button
-                  onClick={() => setReplyTo(c.profiles.username)}
-                  className="text-xs text-muted-foreground hover:text-primary mt-1 font-semibold"
-                >
-                  Responder
+                <button onClick={() => setReplyTo(c.profiles.username)} className="text-xs text-muted-foreground hover:text-primary mt-1 font-semibold">
+                  {t('comments.replyTo')}
                 </button>
               </div>
             </div>
@@ -148,15 +136,13 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
           <div className="border-t border-border p-3 space-y-2">
             {replyTo && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Respondendo a <strong className="text-foreground">@{replyTo}</strong></span>
-                <button onClick={() => setReplyTo(null)}>
-                  <X className="w-3 h-3" />
-                </button>
+                <span>{t('comments.replyingTo')} <strong className="text-foreground">@{replyTo}</strong></span>
+                <button onClick={() => setReplyTo(null)}><X className="w-3 h-3" /></button>
               </div>
             )}
             <div className="flex items-center gap-2">
               <Input
-                placeholder={replyTo ? `Responder @${replyTo}...` : 'Adicione um comentário...'}
+                placeholder={replyTo ? t('comments.replyPlaceholder', { username: replyTo }) : t('comments.addComment')}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -171,7 +157,7 @@ export function CommentsDialog({ postId, postOwnerId, open, onOpenChange }: Comm
         ) : (
           <div className="border-t border-border p-4 text-center">
             <Link to="/auth" className="text-primary font-semibold text-sm hover:underline">
-              Entre para comentar
+              {t('comments.loginToComment')}
             </Link>
           </div>
         )}
