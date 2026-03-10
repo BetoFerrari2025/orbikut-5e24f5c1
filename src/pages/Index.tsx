@@ -15,7 +15,6 @@ const PULL_THRESHOLD = 80;
 const Index = () => {
   const { t } = useTranslation();
   const {
-  const {
     data: posts,
     isLoading,
     error,
