@@ -19,12 +19,11 @@ import { toast } from 'sonner';
 
 function LinkifiedText({ text, allowLinks }: { text: string; allowLinks: boolean }) {
   if (!allowLinks) return <>{text}</>;
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
   return (
     <>
       {parts.map((part, i) =>
-        urlRegex.test(part) ? (
+        /^https?:\/\//.test(part) ? (
           <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:opacity-80">
             {part}
           </a>
