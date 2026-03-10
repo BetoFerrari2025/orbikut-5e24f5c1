@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,22 +19,15 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-function LinkifiedText({ text, allowLinks }: { text: string; allowLinks: boolean }) {
-  if (!allowLinks) return <>{text}</>;
-  const parts = text.split(/(https?:\/\/[^\s]+)/g);
-  return (
-    <>
-      {parts.map((part, i) =>
-        /^https?:\/\//.test(part) ? (
-          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-accent underline hover:opacity-80 break-all">
-            {part}
-          </a>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
+function SafeCaption({ text, allowLinks }: { text: string; allowLinks: boolean }) {
+  try {
+    if (!allowLinks) return <>{text}</>;
+    // Extract URLs and render remaining text without them (URLs go to CTA button)
+    const cleanText = text.replace(/(https?:\/\/[^\s]+)/g, '').trim();
+    return <>{cleanText || text}</>;
+  } catch {
+    return <>{text}</>;
+  }
 }
 
 interface PostCardProps {
@@ -42,6 +35,8 @@ interface PostCardProps {
     id: string;
     image_url: string;
     caption: string | null;
+    link_url: string | null;
+    link_label: string | null;
     created_at: string;
     profiles: {
       id: string;
