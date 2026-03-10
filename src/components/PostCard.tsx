@@ -12,9 +12,29 @@ import { useSendNotification } from '@/hooks/useNotifications';
 import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { CommentsDialog } from '@/components/CommentsDialog';
 import { useDwellTracker, useTrackEngagement } from '@/hooks/useEngagement';
+import { useAdminUserIds } from '@/hooks/useAdminUsers';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+
+function LinkifiedText({ text, allowLinks }: { text: string; allowLinks: boolean }) {
+  if (!allowLinks) return <>{text}</>;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        urlRegex.test(part) ? (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:opacity-80">
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
 
 interface PostCardProps {
   post: {
@@ -49,6 +69,8 @@ export function PostCard({ post }: PostCardProps) {
   const isOwnPost = user?.id === post.profiles.id;
   const { trackSignal } = useTrackEngagement();
   const { onVisible, onHidden } = useDwellTracker(post.id);
+  const { data: adminIds } = useAdminUserIds();
+  const isAdminPost = adminIds?.includes(post.profiles.id) ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for dwell time tracking
@@ -229,7 +251,7 @@ export function PostCard({ post }: PostCardProps) {
               <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
                 {post.profiles.username}
               </Link>
-              {post.caption}
+              <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
             </p>
           )}
 

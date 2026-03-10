@@ -72,6 +72,14 @@ serve(async (req) => {
 
     const followedIds = (follows || []).map((f) => f.following_id);
 
+    // 3b. Get admin user IDs to boost their posts
+    const { data: adminRoles } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+
+    const adminIds = (adminRoles || []).map((r) => r.user_id);
+
     // 4. Build engagement score per post
     const postScores: Record<string, number> = {};
     for (const signal of signals || []) {
@@ -196,6 +204,9 @@ serve(async (req) => {
 
       // Penalize own posts slightly (user already knows them)
       if (post.user_id === userId) score -= 5;
+
+      // Admin posts get a big boost so they appear in all feeds
+      if (adminIds.includes(post.user_id)) score += 20;
 
       // Already heavily engaged = slightly lower (variety)
       if (postScores[post.id] && postScores[post.id] > 10) score -= 2;
