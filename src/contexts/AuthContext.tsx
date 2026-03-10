@@ -27,14 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }).catch(() => ({ data: { session: null } })))
+    supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       })
       .catch(() => {
-        // If session retrieval fails (e.g. expired refresh token), clear state gracefully
         setSession(null);
         setUser(null);
         setLoading(false);
