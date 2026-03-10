@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const PAGE_SIZE = 10;
 
-export type PostWithProfile = Post & {
+export type PostWithProfile = Omit<Post, 'profiles'> & {
   profiles: { id: string; username: string; full_name: string | null; avatar_url: string | null };
 };
 
@@ -59,7 +59,7 @@ export function useCreatePost() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ imageFile, caption }: { imageFile: File; caption: string }) => {
+    mutationFn: async ({ imageFile, caption, linkUrl, linkLabel }: { imageFile: File; caption: string; linkUrl?: string; linkLabel?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = imageFile.name.split('.').pop();
@@ -75,13 +75,19 @@ export function useCreatePost() {
         .from('posts')
         .getPublicUrl(fileName);
 
+      const insertData: any = {
+        user_id: user.id,
+        image_url: publicUrl,
+        caption,
+      };
+      if (linkUrl) {
+        insertData.link_url = linkUrl;
+        insertData.link_label = linkLabel || 'Saiba mais';
+      }
+
       const { error: postError } = await supabase
         .from('posts')
-        .insert({
-          user_id: user.id,
-          image_url: publicUrl,
-          caption,
-        });
+        .insert(insertData);
 
       if (postError) throw postError;
     },

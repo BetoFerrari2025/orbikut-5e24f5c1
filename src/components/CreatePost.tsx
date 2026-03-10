@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react';
-import { ImagePlus, Video, X } from 'lucide-react';
+import { ImagePlus, Video, X, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCreatePost } from '@/hooks/usePosts';
+import { useIsAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
 
 export function CreatePost() {
@@ -11,8 +13,11 @@ export function CreatePost() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkLabel, setLinkLabel] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createPost = useCreatePost();
+  const { data: isAdmin } = useIsAdmin();
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,7 +34,12 @@ export function CreatePost() {
     }
 
     try {
-      await createPost.mutateAsync({ imageFile: selectedImage, caption });
+      await createPost.mutateAsync({
+        imageFile: selectedImage,
+        caption,
+        linkUrl: linkUrl.trim() || undefined,
+        linkLabel: linkLabel.trim() || undefined,
+      });
       toast.success('Post criado com sucesso!');
       setOpen(false);
       resetForm();
@@ -42,6 +52,8 @@ export function CreatePost() {
     setSelectedImage(null);
     setPreview(null);
     setCaption('');
+    setLinkUrl('');
+    setLinkLabel('');
   };
 
   return (
@@ -113,6 +125,26 @@ export function CreatePost() {
             onChange={(e) => setCaption(e.target.value)}
             rows={3}
           />
+
+          {isAdmin && (
+            <div className="space-y-2 p-3 rounded-lg border border-accent/30 bg-accent/5">
+              <p className="text-xs font-semibold text-accent flex items-center gap-1">
+                <Link2 className="w-3 h-3" /> Link de ação (Admin)
+              </p>
+              <Input
+                placeholder="https://exemplo.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="text-sm"
+              />
+              <Input
+                placeholder="Texto do botão (ex: Saiba mais)"
+                value={linkLabel}
+                onChange={(e) => setLinkLabel(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+          )}
 
           <Button
             onClick={handleSubmit}
