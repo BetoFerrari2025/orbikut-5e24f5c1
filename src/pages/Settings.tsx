@@ -11,8 +11,18 @@ import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Camera, Moon } from 'lucide-react';
+import { Camera, Moon, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const LANGUAGES = [
+  { code: 'pt', label: 'Português' },
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+];
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
