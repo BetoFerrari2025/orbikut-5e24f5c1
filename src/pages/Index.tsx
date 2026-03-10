@@ -144,9 +144,9 @@ const Index = () => {
         {posts && posts.length === 0 && (
           <div className="text-center py-12">
             <img src={logoImg} alt="Orbikut" className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
-            <h2 className="text-xl font-semibold mb-2">Nenhum post ainda</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('feed.noPostsYet')}</h2>
             <p className="text-muted-foreground">
-              Seja o primeiro a compartilhar uma foto!
+              {t('feed.beFirst')}
             </p>
           </div>
         )}
