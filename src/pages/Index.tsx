@@ -7,6 +7,7 @@ import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 
 const PULL_THRESHOLD = 80;
