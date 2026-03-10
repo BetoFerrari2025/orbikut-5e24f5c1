@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,42 @@ import { usePagePresence } from '@/hooks/usePagePresence';
 
 export default function Auth() {
   usePagePresence('auth');
+
+  // Load GerenciarROI UTM script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://zwylxoajyyjflvvcwpvz.supabase.co/functions/v1/utms/latest.js';
+    script.async = true;
+    script.defer = true;
+    script.setAttribute('data-gerenciaroi-prevent-xcod-sck', '');
+    script.setAttribute('data-gerenciaroi-prevent-subids', '');
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
+  // GerenciaROI - Rastreamento ao Vivo
+  useEffect(() => {
+    const uid = "0d6e183b-9b25-4bb6-a59c-187fd39f35fe";
+    const sid = Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+    const url = "https://zwylxoajyyjflvvcwpvz.supabase.co/functions/v1/track-visitor";
+    const send = (action: string) => {
+      const data = JSON.stringify({ user_id: uid, session_id: sid, page_url: location.href, action });
+      if (navigator.sendBeacon) { navigator.sendBeacon(url, data); }
+      else { fetch(url, { method: "POST", body: data, headers: { "Content-Type": "application/json" }, keepalive: true }); }
+    };
+    send("heartbeat");
+    const interval = setInterval(() => send("heartbeat"), 15000);
+    const handleUnload = () => send("leave");
+    const handleVisibility = () => { if (document.hidden) send("leave"); else send("heartbeat"); };
+    window.addEventListener("beforeunload", handleUnload);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("beforeunload", handleUnload);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      send("leave");
+    };
+  }, []);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
