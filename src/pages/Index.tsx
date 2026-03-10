@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, TouchEvent } from 'react';
 import { PostCard } from '@/components/PostCard';
+import { PostCardErrorBoundary } from '@/components/PostCardErrorBoundary';
 import { StoriesBar } from '@/components/StoriesBar';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
