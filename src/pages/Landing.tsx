@@ -54,8 +54,8 @@ export default function Landing() {
               <div className="relative w-72">
                 <div className="w-full aspect-[9/19] rounded-[2.5rem] border-4 border-muted bg-card shadow-2xl overflow-hidden">
                   <div className="w-full h-full bg-gradient-to-b from-primary/10 to-accent/10 flex flex-col items-center justify-center gap-4 p-6">
-                    <img src={logoImg} alt="Orbita" className="w-16 h-16 rounded-2xl object-cover" />
-                    <p className="text-3xl font-black text-gradient-brand">Orbita</p>
+                    <img src={logoImg} alt="Orbikut" className="w-16 h-16 rounded-2xl object-cover" />
+                    <p className="text-3xl font-black text-gradient-brand">Orbikut</p>
                     <div className="w-full space-y-3 mt-4">
                       {[1, 2, 3].map(i => (
                         <div key={i} className="w-full h-16 rounded-xl bg-muted/50 animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />
