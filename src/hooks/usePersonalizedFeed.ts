@@ -34,14 +34,34 @@ export function usePersonalizedFeed() {
   const allPosts = (infiniteData?.pages?.flatMap((page) => page?.posts ?? []) ?? [])
     .filter((p) => p.profiles?.username);
 
-  // Sort posts by AI ranking if available (only first page for ranking relevance)
-  const sortedPosts = allPosts.length > 0 && ranking?.post_ids?.length
+  // Sort: recent posts (last 2 hours) stay on top chronologically,
+  // older posts get sorted by AI ranking if available
+  const TWO_HOURS = 2 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const sortedPosts = allPosts.length > 0
     ? [...allPosts].sort((a, b) => {
-        const indexA = ranking.post_ids.indexOf(a.id);
-        const indexB = ranking.post_ids.indexOf(b.id);
-        const scoreA = indexA === -1 ? 9999 : indexA;
-        const scoreB = indexB === -1 ? 9999 : indexB;
-        return scoreA - scoreB;
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        const isRecentA = now - timeA < TWO_HOURS;
+        const isRecentB = now - timeB < TWO_HOURS;
+
+        // Recent posts always come first, sorted newest-first
+        if (isRecentA && !isRecentB) return -1;
+        if (!isRecentA && isRecentB) return 1;
+        if (isRecentA && isRecentB) return timeB - timeA;
+
+        // For older posts, use AI ranking if available
+        if (ranking?.post_ids?.length) {
+          const indexA = ranking.post_ids.indexOf(a.id);
+          const indexB = ranking.post_ids.indexOf(b.id);
+          const scoreA = indexA === -1 ? 9999 : indexA;
+          const scoreB = indexB === -1 ? 9999 : indexB;
+          return scoreA - scoreB;
+        }
+
+        // Fallback: chronological
+        return timeB - timeA;
       })
     : allPosts;
 
