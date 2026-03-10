@@ -91,7 +91,7 @@ export default function AdminUsers() {
         <h1 className="text-2xl font-bold text-foreground">Painel Administrativo</h1>
       </div>
 
-      <Tabs defaultValue="users" className="w-full">
+      <Tabs defaultValue="users" className="w-full max-w-2xl mx-auto">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="users" className="gap-2">
             <Users className="w-4 h-4" /> Usuários
