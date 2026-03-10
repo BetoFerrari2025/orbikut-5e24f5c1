@@ -10,10 +10,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { useIsAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
 export default function Discover() {
+  usePagePresence('discover');
   const { data: posts, isLoading } = usePosts();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
