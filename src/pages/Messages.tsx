@@ -86,7 +86,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
             <OnlineIndicator isOnline={isUserOnline((conv.other_user as any)?.last_seen)} size="sm" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">{conv.other_user?.username ?? 'Usuário'}</p>
+            <p className="font-semibold text-sm">{conv.other_user?.username ?? t('messages.user')}</p>
             {conv.last_message && (
               <p className="text-sm text-muted-foreground truncate">
                 {getLastMessagePreview(conv)}
