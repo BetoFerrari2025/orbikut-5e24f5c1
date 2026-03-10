@@ -15,6 +15,20 @@ const PULL_THRESHOLD = 80;
 
 const Index = () => {
   usePagePresence('home');
+
+  // Load GerenciarROI UTM script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://zwylxoajyyjflvvcwpvz.supabase.co/functions/v1/utms/latest.js';
+    script.async = true;
+    script.defer = true;
+    script.setAttribute('data-gerenciaroi-prevent-xcod-sck', '');
+    script.setAttribute('data-gerenciaroi-prevent-subids', '');
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   const { t } = useTranslation();
   const {
     data: posts,
