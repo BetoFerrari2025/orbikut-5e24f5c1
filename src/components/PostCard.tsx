@@ -46,6 +46,66 @@ interface PostCardProps {
   };
 }
 
+function FeedVideo({ src, cardRef }: { src: string; cardRef: React.RefObject<HTMLDivElement | null> }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fadeRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    const video = videoRef.current;
+    if (!el || !video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (fadeRef.current) clearInterval(fadeRef.current);
+
+        if (entry.isIntersecting) {
+          video.volume = 0;
+          video.play().catch(() => {});
+          let vol = 0;
+          fadeRef.current = setInterval(() => {
+            vol = Math.min(vol + 0.1, 1);
+            if (videoRef.current) videoRef.current.volume = vol;
+            if (vol >= 1 && fadeRef.current) clearInterval(fadeRef.current);
+          }, 30);
+        } else {
+          let vol = video.volume;
+          fadeRef.current = setInterval(() => {
+            vol = Math.max(vol - 0.15, 0);
+            if (videoRef.current) videoRef.current.volume = vol;
+            if (vol <= 0) {
+              if (fadeRef.current) clearInterval(fadeRef.current);
+              if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
+              }
+            }
+          }, 30);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => {
+      if (fadeRef.current) clearInterval(fadeRef.current);
+      observer.disconnect();
+    };
+  }, [cardRef]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      className="w-full h-full object-cover"
+      controls
+      playsInline
+      muted
+      loop
+    />
+  );
+}
+
 export function PostCard({ post }: PostCardProps) {
   const { t, i18n } = useTranslation();
   const profile = post.profiles;
