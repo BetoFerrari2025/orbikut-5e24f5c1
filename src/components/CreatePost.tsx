@@ -82,7 +82,7 @@ export function CreatePost() {
                 <ImagePlus className="w-10 h-10 text-muted-foreground" />
                 <Video className="w-10 h-10 text-muted-foreground" />
               </div>
-              <p className="text-muted-foreground">Clique para selecionar uma imagem ou vídeo</p>
+              <p className="text-muted-foreground">{t('createPost.selectMedia')}</p>
               <input
                 ref={fileInputRef}
                 type="file"
