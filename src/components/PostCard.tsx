@@ -69,6 +69,8 @@ export function PostCard({ post }: PostCardProps) {
   const isOwnPost = user?.id === post.profiles.id;
   const { trackSignal } = useTrackEngagement();
   const { onVisible, onHidden } = useDwellTracker(post.id);
+  const { data: adminIds } = useAdminUserIds();
+  const isAdminPost = adminIds?.includes(post.profiles.id) ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for dwell time tracking
