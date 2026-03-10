@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, TouchEvent } from 'react';
 import { PostCard } from '@/components/PostCard';
 import { PostCardErrorBoundary } from '@/components/PostCardErrorBoundary';
 import { StoriesBar } from '@/components/StoriesBar';
+import { FriendSuggestions } from '@/components/FriendSuggestions';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
