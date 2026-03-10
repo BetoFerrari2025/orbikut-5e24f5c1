@@ -545,7 +545,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           <Input
             value={newMessage}
             onChange={handleInputChange}
-            placeholder="Mensagem..."
+            placeholder={t('messages.messagePlaceholder')}
             className="flex-1"
           />
           <Button
