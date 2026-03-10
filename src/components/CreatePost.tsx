@@ -134,7 +134,7 @@ export function CreatePost() {
                 <Link2 className="w-3 h-3" /> {t('createPost.actionLink')}
               </p>
               <Input
-                placeholder="https://exemplo.com"
+                placeholder={t('createPost.urlPlaceholder')}
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 className="text-sm"
