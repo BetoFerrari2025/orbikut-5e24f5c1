@@ -350,7 +350,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Selecione uma imagem válida');
+      toast.error(t('messages.selectValidImage'));
       return;
     }
 
