@@ -53,13 +53,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
-  // Guard against missing profile data
   const profile = post.profiles;
-  if (!profile?.username) {
-    console.warn('[PostCard] Missing profile data for post', post.id);
-    return null;
-  }
-
   const [showComments, setShowComments] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -73,19 +67,25 @@ export function PostCard({ post }: PostCardProps) {
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
   const sendNotification = useSendNotification();
-  const { data: followStatus } = useFollowStatus(profile.id);
+  const { data: followStatus } = useFollowStatus(profile?.id ?? '');
   const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
-  const isOwnPost = user?.id === profile.id;
+  const isOwnPost = user?.id === profile?.id;
   const { trackSignal } = useTrackEngagement();
   const { onVisible, onHidden } = useDwellTracker(post.id);
   const { data: adminIds } = useAdminUserIds();
-  const isAdminPost = adminIds?.includes(profile.id) ?? false;
+  const isAdminPost = adminIds?.includes(profile?.id ?? '') ?? false;
   const { data: isAdmin } = useIsAdmin();
   const updatePost = useUpdatePost();
   const deletePost = useDeletePost();
   const adminDeletePost = useAdminDeletePost();
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Guard against missing profile data (after hooks)
+  if (!profile?.username) {
+    console.warn('[PostCard] Missing profile data for post', post.id);
+    return null;
+  }
 
   // Intersection Observer for dwell time tracking
   useEffect(() => {
