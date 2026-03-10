@@ -394,7 +394,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
             mediaType: result.type,
           });
         } catch {
-          toast.error('Erro ao enviar áudio');
+          toast.error(t('messages.audioUploadError'));
         }
       };
 
