@@ -63,7 +63,7 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
   return (
     <div>
       <div className="p-4 border-b">
-        <h1 className="text-xl font-bold">Mensagens</h1>
+        <h1 className="text-xl font-bold">{t('messages.title')}</h1>
       </div>
       {isLoading && <div className="p-4 text-center text-muted-foreground">Carregando...</div>}
       {!isLoading && conversations.length === 0 && (
