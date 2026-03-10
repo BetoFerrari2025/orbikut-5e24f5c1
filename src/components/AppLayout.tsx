@@ -15,7 +15,6 @@ interface AppLayoutProps {
 export function AppLayout({ children, hideNavbar }: AppLayoutProps) {
   const { user } = useAuth();
   useUpdateOnlineStatus();
-  console.log('[AppLayout] render — user:', !!user);
 
   if (!user) {
     return (
