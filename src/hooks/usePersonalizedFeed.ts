@@ -11,12 +11,16 @@ export function usePersonalizedFeed() {
     queryKey: ['personalized-feed', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('personalized-feed');
-      if (error) throw error;
+      if (error) {
+        console.warn('Personalized feed unavailable, falling back to chronological:', error.message);
+        return { post_ids: [], topics: [] };
+      }
       return data as { post_ids: string[]; topics: string[] };
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   // Sort posts by AI ranking if available
