@@ -403,7 +403,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
       setRecordingTime(0);
       timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
     } catch {
-      toast.error('Não foi possível acessar o microfone');
+      toast.error(t('messages.micError'));
     }
   };
 
