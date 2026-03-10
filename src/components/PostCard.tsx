@@ -123,7 +123,7 @@ export function PostCard({ post }: PostCardProps) {
     const isLiked = likesData?.isLiked ?? false;
     toggleLike.mutate({ postId: post.id, isLiked });
     if (!isLiked) {
-      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'like', postId: post.id });
       trackSignal(post.id, 'like');
     }
   };
