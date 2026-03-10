@@ -53,6 +53,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const profile = post.profiles;
   const [showComments, setShowComments] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,14 +67,14 @@ export function PostCard({ post }: PostCardProps) {
   const toggleSave = useToggleSave();
   const recordView = useRecordView();
   const sendNotification = useSendNotification();
-  const { data: followStatus } = useFollowStatus(post.profiles.id);
+  const { data: followStatus } = useFollowStatus(profile?.id ?? '');
   const toggleFollow = useToggleFollow();
   const viewRecorded = useRef(false);
-  const isOwnPost = user?.id === post.profiles.id;
+  const isOwnPost = user?.id === profile?.id;
   const { trackSignal } = useTrackEngagement();
   const { onVisible, onHidden } = useDwellTracker(post.id);
   const { data: adminIds } = useAdminUserIds();
-  const isAdminPost = adminIds?.includes(post.profiles.id) ?? false;
+  const isAdminPost = adminIds?.includes(profile?.id ?? '') ?? false;
   const { data: isAdmin } = useIsAdmin();
   const updatePost = useUpdatePost();
   const deletePost = useDeletePost();
@@ -98,7 +99,7 @@ export function PostCard({ post }: PostCardProps) {
 
     observer.observe(el);
     return () => {
-      onHidden(); // flush on unmount
+      onHidden();
       observer.disconnect();
     };
   }, [onVisible, onHidden]);
@@ -110,13 +111,19 @@ export function PostCard({ post }: PostCardProps) {
     }
   }, [post.id]);
 
+  // Guard against missing profile data (after all hooks)
+  if (!profile?.username) {
+    console.warn('[PostCard] Missing profile data for post', post.id);
+    return null;
+  }
+
 
   const handleLike = () => {
     if (!user) return;
     const isLiked = likesData?.isLiked ?? false;
     toggleLike.mutate({ postId: post.id, isLiked });
     if (!isLiked) {
-      sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'like', postId: post.id });
+      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'like', postId: post.id });
       trackSignal(post.id, 'like');
     }
   };
@@ -155,12 +162,12 @@ export function PostCard({ post }: PostCardProps) {
         <div className="relative aspect-[4/5] bg-muted w-full">
           {/* Overlay Header */}
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
-            <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
+            <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
               <Avatar className="w-8 h-8 ring-2 ring-white/30">
-                <AvatarImage src={post.profiles.avatar_url ?? undefined} />
-                <AvatarFallback className="text-white bg-white/20">{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+                <AvatarImage src={profile.avatar_url ?? undefined} />
+                <AvatarFallback className="text-white bg-white/20">{profile.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span className="font-semibold text-sm text-white drop-shadow-md">{post.profiles.username}</span>
+              <span className="font-semibold text-sm text-white drop-shadow-md">{profile.username}</span>
             </Link>
             <div className="flex items-center gap-2">
               {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
@@ -170,8 +177,8 @@ export function PostCard({ post }: PostCardProps) {
                   className="text-white font-semibold text-sm h-auto py-1 px-2 hover:bg-white/20"
                   disabled={toggleFollow.isPending}
                   onClick={() => {
-                    toggleFollow.mutate({ targetUserId: post.profiles.id, isFollowing: false });
-                    sendNotification.mutate({ userId: post.profiles.id, actorId: user.id, type: 'follow' });
+                    toggleFollow.mutate({ targetUserId: profile.id, isFollowing: false });
+                    sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
                   }}
                 >
                   Seguir
@@ -281,8 +288,8 @@ export function PostCard({ post }: PostCardProps) {
             </form>
           ) : post.caption ? (
             <p className="text-sm text-foreground">
-              <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
-                {post.profiles.username}
+              <Link to={`/profile/${profile.username}`} className="font-semibold mr-2">
+                {profile.username}
               </Link>
               <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
             </p>
@@ -308,7 +315,7 @@ export function PostCard({ post }: PostCardProps) {
       {/* Comments Dialog */}
       <CommentsDialog
         postId={post.id}
-        postOwnerId={post.profiles.id}
+        postOwnerId={profile.id}
         open={showComments}
         onOpenChange={setShowComments}
       />

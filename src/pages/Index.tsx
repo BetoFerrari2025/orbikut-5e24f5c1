@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, TouchEvent } from 'react';
 import { PostCard } from '@/components/PostCard';
+import { PostCardErrorBoundary } from '@/components/PostCardErrorBoundary';
 import { StoriesBar } from '@/components/StoriesBar';
 import { usePersonalizedFeed } from '@/hooks/usePersonalizedFeed';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -149,7 +150,9 @@ const Index = () => {
         {posts && posts.length > 0 && (
           <div className="space-y-6">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCardErrorBoundary key={post.id} postId={post.id}>
+                <PostCard post={post} />
+              </PostCardErrorBoundary>
             ))}
 
             {/* Infinite scroll sentinel */}

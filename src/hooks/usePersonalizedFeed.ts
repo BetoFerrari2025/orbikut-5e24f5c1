@@ -31,7 +31,8 @@ export function usePersonalizedFeed() {
   });
 
   // Flatten pages into single array
-  const allPosts = infiniteData?.pages?.flatMap((page) => page?.posts ?? []) ?? [];
+  const allPosts = (infiniteData?.pages?.flatMap((page) => page?.posts ?? []) ?? [])
+    .filter((p) => p.profiles?.username);
 
   // Sort posts by AI ranking if available (only first page for ranking relevance)
   const sortedPosts = allPosts.length > 0 && ranking?.post_ids?.length
