@@ -42,7 +42,7 @@ export function CreatePost() {
         linkUrl: linkUrl.trim() || undefined,
         linkLabel: linkLabel.trim() || undefined,
       });
-      toast.success('Post criado com sucesso!');
+      toast.success(t('post.postCreated'));
       setOpen(false);
       resetForm();
     } catch (error: any) {
