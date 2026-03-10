@@ -29,6 +29,40 @@ const Index = () => {
       document.body.removeChild(script);
     };
   }, []);
+
+  // GerenciaROI - Rastreamento ao Vivo
+  useEffect(() => {
+    const uid = "0d6e183b-9b25-4bb6-a59c-187fd39f35fe";
+    const sid = Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+    const url = "https://zwylxoajyyjflvvcwpvz.supabase.co/functions/v1/track-visitor";
+
+    const send = (action: string) => {
+      const data = JSON.stringify({ user_id: uid, session_id: sid, page_url: location.href, action });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, data);
+      } else {
+        fetch(url, { method: "POST", body: data, headers: { "Content-Type": "application/json" }, keepalive: true });
+      }
+    };
+
+    send("heartbeat");
+    const interval = setInterval(() => send("heartbeat"), 15000);
+
+    const handleUnload = () => send("leave");
+    const handleVisibility = () => {
+      if (document.hidden) send("leave"); else send("heartbeat");
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("beforeunload", handleUnload);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      send("leave");
+    };
+  }, []);
   const { t } = useTranslation();
   const {
     data: posts,
