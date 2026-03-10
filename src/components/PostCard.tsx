@@ -230,6 +230,8 @@ export function PostCard({ post }: PostCardProps) {
               src={post.image_url}
               alt={post.caption ?? 'Post image'}
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           )}
         </div>
