@@ -24,7 +24,7 @@ export default function Messages() {
   if (!user) {
     return (
       <main className="max-w-lg mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Faça login para acessar suas mensagens.</p>
+        <p className="text-muted-foreground">{t('messages.loginRequired')}</p>
       </main>
     );
   }
