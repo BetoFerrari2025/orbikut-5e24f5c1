@@ -205,6 +205,9 @@ serve(async (req) => {
       // Penalize own posts slightly (user already knows them)
       if (post.user_id === userId) score -= 5;
 
+      // Admin posts get a big boost so they appear in all feeds
+      if (adminIds.includes(post.user_id)) score += 20;
+
       // Already heavily engaged = slightly lower (variety)
       if (postScores[post.id] && postScores[post.id] > 10) score -= 2;
 
