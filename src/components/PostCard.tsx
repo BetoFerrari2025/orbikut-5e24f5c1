@@ -315,7 +315,7 @@ export function PostCard({ post }: PostCardProps) {
       {/* Comments Dialog */}
       <CommentsDialog
         postId={post.id}
-        postOwnerId={post.profiles.id}
+        postOwnerId={profile.id}
         open={showComments}
         onOpenChange={setShowComments}
       />
