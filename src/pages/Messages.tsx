@@ -65,11 +65,11 @@ function ConversationList({ conversations, isLoading, onSelect, currentUserId }:
       <div className="p-4 border-b">
         <h1 className="text-xl font-bold">{t('messages.title')}</h1>
       </div>
-      {isLoading && <div className="p-4 text-center text-muted-foreground">Carregando...</div>}
+      {isLoading && <div className="p-4 text-center text-muted-foreground">{t('auth.loading')}</div>}
       {!isLoading && conversations.length === 0 && (
         <div className="p-8 text-center text-muted-foreground">
-          <p>Nenhuma conversa ainda</p>
-          <p className="text-sm mt-1">Inicie uma conversa pelo perfil de alguém</p>
+          <p>{t('messages.noConversations')}</p>
+          <p className="text-sm mt-1">{t('messages.startConversation')}</p>
         </div>
       )}
       {conversations.map((conv) => (
