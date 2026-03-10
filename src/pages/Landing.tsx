@@ -11,9 +11,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20 pointer-events-none" />
         <nav className="relative z-10 max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center glow-primary">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="Orbita" className="w-10 h-10 rounded-xl object-cover" />
             <span className="text-3xl font-black text-gradient-brand tracking-tight">Orbita</span>
           </div>
           <div className="flex items-center gap-3">
