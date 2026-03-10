@@ -15,8 +15,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
-  TrendingUp, UserPlus, FileText, Calendar,
+  TrendingUp, UserPlus, FileText, Calendar, Activity, Radio,
 } from 'lucide-react';
+import { usePresenceCount } from '@/hooks/usePresenceCount';
 import { toast } from 'sonner';
 import { formatDistanceToNow, format, subDays, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
