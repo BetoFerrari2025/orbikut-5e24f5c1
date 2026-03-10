@@ -51,7 +51,7 @@ export default function Notifications() {
   if (!user) {
     return (
       <main className="max-w-lg mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Faça login para ver suas notificações.</p>
+        <p className="text-muted-foreground">{t('notifications.loginRequired')}</p>
       </main>
     );
   }
