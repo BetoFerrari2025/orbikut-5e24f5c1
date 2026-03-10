@@ -39,7 +39,7 @@ export default function Install() {
         <button onClick={() => navigate(-1)} className="text-foreground">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-bold text-foreground">Instalar Orbita</h1>
+        <h1 className="text-lg font-bold text-foreground">Instalar Orbikut</h1>
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6 text-center">
