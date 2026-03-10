@@ -81,12 +81,6 @@ export function PostCard({ post }: PostCardProps) {
   const adminDeletePost = useAdminDeletePost();
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Guard against missing profile data (after hooks)
-  if (!profile?.username) {
-    console.warn('[PostCard] Missing profile data for post', post.id);
-    return null;
-  }
-
   // Intersection Observer for dwell time tracking
   useEffect(() => {
     const el = cardRef.current;
@@ -105,7 +99,7 @@ export function PostCard({ post }: PostCardProps) {
 
     observer.observe(el);
     return () => {
-      onHidden(); // flush on unmount
+      onHidden();
       observer.disconnect();
     };
   }, [onVisible, onHidden]);
@@ -116,6 +110,12 @@ export function PostCard({ post }: PostCardProps) {
       recordView.mutate({ postId: post.id, userId: user?.id });
     }
   }, [post.id]);
+
+  // Guard against missing profile data (after all hooks)
+  if (!profile?.username) {
+    console.warn('[PostCard] Missing profile data for post', post.id);
+    return null;
+  }
 
 
   const handleLike = () => {
