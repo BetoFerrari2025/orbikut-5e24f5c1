@@ -24,7 +24,7 @@ function LinkifiedText({ text, allowLinks }: { text: string; allowLinks: boolean
     <>
       {parts.map((part, i) =>
         /^https?:\/\//.test(part) ? (
-          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:opacity-80">
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-accent underline hover:opacity-80 break-all">
             {part}
           </a>
         ) : (
