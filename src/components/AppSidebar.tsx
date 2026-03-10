@@ -51,8 +51,8 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Brand */}
         <div className={cn("px-4 py-4 flex items-center gap-2", collapsed && "justify-center px-2")}>
-          <img src={logoImg} alt="Orbita" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-          {!collapsed && <span className="text-xl font-extrabold text-gradient-brand">Orbita</span>}
+          <img src={logoImg} alt="Orbita" className="w-7 h-7 object-contain shrink-0" />
+          {!collapsed && <span className="text-xl font-extrabold text-gradient-brand tracking-tight">Orbita</span>}
         </div>
 
         {/* Main nav */}
