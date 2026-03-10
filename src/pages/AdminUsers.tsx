@@ -307,10 +307,12 @@ function RealtimePresenceCards() {
   const authCount = usePresenceCount('auth');
   const feedCount = usePresenceCount('feed');
   const discoverCount = usePresenceCount('discover');
+  const messagesCount = usePresenceCount('messages');
 
   const cards = [
     { label: 'No Feed', count: feedCount, icon: Activity, color: 'green-500', borderClass: 'border-primary/30 bg-primary/5', desc: 'pessoas no feed agora' },
     { label: 'No Explorar', count: discoverCount, icon: Eye, color: 'blue-500', borderClass: 'border-blue-500/30 bg-blue-500/5', desc: 'pessoas explorando agora' },
+    { label: 'Nas Mensagens', count: messagesCount, icon: FileText, color: 'purple-500', borderClass: 'border-purple-500/30 bg-purple-500/5', desc: 'pessoas no chat agora' },
     { label: 'Na Home', count: homeCount, icon: Activity, color: 'green-500', borderClass: 'border-primary/30 bg-primary/5', desc: 'pessoas na home agora' },
     { label: 'Na Página de Cadastro', count: authCount, icon: UserPlus, color: 'accent', borderClass: 'border-accent/30 bg-accent/5', desc: 'visitantes na tela de login/cadastro' },
   ];
