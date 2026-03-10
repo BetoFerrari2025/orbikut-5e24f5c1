@@ -162,12 +162,12 @@ export function PostCard({ post }: PostCardProps) {
         <div className="relative aspect-[4/5] bg-muted w-full">
           {/* Overlay Header */}
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
-            <Link to={`/profile/${post.profiles.username}`} className="flex items-center gap-3">
+            <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
               <Avatar className="w-8 h-8 ring-2 ring-white/30">
-                <AvatarImage src={post.profiles.avatar_url ?? undefined} />
-                <AvatarFallback className="text-white bg-white/20">{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+                <AvatarImage src={profile.avatar_url ?? undefined} />
+                <AvatarFallback className="text-white bg-white/20">{profile.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span className="font-semibold text-sm text-white drop-shadow-md">{post.profiles.username}</span>
+              <span className="font-semibold text-sm text-white drop-shadow-md">{profile.username}</span>
             </Link>
             <div className="flex items-center gap-2">
               {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
