@@ -70,7 +70,7 @@ export function CreatePost() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Criar nova publicação</DialogTitle>
+          <DialogTitle>{t('createPost.title')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {!preview ? (
