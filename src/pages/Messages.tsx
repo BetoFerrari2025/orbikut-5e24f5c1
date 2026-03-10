@@ -510,7 +510,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
           <div className="flex-1 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
             <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
-            <span className="text-sm text-muted-foreground">Gravando...</span>
+            <span className="text-sm text-muted-foreground">{t('messages.recording')}</span>
           </div>
           <Button size="icon" onClick={stopRecording} className="gradient-brand hover:opacity-90">
             <Square className="w-4 h-4" />
