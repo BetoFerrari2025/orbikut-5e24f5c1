@@ -14,22 +14,23 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-const typeConfig = {
-  like: { icon: Heart, label: 'curtiu seu post', color: 'text-red-500' },
-  comment: { icon: MessageCircle, label: 'comentou no seu post', color: 'text-blue-500' },
-  follow: { icon: UserPlus, label: 'começou a seguir você', color: 'text-green-500' },
-};
-
 type FilterType = 'all' | 'like' | 'comment' | 'follow';
 
-const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
-  { value: 'all', label: 'Todas', icon: Bell },
-  { value: 'like', label: 'Curtidas', icon: Heart },
-  { value: 'comment', label: 'Comentários', icon: MessageCircle },
-  { value: 'follow', label: 'Seguidores', icon: UserPlus },
-];
-
 export default function Notifications() {
+  const { t } = useTranslation();
+
+  const typeConfig = {
+    like: { icon: Heart, label: t('notifications.likedPost'), color: 'text-red-500' },
+    comment: { icon: MessageCircle, label: t('notifications.commentedPost'), color: 'text-blue-500' },
+    follow: { icon: UserPlus, label: t('notifications.followedYou'), color: 'text-green-500' },
+  };
+
+  const filters: { value: FilterType; label: string; icon: typeof Heart }[] = [
+    { value: 'all', label: t('notifications.all'), icon: Bell },
+    { value: 'like', label: t('notifications.likesFilter'), icon: Heart },
+    { value: 'comment', label: t('notifications.commentsFilter'), icon: MessageCircle },
+    { value: 'follow', label: t('notifications.followersFilter'), icon: UserPlus },
+  ];
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
