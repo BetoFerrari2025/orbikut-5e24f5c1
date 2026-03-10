@@ -18,10 +18,12 @@ import { ProfileLinks } from '@/components/ProfileLinks';
 import { OnlineIndicator } from '@/components/OnlineIndicator';
 import { isUserOnline } from '@/hooks/useOnlineStatus';
 import { useTranslation } from 'react-i18next';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
 export default function Profile() {
+  usePagePresence('profile');
   const { t } = useTranslation();
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
