@@ -64,7 +64,7 @@ export default function Notifications() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                <Trash2 className="w-4 h-4 mr-1" /> Excluir tudo
+                <Trash2 className="w-4 h-4 mr-1" /> {t('notifications.deleteAll')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
