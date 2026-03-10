@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Camera, Users, Heart, MessageCircle, Zap } from 'lucide-react';
+import { Camera, Users, Heart, MessageCircle, Zap, Sparkles } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function Landing() {
   return (
@@ -10,9 +11,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20 pointer-events-none" />
         <nav className="relative z-10 max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center glow-primary">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="Orbita" className="w-10 h-10 rounded-xl object-cover" />
             <span className="text-3xl font-black text-gradient-brand tracking-tight">Orbita</span>
           </div>
           <div className="flex items-center gap-3">
@@ -55,9 +54,7 @@ export default function Landing() {
               <div className="relative w-72">
                 <div className="w-full aspect-[9/19] rounded-[2.5rem] border-4 border-muted bg-card shadow-2xl overflow-hidden">
                   <div className="w-full h-full bg-gradient-to-b from-primary/10 to-accent/10 flex flex-col items-center justify-center gap-4 p-6">
-                    <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-primary-foreground" />
-                    </div>
+                    <img src={logoImg} alt="Orbita" className="w-16 h-16 rounded-2xl object-cover" />
                     <p className="text-3xl font-black text-gradient-brand">Orbita</p>
                     <div className="w-full space-y-3 mt-4">
                       {[1, 2, 3].map(i => (
@@ -132,7 +129,7 @@ export default function Landing() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <img src={logoImg} alt="Orbita" className="w-5 h-5 rounded object-cover" />
             <span className="font-bold">Orbita</span>
           </div>
           <p>© {new Date().getFullYear()} Orbita. Todos os direitos reservados.</p>
