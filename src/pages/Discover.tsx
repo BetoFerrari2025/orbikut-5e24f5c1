@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Volume2, VolumeX, Play, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { usePosts, useLikes, useToggleLike, useComments, useAddComment, useUpdateComment, useDeleteComment } from '@/hooks/usePosts';
+import { usePosts, useLikes, useToggleLike, useComments, useAddComment, useUpdateComment, useDeleteComment, useDeletePost, useAdminDeletePost } from '@/hooks/usePosts';
 import { usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
+import { useIsAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
@@ -124,6 +125,10 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const addComment = useAddComment();
   const updateComment = useUpdateComment();
   const deleteComment = useDeleteComment();
+  const deletePost = useDeletePost();
+  const adminDeletePost = useAdminDeletePost();
+  const { data: isAdmin } = useIsAdmin();
+  const isOwnPost = user?.id === post.profiles?.id;
 
   useEffect(() => {
     if (isActive && !viewRecorded.current) {
@@ -271,6 +276,17 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
           <Eye className="w-6 h-6 text-white/70" />
           <span className="text-white text-xs font-semibold">{viewCount ?? 0}</span>
         </div>
+
+        {isOwnPost && (
+          <button onClick={(e) => { e.stopPropagation(); if (confirm('Excluir este post?')) { deletePost.mutate(post.id); toast.success('Post excluído!'); } }} className="w-10 h-10 flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-white/70 hover:text-destructive" />
+          </button>
+        )}
+        {!isOwnPost && isAdmin && (
+          <button onClick={(e) => { e.stopPropagation(); if (confirm('Excluir como admin?')) { adminDeletePost.mutate(post.id); toast.success('Post excluído pelo admin!'); } }} className="w-10 h-10 flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-red-400 hover:text-red-300" />
+          </button>
+        )}
       </div>
 
       {/* Video progress bar */}

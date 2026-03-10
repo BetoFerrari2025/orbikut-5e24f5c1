@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Bookmark, BookmarkCheck, Eye, Share2, Flag, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useLikes, useToggleLike, useComments } from '@/hooks/usePosts';
+import { useLikes, useToggleLike, useComments, useUpdatePost, useDeletePost, useAdminDeletePost } from '@/hooks/usePosts';
 import { useSavedPost, useToggleSave, usePostViews, useRecordView } from '@/hooks/usePostExtras';
 import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
@@ -13,6 +14,7 @@ import { useFollowStatus, useToggleFollow } from '@/hooks/useProfile';
 import { CommentsDialog } from '@/components/CommentsDialog';
 import { useDwellTracker, useTrackEngagement } from '@/hooks/useEngagement';
 import { useAdminUserIds } from '@/hooks/useAdminUsers';
+import { useIsAdmin } from '@/hooks/useAdmin';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -53,6 +55,8 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editCaption, setEditCaption] = useState(post.caption ?? '');
   const { user } = useAuth();
   const { data: likesData } = useLikes(post.id);
   const { data: comments } = useComments(post.id);
@@ -70,6 +74,10 @@ export function PostCard({ post }: PostCardProps) {
   const { onVisible, onHidden } = useDwellTracker(post.id);
   const { data: adminIds } = useAdminUserIds();
   const isAdminPost = adminIds?.includes(post.profiles.id) ?? false;
+  const { data: isAdmin } = useIsAdmin();
+  const updatePost = useUpdatePost();
+  const deletePost = useDeletePost();
+  const adminDeletePost = useAdminDeletePost();
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for dwell time tracking
@@ -176,6 +184,24 @@ export function PostCard({ post }: PostCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {isOwnPost && (
+                    <DropdownMenuItem onClick={() => { setIsEditing(true); setEditCaption(post.caption ?? ''); }} className="gap-2">
+                      <Pencil className="w-4 h-4" />
+                      Editar legenda
+                    </DropdownMenuItem>
+                  )}
+                  {isOwnPost && (
+                    <DropdownMenuItem onClick={() => { if (confirm('Tem certeza que deseja excluir este post?')) { deletePost.mutate(post.id); toast.success('Post excluído!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Excluir post
+                    </DropdownMenuItem>
+                  )}
+                  {!isOwnPost && isAdmin && (
+                    <DropdownMenuItem onClick={() => { if (confirm('Excluir este post como administrador?')) { adminDeletePost.mutate(post.id); toast.success('Post excluído pelo admin!'); } }} className="gap-2 text-destructive focus:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Excluir (Admin)
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
                     <EyeOff className="w-4 h-4" />
                     Ocultar post
@@ -245,14 +271,20 @@ export function PostCard({ post }: PostCardProps) {
           </div>
 
           {/* Caption */}
-          {post.caption && (
+          {isEditing ? (
+            <form onSubmit={(e) => { e.preventDefault(); updatePost.mutate({ postId: post.id, caption: editCaption }); setIsEditing(false); toast.success('Legenda atualizada!'); }} className="flex gap-2 items-center">
+              <Input value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className="text-sm flex-1" autoFocus />
+              <Button type="submit" size="sm" disabled={updatePost.isPending}>Salvar</Button>
+              <button type="button" onClick={() => setIsEditing(false)} className="text-muted-foreground text-sm">Cancelar</button>
+            </form>
+          ) : post.caption ? (
             <p className="text-sm text-foreground">
               <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
                 {post.profiles.username}
               </Link>
               <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
             </p>
-          )}
+          ) : null}
 
           {/* Comments preview */}
           {comments && comments.length > 0 && (

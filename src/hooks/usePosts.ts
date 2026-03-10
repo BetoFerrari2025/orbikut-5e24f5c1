@@ -92,6 +92,26 @@ export function useCreatePost() {
   });
 }
 
+export function useUpdatePost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, caption }: { postId: string; caption: string }) => {
+      const { error } = await supabase
+        .from('posts')
+        .update({ caption })
+        .eq('id', postId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
+      queryClient.invalidateQueries({ queryKey: ['personalized-feed'] });
+    },
+  });
+}
+
 export function useDeletePost() {
   const queryClient = useQueryClient();
 
@@ -107,6 +127,23 @@ export function useDeletePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
+      queryClient.invalidateQueries({ queryKey: ['personalized-feed'] });
+    },
+  });
+}
+
+export function useAdminDeletePost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase.rpc('admin_delete_post', { _post_id: postId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts-infinite'] });
+      queryClient.invalidateQueries({ queryKey: ['personalized-feed'] });
     },
   });
 }
