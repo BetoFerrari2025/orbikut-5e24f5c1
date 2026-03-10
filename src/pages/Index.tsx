@@ -150,9 +150,12 @@ const Index = () => {
 
         {posts && posts.length > 0 && (
           <div className="space-y-6">
-            {posts.map((post) => (
+            {posts.map((post, index) => (
               <PostCardErrorBoundary key={post.id} postId={post.id}>
-                <PostCard post={post} />
+                <>
+                  <PostCard post={post} />
+                  {index === 2 && <FriendSuggestions />}
+                </>
               </PostCardErrorBoundary>
             ))}
 
