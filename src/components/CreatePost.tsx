@@ -46,7 +46,7 @@ export function CreatePost() {
       setOpen(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao criar post');
+      toast.error(error.message || t('post.createError'));
     }
   };
 
