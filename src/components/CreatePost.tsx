@@ -131,7 +131,7 @@ export function CreatePost() {
           {isAdmin && (
             <div className="space-y-2 p-3 rounded-lg border border-accent/30 bg-accent/5">
               <p className="text-xs font-semibold text-accent flex items-center gap-1">
-                <Link2 className="w-3 h-3" /> Link de ação (Admin)
+                <Link2 className="w-3 h-3" /> {t('createPost.actionLink')}
               </p>
               <Input
                 placeholder="https://exemplo.com"
