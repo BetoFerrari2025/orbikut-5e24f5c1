@@ -69,8 +69,8 @@ export default function Notifications() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Excluir todas as notificações?</AlertDialogTitle>
-                <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                <AlertDialogTitle>{t('notifications.deleteAllConfirm')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('notifications.deleteAllDesc')}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
