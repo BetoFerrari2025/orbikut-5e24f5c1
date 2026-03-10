@@ -109,7 +109,7 @@ const Index = () => {
         )}
       </div>
 
-      <main className="max-w-lg mx-auto px-4 md:px-4 py-2">
+      <main className="max-w-lg mx-auto px-4 md:px-4 py-2 w-full">
         <StoriesBar />
 
         {isLoading && (
