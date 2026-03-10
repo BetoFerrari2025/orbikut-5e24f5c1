@@ -139,6 +139,12 @@ export default function Notifications() {
 }
 
 function NotificationItem({ notification, onDelete }: { notification: Notification; onDelete: (id: string) => void }) {
+  const { t } = useTranslation();
+  const typeConfig = {
+    like: { icon: Heart, label: t('notifications.likedPost'), color: 'text-red-500' },
+    comment: { icon: MessageCircle, label: t('notifications.commentedPost'), color: 'text-blue-500' },
+    follow: { icon: UserPlus, label: t('notifications.followedYou'), color: 'text-green-500' },
+  };
   const config = typeConfig[notification.type];
   const Icon = config.icon;
 
