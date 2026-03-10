@@ -12,10 +12,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { OnlineIndicator } from '@/components/OnlineIndicator';
 import { isUserOnline } from '@/hooks/useOnlineStatus';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 const QUICK_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
 
 export default function Messages() {
+  usePagePresence('messages');
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: conversations, isLoading } = useConversations();
