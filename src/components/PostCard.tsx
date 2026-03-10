@@ -136,7 +136,7 @@ export function PostCard({ post }: PostCardProps) {
     trackSignal(post.id, 'share');
     const url = `${window.location.origin}/post/${post.id}`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'Orbita', url }); } catch {}
+      try { await navigator.share({ title: 'Orbikut', url }); } catch {}
     } else {
       navigator.clipboard.writeText(url);
       toast.success('Link copiado!');
