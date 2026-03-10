@@ -51,9 +51,7 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Brand */}
         <div className={cn("px-4 py-4 flex items-center gap-2", collapsed && "justify-center px-2")}>
-          <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="Orbita" className="w-8 h-8 rounded-lg object-cover shrink-0" />
           {!collapsed && <span className="text-xl font-extrabold text-gradient-brand">Orbita</span>}
         </div>
 

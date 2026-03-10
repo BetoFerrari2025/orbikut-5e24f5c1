@@ -36,9 +36,7 @@ const Index = () => {
 
       {posts && posts.length === 0 && (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-brand flex items-center justify-center glow-primary">
-            <Sparkles className="w-8 h-8 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="Orbita" className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
           <h2 className="text-xl font-semibold mb-2">Nenhum post ainda</h2>
           <p className="text-muted-foreground">
             Seja o primeiro a compartilhar uma foto!
