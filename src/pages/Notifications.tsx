@@ -13,10 +13,12 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 type FilterType = 'all' | 'like' | 'comment' | 'follow';
 
 export default function Notifications() {
+  usePagePresence('notifications');
   const { t } = useTranslation();
 
   const typeConfig = {
