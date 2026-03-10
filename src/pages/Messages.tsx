@@ -431,27 +431,23 @@ function ChatView({ conversation, onBack, currentUserId }: {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
         <div className="relative">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={conversation.other_user?.avatar_url ?? undefined} />
-            <AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-          </Avatar>
+          <Avatar className="w-8 h-8"><AvatarImage src={conversation.other_user?.avatar_url ?? undefined} /><AvatarFallback>{conversation.other_user?.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback></Avatar>
           <OnlineIndicator isOnline={isUserOnline((conversation.other_user as any)?.last_seen)} size="sm" />
         </div>
         <div>
-          <span className="font-semibold">{conversation.other_user?.username ?? 'Usuário'}</span>
+          <span className="font-semibold">{conversation.other_user?.username ?? t('messages.user')}</span>
           {isUserOnline((conversation.other_user as any)?.last_seen) && !otherTyping && (
-            <p className="text-xs text-green-500">online</p>
+            <p className="text-xs text-green-500">{t('messages.online')}</p>
           )}
           {otherTyping && (
-            <p className="text-xs text-primary animate-pulse">digitando...</p>
+            <p className="text-xs text-primary animate-pulse">{t('messages.typing')}</p>
           )}
         </div>
       </div>
