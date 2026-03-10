@@ -209,7 +209,7 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
           {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
-            <video src={post.image_url} className="w-full h-full object-cover" controls playsInline muted loop />
+            <FeedVideo src={post.image_url} cardRef={cardRef} />
           ) : (
             <img src={post.image_url} alt={post.caption ?? 'Post image'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           )}
