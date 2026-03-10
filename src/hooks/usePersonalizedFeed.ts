@@ -31,7 +31,7 @@ export function usePersonalizedFeed() {
   });
 
   // Flatten pages into single array
-  const allPosts = infiniteData?.pages.flatMap((page) => page.posts) ?? [];
+  const allPosts = infiniteData?.pages?.flatMap((page) => page?.posts ?? []) ?? [];
 
   // Sort posts by AI ranking if available (only first page for ranking relevance)
   const sortedPosts = allPosts.length > 0 && ranking?.post_ids?.length
@@ -45,7 +45,7 @@ export function usePersonalizedFeed() {
     : allPosts;
 
   return {
-    data: sortedPosts.length > 0 ? sortedPosts : undefined,
+    data: sortedPosts.length > 0 ? sortedPosts : (postsLoading ? undefined : []),
     isLoading: postsLoading,
     error: postsError,
     topics: ranking?.topics,

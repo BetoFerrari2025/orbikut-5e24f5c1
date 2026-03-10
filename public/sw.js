@@ -1,4 +1,4 @@
-const CACHE_NAME = 'orbita-cache-v1';
+const CACHE_NAME = 'orbita-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -33,28 +33,43 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip API calls and supabase requests
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/rest/') || url.hostname.includes('supabase')) return;
 
+  // Skip API calls, supabase requests, and edge functions entirely
+  if (
+    url.pathname.startsWith('/rest/') ||
+    url.hostname.includes('supabase') ||
+    url.pathname.startsWith('/functions/') ||
+    url.pathname.includes('/auth/')
+  ) return;
+
+  // For navigation requests (HTML pages), always go network-first
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match('/').then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
+
+  // For other assets (JS, CSS, images), network-first with cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone response and cache it
         if (response.status === 200) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
       })
-      .catch(() => {
-        // Fallback to cache
-        return caches.match(event.request).then((cached) => {
-          return cached || caches.match('/');
-        });
-      })
+      .catch(() => caches.match(event.request))
   );
 });
 
