@@ -122,7 +122,7 @@ export function CreatePost() {
           )}
 
           <Textarea
-            placeholder="Escreva uma legenda..."
+            placeholder={t('createPost.caption')}
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             rows={3}
