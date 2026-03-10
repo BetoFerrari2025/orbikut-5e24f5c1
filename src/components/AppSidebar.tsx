@@ -2,8 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import {
   Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
-  ShieldAlert, Sparkles, PlusSquare, LogOut,
+  ShieldAlert, PlusSquare, LogOut,
 } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsAdmin } from '@/hooks/useAdmin';
