@@ -16,6 +16,7 @@ import { isUserOnline } from '@/hooks/useOnlineStatus';
 const QUICK_EMOJIS = ['❤️', '😂', '😮', '😢', '👍', '🔥'];
 
 export default function Messages() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: conversations, isLoading } = useConversations();
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
