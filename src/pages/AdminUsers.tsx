@@ -305,37 +305,34 @@ export default function AdminUsers() {
 function RealtimePresenceCards() {
   const homeCount = usePresenceCount('home');
   const authCount = usePresenceCount('auth');
+  const feedCount = usePresenceCount('feed');
+  const discoverCount = usePresenceCount('discover');
+
+  const cards = [
+    { label: 'No Feed', count: feedCount, icon: Activity, color: 'green-500', borderClass: 'border-primary/30 bg-primary/5', desc: 'pessoas no feed agora' },
+    { label: 'No Explorar', count: discoverCount, icon: Eye, color: 'blue-500', borderClass: 'border-blue-500/30 bg-blue-500/5', desc: 'pessoas explorando agora' },
+    { label: 'Na Home', count: homeCount, icon: Activity, color: 'green-500', borderClass: 'border-primary/30 bg-primary/5', desc: 'pessoas na home agora' },
+    { label: 'Na Página de Cadastro', count: authCount, icon: UserPlus, color: 'accent', borderClass: 'border-accent/30 bg-accent/5', desc: 'visitantes na tela de login/cadastro' },
+  ];
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-            <Activity className="w-4 h-4 text-green-500 animate-pulse" /> Na Home (tempo real)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <Radio className="w-3 h-3 text-green-500 animate-pulse" />
-            <p className="text-3xl font-bold text-foreground">{homeCount}</p>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">pessoas acessando agora</p>
-        </CardContent>
-      </Card>
-      <Card className="border-accent/30 bg-accent/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-accent animate-pulse" /> Na Página de Cadastro
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <Radio className="w-3 h-3 text-accent animate-pulse" />
-            <p className="text-3xl font-bold text-foreground">{authCount}</p>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">visitantes na tela de login/cadastro</p>
-        </CardContent>
-      </Card>
+      {cards.map((c) => (
+        <Card key={c.label} className={c.borderClass}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <c.icon className={`w-4 h-4 text-${c.color} animate-pulse`} /> {c.label} (tempo real)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <Radio className={`w-3 h-3 text-${c.color} animate-pulse`} />
+              <p className="text-3xl font-bold text-foreground">{c.count}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">{c.desc}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SparkReaction } from '@/components/SparkReaction';
 import { useIsAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
+import { usePagePresence } from '@/hooks/usePagePresence';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 
