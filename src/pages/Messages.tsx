@@ -355,7 +355,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máx. 10MB)');
+      toast.error(t('messages.imageTooLarge'));
       return;
     }
 
