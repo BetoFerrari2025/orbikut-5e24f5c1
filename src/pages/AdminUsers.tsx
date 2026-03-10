@@ -302,6 +302,44 @@ export default function AdminUsers() {
   );
 }
 
+function RealtimePresenceCards() {
+  const homeCount = usePresenceCount('home');
+  const authCount = usePresenceCount('auth');
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+            <Activity className="w-4 h-4 text-green-500 animate-pulse" /> Na Home (tempo real)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <Radio className="w-3 h-3 text-green-500 animate-pulse" />
+            <p className="text-3xl font-bold text-foreground">{homeCount}</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">pessoas acessando agora</p>
+        </CardContent>
+      </Card>
+      <Card className="border-accent/30 bg-accent/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-accent animate-pulse" /> Na Página de Cadastro
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <Radio className="w-3 h-3 text-accent animate-pulse" />
+            <p className="text-3xl font-bold text-foreground">{authCount}</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">visitantes na tela de login/cadastro</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function UserDetailDialog({ userId, onClose, onDeletePost }: { userId: string; onClose: () => void; onDeletePost: (postId: string) => void }) {
   const { data: users } = useAdminUsers();
   const user = users?.find((u: any) => u.id === userId);
