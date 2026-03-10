@@ -31,7 +31,7 @@ export function CreatePost() {
 
   const handleSubmit = async () => {
     if (!selectedImage) {
-      toast.error('Selecione uma imagem');
+      toast.error(t('post.selectImage'));
       return;
     }
 
