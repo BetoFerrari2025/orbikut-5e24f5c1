@@ -122,8 +122,8 @@ export default function Notifications() {
       {!isLoading && (!filteredNotifications || filteredNotifications.length === 0) && (
         <div className="text-center py-16">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Nenhuma notificação ainda</p>
-          <p className="text-sm text-muted-foreground mt-1">Quando alguém curtir, comentar ou seguir você, aparecerá aqui</p>
+          <p className="text-muted-foreground">{t('notifications.noNotifications')}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('notifications.noNotificationsDesc')}</p>
         </div>
       )}
 
