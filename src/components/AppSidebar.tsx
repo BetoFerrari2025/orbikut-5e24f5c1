@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom';
-import { NavLink } from '@/components/NavLink';
 import {
   Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
   ShieldAlert, PlusSquare, LogOut,
@@ -10,6 +9,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useIsAdmin } from '@/hooks/useAdmin';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { CreatePost } from '@/components/CreatePost';
+import { useTranslation } from 'react-i18next';
 import {
   Sidebar,
   SidebarContent,
@@ -31,19 +31,20 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
 
   if (!user) return null;
 
   const mainItems = [
-    { title: 'Início', url: '/', icon: Home },
-    { title: 'Buscar', url: '/search', icon: Search },
-    { title: 'Explorar', url: '/discover', icon: Rabbit },
-    { title: 'Notificações', url: '/notifications', icon: Bell, badge: unreadCount },
-    { title: 'Mensagens', url: '/messages', icon: MessageCircle },
-    ...(profile ? [{ title: 'Perfil', url: `/profile/${profile.username}`, icon: User }] : []),
-    { title: 'Configurações', url: '/settings', icon: Settings },
+    { title: t('nav.home'), url: '/', icon: Home },
+    { title: t('nav.search'), url: '/search', icon: Search },
+    { title: t('nav.explore'), url: '/discover', icon: Rabbit },
+    { title: t('nav.notifications'), url: '/notifications', icon: Bell, badge: unreadCount },
+    { title: t('nav.messages'), url: '/messages', icon: MessageCircle },
+    ...(profile ? [{ title: t('nav.profile'), url: `/profile/${profile.username}`, icon: User }] : []),
+    { title: t('nav.settings'), url: '/settings', icon: Settings },
   ];
 
   return (
@@ -79,7 +80,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <div>
                     <CreatePost />
-                    {!collapsed && <span className="ml-1">Criar Post</span>}
+                    {!collapsed && <span className="ml-1">{t('nav.createPost')}</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -90,14 +91,14 @@ export function AppSidebar() {
         {/* Admin section */}
         {isAdmin && (
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel>Administração</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel>{t('nav.admin')}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
                     <Link to="/admin/users">
                       <ShieldAlert className="w-5 h-5 shrink-0" />
-                      {!collapsed && <span>Gerenciar Usuários</span>}
+                      {!collapsed && <span>{t('nav.manageUsers')}</span>}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -113,7 +114,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={signOut} className="text-destructive hover:bg-destructive/10">
                   <LogOut className="w-5 h-5 shrink-0" />
-                  {!collapsed && <span>Sair</span>}
+                  {!collapsed && <span>{t('nav.signOut')}</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useTheme } from '@/hooks/useTheme';
+import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 
 export function Navbar() {
@@ -13,6 +14,7 @@ export function Navbar() {
   const { data: profile } = useProfile(user?.id);
   const { data: unreadCount } = useUnreadCount();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
@@ -67,7 +69,7 @@ export function Navbar() {
             </Button>
           )}
 
-          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}>
+          <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}>
             {theme === 'dark' ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
           </Button>
 
@@ -79,7 +81,7 @@ export function Navbar() {
 
           {!user && (
             <Button asChild className="gradient-brand hover:opacity-90 glow-primary text-white">
-              <Link to="/auth">Entrar</Link>
+              <Link to="/auth">{t('nav.signIn')}</Link>
             </Button>
           )}
         </div>
@@ -109,7 +111,7 @@ export function Navbar() {
             </>
           ) : (
             <Button asChild size="sm" className="gradient-brand hover:opacity-90 text-white font-semibold">
-              <Link to="/auth">Entrar</Link>
+              <Link to="/auth">{t('nav.signIn')}</Link>
             </Button>
           )}
         </div>

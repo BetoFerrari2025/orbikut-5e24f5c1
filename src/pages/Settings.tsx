@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Camera, Moon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
@@ -20,12 +21,12 @@ export default function Settings() {
   const { data: profile } = useProfile(user?.id);
   const updateProfile = useUpdateProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
   const [uploading, setUploading] = useState(false);
 
-  // Update form when profile loads
   useState(() => {
     if (profile) {
       setFullName(profile.full_name ?? '');
@@ -53,9 +54,9 @@ export default function Settings() {
         .getPublicUrl(fileName);
 
       await updateProfile.mutateAsync({ avatar_url: publicUrl });
-      toast.success('Foto atualizada!');
+      toast.success(t('settings.photoUpdated'));
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer upload');
+      toast.error(error.message || t('settings.uploadError'));
     } finally {
       setUploading(false);
     }
@@ -65,27 +66,26 @@ export default function Settings() {
     e.preventDefault();
     try {
       await updateProfile.mutateAsync({ full_name: fullName, bio });
-      toast.success('Perfil atualizado!');
+      toast.success(t('settings.profileUpdated'));
       navigate(`/profile/${profile?.username}`);
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao atualizar perfil');
+      toast.error(error.message || t('settings.updateError'));
     }
   };
 
   if (!user || !profile) {
     return (
       <main className="max-w-lg mx-auto px-4 py-6 text-center">
-        <p>Carregando...</p>
+        <p>{t('settings.loadingText')}</p>
       </main>
     );
   }
 
   return (
     <main className="max-w-lg mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6 text-foreground">Editar perfil</h1>
+      <h1 className="text-2xl font-bold mb-6 text-foreground">{t('settings.editProfile')}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Avatar */}
         <div className="flex items-center gap-6">
           <div className="relative">
             <Avatar className="w-20 h-20">
@@ -118,30 +118,28 @@ export default function Settings() {
               className="text-sm text-primary font-semibold"
               disabled={uploading}
             >
-              {uploading ? 'Enviando...' : 'Alterar foto'}
+              {uploading ? t('settings.uploading') : t('settings.changePhoto')}
             </button>
           </div>
         </div>
 
-        {/* Full name */}
         <div className="space-y-2">
-          <Label htmlFor="fullName">Nome</Label>
+          <Label htmlFor="fullName">{t('settings.name')}</Label>
           <Input
             id="fullName"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Seu nome"
+            placeholder={t('settings.namePlaceholder')}
           />
         </div>
 
-        {/* Bio */}
         <div className="space-y-2">
-          <Label htmlFor="bio">Biografia</Label>
+          <Label htmlFor="bio">{t('settings.bio')}</Label>
           <Textarea
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Conte um pouco sobre você..."
+            placeholder={t('settings.bioPlaceholder')}
             rows={4}
           />
         </div>
@@ -151,17 +149,16 @@ export default function Settings() {
           disabled={updateProfile.isPending}
           className="w-full gradient-brand hover:opacity-90 glow-primary"
         >
-          {updateProfile.isPending ? 'Salvando...' : 'Salvar'}
+          {updateProfile.isPending ? t('settings.saving') : t('settings.save')}
         </Button>
       </form>
 
-      {/* Theme toggle */}
       <div className="mt-8 border-t border-border pt-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Aparência</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">{t('settings.appearance')}</h2>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Moon className="w-5 h-5 text-foreground" />
-            <Label htmlFor="dark-mode" className="cursor-pointer">Modo escuro</Label>
+            <Label htmlFor="dark-mode" className="cursor-pointer">{t('settings.darkMode')}</Label>
           </div>
           <Switch
             id="dark-mode"

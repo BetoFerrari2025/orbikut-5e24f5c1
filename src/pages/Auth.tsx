@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 
 export default function Auth() {
@@ -20,6 +21,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,39 +31,38 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) throw error;
-        toast.success('Login realizado com sucesso!');
+        toast.success(t('auth.loginSuccess'));
         navigate('/');
       } else {
         if (!username.trim()) {
-          toast.error('Nome de usuário é obrigatório');
+          toast.error(t('auth.usernameRequired'));
           setLoading(false);
           return;
         }
         const { error } = await signUp(email, password, username, fullName);
         if (error) throw error;
-        toast.success('Conta criada com sucesso!');
+        toast.success(t('auth.accountCreated'));
         navigate('/');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Ocorreu um erro');
+      toast.error(error.message || t('auth.error'));
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-start sm:items-center justify-center bg-background p-4 pt-8 sm:pt-4 overflow-y-auto">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <img src={logoImg} alt="Orbita" className="w-16 h-16 rounded-2xl object-cover" />
+            <img src={logoImg} alt="Orbikut" className="w-16 h-16 rounded-2xl object-cover" />
           </div>
           <CardTitle className="text-3xl font-bold text-gradient-brand">
-            Orbita
+            Orbikut
           </CardTitle>
           <CardDescription>
-            {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}
+            {isLogin ? t('auth.loginTitle') : t('auth.signupTitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,22 +70,22 @@ export default function Auth() {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="username">Nome de usuário</Label>
+                  <Label htmlFor="username">{t('auth.username')}</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="seunome"
+                    placeholder={t('auth.usernamePlaceholder')}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required={!isLogin}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome completo</Label>
+                  <Label htmlFor="fullName">{t('auth.fullName')}</Label>
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder="Seu Nome"
+                    placeholder={t('auth.fullNamePlaceholder')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                   />
@@ -92,18 +93,18 @@ export default function Auth() {
               </>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder={t('auth.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -129,7 +130,7 @@ export default function Auth() {
               className="w-full gradient-brand hover:opacity-90 glow-primary"
               disabled={loading}
             >
-              {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
+              {loading ? t('auth.loading') : isLogin ? t('auth.login') : t('auth.createAccount')}
             </Button>
           </form>
           {isLogin && (
@@ -138,7 +139,7 @@ export default function Auth() {
                 type="button"
                 onClick={async () => {
                   if (!email.trim()) {
-                    toast.error('Digite seu e-mail primeiro');
+                    toast.error(t('auth.enterEmailFirst'));
                     return;
                   }
                   try {
@@ -146,14 +147,14 @@ export default function Auth() {
                       redirectTo: `${window.location.origin}/reset-password`,
                     });
                     if (error) throw error;
-                    toast.success('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+                    toast.success(t('auth.recoveryEmailSent'));
                   } catch (err: any) {
-                    toast.error(err.message || 'Erro ao enviar e-mail de recuperação');
+                    toast.error(err.message || t('auth.recoveryEmailError'));
                   }
                 }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                Esqueceu sua senha?
+                {t('auth.forgotPassword')}
               </button>
             </div>
           )}
@@ -163,7 +164,7 @@ export default function Auth() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
+              {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
             </button>
           </div>
         </CardContent>
