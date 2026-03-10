@@ -118,6 +118,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   const recordView = useRecordView();
   const viewRecorded = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [showComments, setShowComments] = useState(false);
@@ -142,15 +143,54 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Clear any existing fade interval
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+
     if (isActive) {
-      video.currentTime = video.currentTime; // force sync
+      // Fade in: start at 0 volume and ramp up
+      video.volume = 0;
+      video.currentTime = video.currentTime;
       video.play().catch(() => {});
       setIsPlaying(true);
+
+      let vol = 0;
+      fadeIntervalRef.current = setInterval(() => {
+        vol = Math.min(vol + 0.1, 1);
+        if (video) video.volume = vol;
+        if (vol >= 1 && fadeIntervalRef.current) {
+          clearInterval(fadeIntervalRef.current);
+          fadeIntervalRef.current = null;
+        }
+      }, 30);
     } else {
-      video.pause();
-      video.currentTime = 0;
+      // Fade out: ramp volume down then pause
+      let vol = video.volume;
+      fadeIntervalRef.current = setInterval(() => {
+        vol = Math.max(vol - 0.15, 0);
+        if (video) video.volume = vol;
+        if (vol <= 0) {
+          if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
+          }
+          video.pause();
+          video.currentTime = 0;
+          video.volume = 1;
+        }
+      }, 30);
       setIsPlaying(false);
     }
+
+    return () => {
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+    };
   }, [isActive]);
 
   useEffect(() => {
