@@ -140,7 +140,7 @@ export function CreatePost() {
                 className="text-sm"
               />
               <Input
-                placeholder="Texto do botão (ex: Saiba mais)"
+                placeholder={t('createPost.buttonText')}
                 value={linkLabel}
                 onChange={(e) => setLinkLabel(e.target.value)}
                 className="text-sm"
