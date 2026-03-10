@@ -288,8 +288,8 @@ export function PostCard({ post }: PostCardProps) {
             </form>
           ) : post.caption ? (
             <p className="text-sm text-foreground">
-              <Link to={`/profile/${post.profiles.username}`} className="font-semibold mr-2">
-                {post.profiles.username}
+              <Link to={`/profile/${profile.username}`} className="font-semibold mr-2">
+                {profile.username}
               </Link>
               <LinkifiedText text={post.caption} allowLinks={isAdminPost} />
             </p>
