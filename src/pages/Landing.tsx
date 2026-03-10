@@ -129,10 +129,10 @@ export default function Landing() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src={logoImg} alt="Orbita" className="w-5 h-5 rounded object-cover" />
-            <span className="font-bold">Orbita</span>
+            <img src={logoImg} alt="Orbikut" className="w-5 h-5 rounded object-cover" />
+            <span className="font-bold">Orbikut</span>
           </div>
-          <p>© {new Date().getFullYear()} Orbita. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Orbikut. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>
