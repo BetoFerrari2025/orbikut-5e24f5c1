@@ -493,7 +493,7 @@ function ChatView({ conversation, onBack, currentUserId }: {
             <img src={pendingMedia.url} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
           )}
           <span className="text-sm text-muted-foreground flex-1">
-            {pendingMedia.type.startsWith('image/') ? 'Imagem pronta para enviar' : 'Áudio pronto para enviar'}
+            {pendingMedia.type.startsWith('image/') ? t('messages.imageReady') : t('messages.audioReady')}
           </span>
           <Button variant="ghost" size="icon" onClick={() => setPendingMedia(null)}>
             <X className="w-4 h-4" />
