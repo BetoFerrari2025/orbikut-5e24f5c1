@@ -140,14 +140,16 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
   }, [isActive, post.id]);
 
   useEffect(() => {
-    if (videoRef.current) {
-      if (isActive) {
-        videoRef.current.play().catch(() => {});
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+    const video = videoRef.current;
+    if (!video) return;
+    if (isActive) {
+      video.currentTime = video.currentTime; // force sync
+      video.play().catch(() => {});
+      setIsPlaying(true);
+    } else {
+      video.pause();
+      video.currentTime = 0;
+      setIsPlaying(false);
     }
   }, [isActive]);
 
