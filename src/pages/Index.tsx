@@ -187,7 +187,7 @@ const Index = () => {
 
         {error && (
           <div className="text-center py-12">
-            <p className="text-destructive">Erro ao carregar posts</p>
+            <p className="text-destructive">{t('feed.loadError')}</p>
           </div>
         )}
 
