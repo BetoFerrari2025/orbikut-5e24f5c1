@@ -23,12 +23,16 @@ const LANGUAGES = [
   { code: 'zh', label: '中文', flag: '🇨🇳' },
 ];
 
+import type { Easing } from 'framer-motion';
+
+const ease: Easing = [0, 0, 0.2, 1];
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: 'easeOut' },
+    transition: { delay: i * 0.1, duration: 0.5, ease },
   }),
 };
 
@@ -39,7 +43,7 @@ const staggerContainer = {
 
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease } },
 };
 
 export default function Landing() {
