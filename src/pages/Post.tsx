@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PostCard } from '@/components/PostCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from 'react-i18next';
 
 function usePost(postId: string | undefined) {
   return useQuery({
@@ -24,6 +25,7 @@ function usePost(postId: string | undefined) {
 export default function Post() {
   const { postId } = useParams<{ postId: string }>();
   const { data: post, isLoading } = usePost(postId);
+  const { t } = useTranslation();
 
   return (
     <main className="max-w-xl mx-auto px-4 py-8">
@@ -32,7 +34,7 @@ export default function Post() {
       ) : post ? (
         <PostCard post={post} />
       ) : (
-        <p className="text-center text-muted-foreground">Post não encontrado</p>
+        <p className="text-center text-muted-foreground">{t('postPage.notFound')}</p>
       )}
     </main>
   );

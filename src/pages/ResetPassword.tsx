@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Sparkles, Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -15,6 +16,7 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -34,11 +36,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('As senhas não coincidem');
+      toast.error(t('resetPassword.passwordsMismatch'));
       return;
     }
     if (password.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres');
+      toast.error(t('resetPassword.passwordMinLength'));
       return;
     }
 
@@ -46,10 +48,10 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast.success('Senha atualizada com sucesso!');
+      toast.success(t('resetPassword.passwordUpdated'));
       navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao atualizar senha');
+      toast.error(error.message || t('resetPassword.updateError'));
     } finally {
       setLoading(false);
     }
@@ -60,11 +62,11 @@ export default function ResetPassword() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>Link inválido</CardTitle>
-            <CardDescription>Este link de recuperação é inválido ou expirou.</CardDescription>
+            <CardTitle>{t('resetPassword.invalidLink')}</CardTitle>
+            <CardDescription>{t('resetPassword.invalidLinkDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" onClick={() => navigate('/auth')}>Voltar ao login</Button>
+            <Button className="w-full" onClick={() => navigate('/auth')}>{t('resetPassword.backToLogin')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -80,13 +82,13 @@ export default function ResetPassword() {
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Nova senha</CardTitle>
-          <CardDescription>Digite sua nova senha abaixo</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t('resetPassword.newPassword')}</CardTitle>
+          <CardDescription>{t('resetPassword.typeNewPassword')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Nova senha</Label>
+              <Label htmlFor="password">{t('resetPassword.newPassword')}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -108,7 +110,7 @@ export default function ResetPassword() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar senha</Label>
+              <Label htmlFor="confirmPassword">{t('resetPassword.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
@@ -120,7 +122,7 @@ export default function ResetPassword() {
               />
             </div>
             <Button type="submit" className="w-full gradient-brand hover:opacity-90 glow-primary" disabled={loading}>
-              {loading ? 'Atualizando...' : 'Atualizar senha'}
+              {loading ? t('resetPassword.updating') : t('resetPassword.updatePassword')}
             </Button>
           </form>
         </CardContent>
