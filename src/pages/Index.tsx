@@ -157,10 +157,10 @@ const Index = () => {
           }}
         />
         {readyToRefresh && !isRefreshing && (
-          <span className="ml-2 text-xs text-muted-foreground">Solte para atualizar</span>
+          <span className="ml-2 text-xs text-muted-foreground">{t('feed.releaseToRefresh')}</span>
         )}
         {isRefreshing && (
-          <span className="ml-2 text-xs text-muted-foreground">Atualizando...</span>
+          <span className="ml-2 text-xs text-muted-foreground">{t('feed.refreshing')}</span>
         )}
       </div>
 
