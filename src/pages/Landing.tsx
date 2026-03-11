@@ -1,11 +1,31 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Camera, Users, Heart, MessageCircle, Zap, Sparkles } from 'lucide-react';
+import { Camera, Users, Heart, MessageCircle, Zap, Sparkles, Globe, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const LANGUAGES = [
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'ko', label: '한국어', flag: '🇰🇷' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+];
 
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const currentLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
   const features = [
     { icon: Camera, title: t('landing.photosVideos'), desc: t('landing.photosVideosDesc'), color: 'text-primary' },
@@ -27,6 +47,29 @@ export default function Landing() {
             <span className="text-3xl font-black text-gradient-brand tracking-tight">Orbikut</span>
           </div>
           <div className="flex items-center gap-3">
+            {/* Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+                  <Globe className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">{currentLang.flag} {currentLang.label}</span>
+                  <span className="sm:hidden text-sm">{currentLang.flag}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                {LANGUAGES.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => i18n.changeLanguage(lang.code)}
+                    className={i18n.language === lang.code ? 'bg-accent/10 font-semibold' : ''}
+                  >
+                    <span className="mr-2">{lang.flag}</span>
+                    {lang.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button variant="ghost" asChild>
               <Link to="/auth">{t('nav.signIn')}</Link>
             </Button>
@@ -47,10 +90,11 @@ export default function Landing() {
                 {t('landing.heroDesc')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="gradient-brand hover:opacity-90 glow-primary text-lg px-8 h-14 font-bold">
+                <Button asChild size="lg" className="gradient-brand hover:opacity-90 glow-primary text-lg px-8 h-14 font-bold group">
                   <Link to="/auth">
                     <Sparkles className="w-5 h-5 mr-2" />
                     {t('landing.cta')}
+                    <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </div>
@@ -122,8 +166,11 @@ export default function Landing() {
           <p className="text-xl text-muted-foreground">
             {t('landing.ctaDesc')}
           </p>
-          <Button asChild size="lg" className="gradient-brand hover:opacity-90 glow-primary text-lg px-10 h-14 font-bold">
-            <Link to="/auth">{t('landing.createMyAccount')}</Link>
+          <Button asChild size="lg" className="gradient-brand hover:opacity-90 glow-primary text-lg px-10 h-14 font-bold group">
+            <Link to="/auth">
+              {t('landing.createMyAccount')}
+              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+            </Link>
           </Button>
         </div>
       </section>
