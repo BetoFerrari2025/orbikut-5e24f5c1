@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ExternalLink, Plus, X, Link as LinkIcon, Pencil, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileLinksProps {
   userId: string;
@@ -21,10 +22,11 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editUrl, setEditUrl] = useState('');
+  const { t } = useTranslation();
 
   const handleAdd = () => {
     if (!title.trim() || !url.trim()) {
-      toast.error('Preencha todos os campos');
+      toast.error(t('profileLinks.fillAllFields'));
       return;
     }
     const finalUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -33,9 +35,9 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
         setTitle('');
         setUrl('');
         setAdding(false);
-        toast.success('Link adicionado!');
+        toast.success(t('profileLinks.linkAdded'));
       },
-      onError: () => toast.error('Erro ao adicionar link'),
+      onError: () => toast.error(t('profileLinks.addError')),
     });
   };
 
@@ -47,23 +49,23 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
 
   const handleUpdate = () => {
     if (!editingId || !editTitle.trim() || !editUrl.trim()) {
-      toast.error('Preencha todos os campos');
+      toast.error(t('profileLinks.fillAllFields'));
       return;
     }
     const finalUrl = editUrl.startsWith('http') ? editUrl : `https://${editUrl}`;
     updateLink.mutate({ id: editingId, title: editTitle.trim(), url: finalUrl }, {
       onSuccess: () => {
         setEditingId(null);
-        toast.success('Link atualizado!');
+        toast.success(t('profileLinks.linkUpdated'));
       },
-      onError: () => toast.error('Erro ao atualizar link'),
+      onError: () => toast.error(t('profileLinks.updateError')),
     });
   };
 
   const handleDelete = (linkId: string) => {
     deleteLink.mutate(linkId, {
-      onSuccess: () => toast.success('Link removido!'),
-      onError: () => toast.error('Erro ao remover link'),
+      onSuccess: () => toast.success(t('profileLinks.linkRemoved')),
+      onError: () => toast.error(t('profileLinks.removeError')),
     });
   };
 
@@ -80,7 +82,7 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
                 <Input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="Título"
+                  placeholder={t('profileLinks.title')}
                   className="h-8 text-sm flex-1"
                 />
                 <Input
@@ -99,26 +101,15 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
             ) : (
               <div key={link.id} className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5 text-sm group">
                 <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
-                >
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                   {link.title}
                 </a>
                 {isOwnProfile && (
                   <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => startEdit(link)}
-                      className="text-muted-foreground hover:text-primary"
-                    >
+                    <button onClick={() => startEdit(link)} className="text-muted-foreground hover:text-primary">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(link.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
+                    <button onClick={() => handleDelete(link.id)} className="text-muted-foreground hover:text-destructive">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -135,14 +126,14 @@ export function ProfileLinks({ userId, isOwnProfile }: ProfileLinksProps) {
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Adicionar link
+          {t('profileLinks.addLink')}
         </button>
       )}
 
       {adding && (
         <div className="flex items-center gap-2 mt-2">
           <Input
-            placeholder="Título"
+            placeholder={t('profileLinks.title')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="h-8 text-sm flex-1"

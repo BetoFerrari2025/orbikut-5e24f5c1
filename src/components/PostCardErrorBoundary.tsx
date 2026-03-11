@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react';
+import i18n from '@/i18n';
 
 interface Props {
   children: ReactNode;
@@ -27,7 +28,7 @@ export class PostCardErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="bg-card border-y md:border md:rounded-lg p-6 -mx-4 md:mx-0 w-[calc(100%+2rem)] md:w-full text-center">
-          <p className="text-sm text-muted-foreground">Não foi possível carregar este post</p>
+          <p className="text-sm text-muted-foreground">{i18n.t('postError.loadError')}</p>
         </div>
       );
     }
