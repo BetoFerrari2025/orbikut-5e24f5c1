@@ -157,10 +157,10 @@ const Index = () => {
           }}
         />
         {readyToRefresh && !isRefreshing && (
-          <span className="ml-2 text-xs text-muted-foreground">Solte para atualizar</span>
+          <span className="ml-2 text-xs text-muted-foreground">{t('feed.releaseToRefresh')}</span>
         )}
         {isRefreshing && (
-          <span className="ml-2 text-xs text-muted-foreground">Atualizando...</span>
+          <span className="ml-2 text-xs text-muted-foreground">{t('feed.refreshing')}</span>
         )}
       </div>
 
@@ -187,7 +187,7 @@ const Index = () => {
 
         {error && (
           <div className="text-center py-12">
-            <p className="text-destructive">Erro ao carregar posts</p>
+            <p className="text-destructive">{t('feed.loadError')}</p>
           </div>
         )}
 
@@ -223,7 +223,7 @@ const Index = () => {
 
             {!hasNextPage && posts.length > 10 && (
               <p className="text-center text-sm text-muted-foreground py-4">
-                Você viu todos os posts 🎉
+                {t('feed.seenAll')}
               </p>
             )}
           </div>
