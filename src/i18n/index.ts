@@ -27,10 +27,13 @@ i18n
       zh: { translation: zh },
     },
     fallbackLng: 'pt',
+    supportedLngs: ['pt', 'en', 'es', 'fr', 'de', 'it', 'ja', 'ko', 'zh'],
+    load: 'languageOnly',
     interpolation: { escapeValue: false },
     detection: {
-      order: ['navigator', 'htmlTag', 'localStorage'],
+      order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
   });
 
