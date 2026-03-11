@@ -89,7 +89,11 @@
   "feed": {
     "noPostsYet": "No posts yet",
     "beFirst": "Be the first to share a photo!",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "releaseToRefresh": "Release to refresh",
+    "refreshing": "Refreshing...",
+    "loadError": "Error loading posts",
+    "seenAll": "You've seen all posts 🎉"
   },
   "install": {
     "title": "Install Orbikut",

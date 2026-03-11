@@ -223,7 +223,7 @@ const Index = () => {
 
             {!hasNextPage && posts.length > 10 && (
               <p className="text-center text-sm text-muted-foreground py-4">
-                Você viu todos os posts 🎉
+                {t('feed.seenAll')}
               </p>
             )}
           </div>
