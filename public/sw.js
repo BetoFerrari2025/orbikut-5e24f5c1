@@ -1,4 +1,4 @@
-const CACHE_NAME = 'orbita-cache-v2';
+const CACHE_NAME = 'orbita-cache-v3-light';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
