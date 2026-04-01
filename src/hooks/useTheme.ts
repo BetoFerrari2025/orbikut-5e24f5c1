@@ -7,7 +7,7 @@ const STORAGE_KEY = 'orbita-theme';
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  return stored === 'light' ? 'light' : 'dark'; // default dark
+  return stored === 'dark' ? 'dark' : 'light'; // default light
 }
 
 export function useTheme() {
