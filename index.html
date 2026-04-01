@@ -21,7 +21,7 @@
     <link rel="icon" href="/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon-512.png">
     <script>
-      (function(){var t=localStorage.getItem('orbita-theme');if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');})();
+      (function(){var t=localStorage.getItem('orbita-theme');var e=localStorage.getItem('orbita-theme-explicit')==='true';var r=e&&t==='dark'?'dark':'light';document.documentElement.classList.toggle('dark',r==='dark');document.documentElement.style.colorScheme=r;localStorage.setItem('orbita-theme',r);if(localStorage.getItem('orbita-theme-explicit')===null)localStorage.setItem('orbita-theme-explicit','false');})();
     </script>
   </head>
   <body>
