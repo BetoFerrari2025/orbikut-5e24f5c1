@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 import { Heart, Camera, MessageCircle, Users, Star, TrendingUp } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
+import type { Easing } from 'framer-motion';
+const ease: Easing = [0, 0, 0.2, 1];
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0, 0, 0.2, 1] } },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease } },
 };
 
 export default function LandingHeroMockup() {
