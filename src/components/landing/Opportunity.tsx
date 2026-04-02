@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const steps = [
-  { year: '2004', name: 'Orkut', desc: 'Quem entrou no começo dominou as comunidades.' },
-  { year: '2010', name: 'Instagram', desc: 'Os primeiros perfis viraram referência.' },
-  { year: '2016', name: 'TikTok', desc: 'Criadores iniciais explodiram em seguidores.' },
-  { year: '2025', name: 'Orbikut', desc: 'A sua vez de estar no começo. 🚀', active: true },
+  { year: '2004', name: 'Orkut', desc: 'Quem entrou no começo dominou as comunidades.', status: 'Saturou' },
+  { year: '2010', name: 'Instagram', desc: 'Os primeiros perfis viraram referência.', status: 'Saturou' },
+  { year: '2016', name: 'TikTok', desc: 'Criadores iniciais explodiram em seguidores.', status: 'Saturando' },
+  { year: '2025', name: 'Orbikut', desc: 'Ainda no começo. A sua vez chegou. 🚀', active: true, status: 'AGORA' },
 ];
 
 export default function LandingOpportunity() {
@@ -46,10 +46,17 @@ export default function LandingOpportunity() {
               <span className={`text-xl sm:text-2xl font-black shrink-0 ${s.active ? 'bg-gradient-to-r from-[#7c3aed] to-[#ff2d55] bg-clip-text text-transparent' : 'text-white/30'}`}>
                 {s.year}
               </span>
-              <div>
+              <div className="flex-1">
                 <p className={`font-bold ${s.active ? 'text-white' : 'text-white/60'}`}>{s.name}</p>
                 <p className={`text-sm ${s.active ? 'text-white/70' : 'text-white/40'}`}>{s.desc}</p>
               </div>
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${
+                s.active 
+                  ? 'bg-[#ff2d55]/20 text-[#ff2d55] animate-pulse' 
+                  : 'bg-white/5 text-white/30'
+              }`}>
+                {s.status}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -63,7 +70,7 @@ export default function LandingOpportunity() {
         >
           <Button asChild size="lg" className="bg-gradient-to-r from-[#7c3aed] to-[#ff2d55] hover:opacity-90 text-white text-lg px-8 h-14 font-bold group shadow-xl shadow-purple-500/30 rounded-xl">
             <Link to="/auth">
-              Criar conta grátis agora
+              Garantir meu lugar agora
               <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
