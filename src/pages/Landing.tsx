@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Globe, ArrowRight, Sparkles, TrendingUp, Eye, Zap, Users, Star, ChevronRight, CheckCircle2, MessageCircle, Heart, Camera } from 'lucide-react';
+import { Globe, ArrowRight, Sparkles, TrendingUp, Eye, Zap, Users, Star, ChevronRight, CheckCircle2, MessageCircle, Heart, Camera, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 import { motion } from 'framer-motion';
@@ -50,6 +50,21 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
+      {/* ── URGENCY BANNER ── */}
+      <div className="relative bg-gradient-to-r from-[#7c3aed] via-[#ff2d55] to-[#ff6090] text-white text-center py-2.5 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-30" />
+        <motion.p 
+          className="relative text-xs sm:text-sm font-bold tracking-wide flex items-center justify-center gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Flame className="w-4 h-4 animate-pulse" />
+          <span>⚠️ Você está entre os primeiros usuários — isso significa mais alcance e menos concorrência</span>
+          <Flame className="w-4 h-4 animate-pulse" />
+        </motion.p>
+      </div>
+
       {/* ── NAV ── */}
       <nav className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
@@ -77,7 +92,7 @@ export default function Landing() {
               <Link to="/auth">{t('nav.signIn')}</Link>
             </Button>
             <Button asChild className="bg-gradient-to-r from-[#7c3aed] to-[#ff2d55] hover:opacity-90 text-white font-bold shadow-lg shadow-purple-500/25">
-              <Link to="/auth">{t('auth.createAccount')}</Link>
+              <Link to="/auth">Entrar antes que cresça 🚀</Link>
             </Button>
           </div>
         </div>
@@ -103,7 +118,7 @@ export default function Landing() {
               <Link to="/auth">{t('nav.signIn')}</Link>
             </Button>
             <Button asChild size="sm" className="bg-gradient-to-r from-[#7c3aed] to-[#ff2d55] hover:opacity-90 text-white font-bold h-9 text-sm shadow-lg shadow-purple-500/25">
-              <Link to="/auth">{t('auth.createAccount')}</Link>
+              <Link to="/auth">Entrar agora 🚀</Link>
             </Button>
           </div>
         </div>
@@ -122,8 +137,8 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-12 items-center">
             <motion.div className="space-y-6 md:space-y-8" initial="hidden" animate="visible" variants={staggerContainer}>
               <motion.div variants={fadeUp} custom={0}>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white/10 text-[#00f0ff] px-3 py-1.5 rounded-full border border-[#00f0ff]/20 mb-4">
-                  <Sparkles className="w-3.5 h-3.5" /> Nova rede social brasileira
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#ff2d55]/15 text-[#ff2d55] px-3 py-1.5 rounded-full border border-[#ff2d55]/25 mb-4 animate-pulse">
+                  <Flame className="w-3.5 h-3.5" /> +847 pessoas entraram esta semana
                 </span>
               </motion.div>
 
@@ -131,28 +146,28 @@ export default function Landing() {
                 className="text-3xl sm:text-4xl md:text-6xl font-black leading-[1.08] tracking-tight"
                 variants={fadeUp} custom={1}
               >
-                Entre na nova rede social{' '}
+                Sua chance de{' '}
                 <span className="bg-gradient-to-r from-[#7c3aed] via-[#ff2d55] to-[#ff6090] bg-clip-text text-transparent">
-                  enquanto ainda está no começo
+                  crescer antes de todo mundo
                 </span>
               </motion.h1>
 
               <motion.p className="text-base sm:text-lg text-white/60 max-w-lg leading-relaxed" variants={fadeUp} custom={2}>
-                Mais alcance, menos concorrência. Quem entra primeiro sai na frente.
+                Enquanto as redes tradicionais estão saturadas, aqui seu conteúdo é visto de verdade. Quem entra primeiro, sai na frente.
               </motion.p>
 
               <motion.div variants={fadeUp} custom={3}>
                 <Button asChild size="lg" className="w-full sm:w-auto bg-gradient-to-r from-[#7c3aed] to-[#ff2d55] hover:opacity-90 text-white text-base sm:text-lg px-8 h-14 font-bold group shadow-xl shadow-purple-500/30 rounded-xl">
                   <Link to="/auth">
-                    Criar conta grátis agora
+                    Entrar antes que cresça
                     <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </motion.div>
 
               <motion.div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-white/50 text-sm" variants={fadeUp} custom={4}>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Sem custo</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Leva menos de 1 minuto</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> 100% gratuito</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Menos de 30 segundos</span>
                 <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Acesso imediato</span>
               </motion.div>
             </motion.div>
