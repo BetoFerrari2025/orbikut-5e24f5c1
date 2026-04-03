@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
-  ShieldAlert, PlusSquare, LogOut,
+  ShieldAlert, PlusSquare, LogOut, Gift,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
