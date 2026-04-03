@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Globe, ArrowRight, Sparkles, TrendingUp, Eye, Zap, Users, Star, ChevronRight, CheckCircle2, MessageCircle, Heart, Camera, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 import { motion } from 'framer-motion';
+import { captureReferralCode } from '@/hooks/useReferral';
 import {
   DropdownMenu,
   DropdownMenuContent,
