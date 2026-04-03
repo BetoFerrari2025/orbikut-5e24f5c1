@@ -95,6 +95,11 @@ export default function Auth() {
         }
         const { error } = await signUp(email, password, username, fullName);
         if (error) throw error;
+        // Process referral after successful signup
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        if (newSession?.user) {
+          await processReferral(newSession.user.id);
+        }
         toast.success(t('auth.accountCreated'));
         navigate('/');
       }
