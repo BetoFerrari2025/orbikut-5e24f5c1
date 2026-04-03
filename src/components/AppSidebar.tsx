@@ -45,6 +45,7 @@ export function AppSidebar() {
     { title: t('nav.messages'), url: '/messages', icon: MessageCircle },
     ...(profile ? [{ title: t('nav.profile'), url: `/profile/${profile.username}`, icon: User }] : []),
     { title: t('nav.settings'), url: '/settings', icon: Settings },
+    { title: 'Indique e Ganhe', url: '/referrals', icon: Gift },
   ];
 
   return (
