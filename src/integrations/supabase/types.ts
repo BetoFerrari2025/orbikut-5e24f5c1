@@ -469,6 +469,7 @@ export type Database = {
           last_post_date: string | null
           last_seen: string | null
           max_streak: number | null
+          referral_code: string | null
           updated_at: string
           username: string
         }
@@ -483,6 +484,7 @@ export type Database = {
           last_post_date?: string | null
           last_seen?: string | null
           max_streak?: number | null
+          referral_code?: string | null
           updated_at?: string
           username: string
         }
@@ -497,8 +499,30 @@ export type Database = {
           last_post_date?: string | null
           last_seen?: string | null
           max_streak?: number | null
+          referral_code?: string | null
           updated_at?: string
           username?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
         }
         Relationships: []
       }
@@ -929,6 +953,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_referral_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

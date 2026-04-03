@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { processReferral } from '@/hooks/useReferral';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -94,6 +95,11 @@ export default function Auth() {
         }
         const { error } = await signUp(email, password, username, fullName);
         if (error) throw error;
+        // Process referral after successful signup
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        if (newSession?.user) {
+          await processReferral(newSession.user.id);
+        }
         toast.success(t('auth.accountCreated'));
         navigate('/');
       }
