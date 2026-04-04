@@ -44,13 +44,13 @@ export function BottomNav() {
         </div>
 
         <Link
-          to="/search"
+          to="/referrals"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full transition-colors",
-            isActive('/search') ? "text-primary" : "text-muted-foreground"
+            isActive('/referrals') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <Search className="w-6 h-6" />
+          <Gift className="w-6 h-6" />
         </Link>
 
         {profile && (
