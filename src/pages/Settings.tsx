@@ -40,12 +40,12 @@ export default function Settings() {
   const [bio, setBio] = useState(profile?.bio ?? '');
   const [uploading, setUploading] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setFullName(profile.full_name ?? '');
       setBio(profile.bio ?? '');
     }
-  });
+  }, [profile]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
