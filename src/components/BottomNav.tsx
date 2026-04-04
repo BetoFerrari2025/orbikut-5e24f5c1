@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, Rabbit, User, Bell } from 'lucide-react';
+import { Home, Search, Rabbit, User, Gift } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useUnreadCount } from '@/hooks/useNotifications';
@@ -44,13 +44,13 @@ export function BottomNav() {
         </div>
 
         <Link
-          to="/search"
+          to="/referrals"
           className={cn(
             "flex flex-col items-center justify-center w-full h-full transition-colors",
-            isActive('/search') ? "text-primary" : "text-muted-foreground"
+            isActive('/referrals') ? "text-primary" : "text-muted-foreground"
           )}
         >
-          <Search className="w-6 h-6" />
+          <Gift className="w-6 h-6" />
         </Link>
 
         {profile && (
