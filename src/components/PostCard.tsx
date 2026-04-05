@@ -200,7 +200,45 @@ export function PostCard({ post }: PostCardProps) {
     setShowComments(true);
   };
 
-  if (hidden) return null;
+  const PostMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className={post.image_url ? "text-white hover:bg-white/20" : "text-foreground hover:bg-muted"}>
+          <MoreHorizontal className="w-5 h-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {isOwnPost && (
+          <DropdownMenuItem onClick={() => { setIsEditing(true); setEditCaption(post.caption ?? ''); }} className="gap-2">
+            <Pencil className="w-4 h-4" />
+            {t('post.editCaption')}
+          </DropdownMenuItem>
+        )}
+        {isOwnPost && (
+          <DropdownMenuItem onClick={() => { if (confirm(t('post.deletePostConfirm'))) { deletePost.mutate(post.id); toast.success(t('post.postDeleted')); } }} className="gap-2 text-destructive focus:text-destructive">
+            <Trash2 className="w-4 h-4" />
+            {t('post.deletePost')}
+          </DropdownMenuItem>
+        )}
+        {!isOwnPost && isAdmin && (
+          <DropdownMenuItem onClick={() => { if (confirm(t('post.adminDeleteConfirm'))) { adminDeletePost.mutate(post.id); toast.success(t('post.adminDeleteDone')); } }} className="gap-2 text-destructive focus:text-destructive">
+            <Trash2 className="w-4 h-4" />
+            {t('post.adminDelete')}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
+          <EyeOff className="w-4 h-4" />
+          {t('post.hidePost')}
+        </DropdownMenuItem>
+        {!isOwnPost && (
+          <DropdownMenuItem onClick={() => toast.success(t('post.reportDone'))} className="gap-2 text-destructive focus:text-destructive">
+            <Flag className="w-4 h-4" />
+            {t('post.report')}
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   return (
     <>
