@@ -32,12 +32,12 @@ export function InlinePostComposer() {
   };
 
   const handleSubmit = async () => {
-    if (!file) {
-      toast.error('Selecione uma foto ou vídeo para publicar');
+    if (!file && !text.trim()) {
+      toast.error('Escreva algo ou adicione uma foto/vídeo');
       return;
     }
     try {
-      await createPost.mutateAsync({ imageFile: file, caption: text });
+      await createPost.mutateAsync({ imageFile: file ?? undefined, caption: text });
       toast.success('Publicado com sucesso!');
       setText('');
       setFile(null);
@@ -105,7 +105,7 @@ export function InlinePostComposer() {
               size="sm"
               className="h-8 gap-1.5 gradient-brand"
               onClick={handleSubmit}
-              disabled={!file || createPost.isPending}
+              disabled={(!file && !text.trim()) || createPost.isPending}
             >
               <Send className="w-3.5 h-3.5" />
               {createPost.isPending ? 'Publicando...' : 'Publicar'}

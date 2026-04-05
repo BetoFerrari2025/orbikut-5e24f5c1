@@ -59,27 +59,32 @@ export function useCreatePost() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ imageFile, caption, linkUrl, linkLabel }: { imageFile: File; caption: string; linkUrl?: string; linkLabel?: string }) => {
+    mutationFn: async ({ imageFile, caption, linkUrl, linkLabel }: { imageFile?: File; caption: string; linkUrl?: string; linkLabel?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('posts')
-        .upload(fileName, imageFile);
+      let publicUrl: string | null = null;
 
-      if (uploadError) throw uploadError;
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('posts')
+          .upload(fileName, imageFile);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('posts')
-        .getPublicUrl(fileName);
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('posts')
+          .getPublicUrl(fileName);
+        publicUrl = data.publicUrl;
+      }
 
       const insertData: any = {
         user_id: user.id,
-        image_url: publicUrl,
         caption,
       };
+      if (publicUrl) insertData.image_url = publicUrl;
       if (linkUrl) {
         insertData.link_url = linkUrl;
         insertData.link_label = linkLabel || 'Saiba mais';
