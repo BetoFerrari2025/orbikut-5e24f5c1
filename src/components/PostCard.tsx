@@ -32,7 +32,7 @@ function SafeCaption({ text, allowLinks }: { text: string; allowLinks: boolean }
 interface PostCardProps {
   post: {
     id: string;
-    image_url: string;
+    image_url: string | null;
     caption: string | null;
     link_url: string | null;
     link_label: string | null;
