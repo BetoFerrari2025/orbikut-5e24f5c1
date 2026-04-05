@@ -105,7 +105,7 @@ export function InlinePostComposer() {
               size="sm"
               className="h-8 gap-1.5 gradient-brand"
               onClick={handleSubmit}
-              disabled={!file || createPost.isPending}
+              disabled={(!file && !text.trim()) || createPost.isPending}
             >
               <Send className="w-3.5 h-3.5" />
               {createPost.isPending ? 'Publicando...' : 'Publicar'}
