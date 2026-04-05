@@ -277,8 +277,13 @@ export function PostCard({ post }: PostCardProps) {
             const linkUrl = post.link_url || (isAdminPost && post.caption ? post.caption.match(/(https?:\/\/[^\s]+)/)?.[0] : null);
             const linkLabel = post.link_label || t('post.learnMore');
             if (!linkUrl) return null;
+            const handleLinkClick = () => {
+              import('@/integrations/supabase/client').then(({ supabase }) => {
+                supabase.from('link_clicks').insert({ post_id: post.id, user_id: user?.id ?? null } as any).then(() => {});
+              });
+            };
             return (
-              <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105">
+              <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105">
                 <ExternalLink className="w-4 h-4" />
                 {linkLabel}
               </a>

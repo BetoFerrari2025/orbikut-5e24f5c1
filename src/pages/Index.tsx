@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 import { usePagePresence } from '@/hooks/usePagePresence';
+import { InlinePostComposer } from '@/components/InlinePostComposer';
 
 const PULL_THRESHOLD = 80;
 
@@ -166,6 +167,7 @@ const Index = () => {
 
       <main className="max-w-lg mx-auto px-4 md:px-4 py-2 w-full">
         <StoriesBar />
+        <InlinePostComposer />
 
         {isLoading && (
           <div className="space-y-6">
