@@ -205,91 +205,97 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <>
       <div ref={cardRef} className="bg-card border-y md:border md:rounded-lg overflow-hidden -mx-4 md:mx-0 w-[calc(100%+2rem)] md:w-full">
-        <div className="relative aspect-[4/5] bg-muted w-full">
-          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
-            <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
-              <Avatar className="w-8 h-8 ring-2 ring-white/30">
-                <AvatarImage src={profile.avatar_url ?? undefined} />
-                <AvatarFallback className="text-white bg-white/20">{profile.username[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <span className="font-semibold text-sm text-white drop-shadow-md">{profile.username}</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-white font-semibold text-sm h-auto py-1 px-2 hover:bg-white/20"
-                  disabled={toggleFollow.isPending}
-                  onClick={() => {
-                    toggleFollow.mutate({ targetUserId: profile.id, isFollowing: false });
-                    sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
-                  }}
-                >
-                  {t('post.follow')}
-                </Button>
+        {/* Header - always visible */}
+        <div className={post.image_url ? "relative aspect-[4/5] bg-muted w-full" : ""}>
+          {post.image_url ? (
+            <>
+              <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-black/60 to-transparent">
+                <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8 ring-2 ring-white/30">
+                    <AvatarImage src={profile.avatar_url ?? undefined} />
+                    <AvatarFallback className="text-white bg-white/20">{profile.username[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-semibold text-sm text-white drop-shadow-md">{profile.username}</span>
+                </Link>
+                <div className="flex items-center gap-2">
+                  {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white font-semibold text-sm h-auto py-1 px-2 hover:bg-white/20"
+                      disabled={toggleFollow.isPending}
+                      onClick={() => {
+                        toggleFollow.mutate({ targetUserId: profile.id, isFollowing: false });
+                        sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
+                      }}
+                    >
+                      {t('post.follow')}
+                    </Button>
+                  )}
+                  <PostMenu />
+                </div>
+              </div>
+              {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
+                <FeedVideo src={post.image_url} cardRef={cardRef} />
+              ) : (
+                <img src={post.image_url} alt={post.caption ?? 'Post image'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {isOwnPost && (
-                    <DropdownMenuItem onClick={() => { setIsEditing(true); setEditCaption(post.caption ?? ''); }} className="gap-2">
-                      <Pencil className="w-4 h-4" />
-                      {t('post.editCaption')}
-                    </DropdownMenuItem>
-                  )}
-                  {isOwnPost && (
-                    <DropdownMenuItem onClick={() => { if (confirm(t('post.deletePostConfirm'))) { deletePost.mutate(post.id); toast.success(t('post.postDeleted')); } }} className="gap-2 text-destructive focus:text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                      {t('post.deletePost')}
-                    </DropdownMenuItem>
-                  )}
-                  {!isOwnPost && isAdmin && (
-                    <DropdownMenuItem onClick={() => { if (confirm(t('post.adminDeleteConfirm'))) { adminDeletePost.mutate(post.id); toast.success(t('post.adminDeleteDone')); } }} className="gap-2 text-destructive focus:text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                      {t('post.adminDelete')}
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => setHidden(true)} className="gap-2">
-                    <EyeOff className="w-4 h-4" />
-                    {t('post.hidePost')}
-                  </DropdownMenuItem>
-                  {!isOwnPost && (
-                    <DropdownMenuItem onClick={() => toast.success(t('post.reportDone'))} className="gap-2 text-destructive focus:text-destructive">
-                      <Flag className="w-4 h-4" />
-                      {t('post.report')}
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          {/\.(mp4|webm|mov)$/i.test(post.image_url) ? (
-            <FeedVideo src={post.image_url} cardRef={cardRef} />
+              {(() => {
+                const linkUrl = post.link_url || (isAdminPost && post.caption ? post.caption.match(/(https?:\/\/[^\s]+)/)?.[0] : null);
+                const linkLabel = post.link_label || t('post.learnMore');
+                if (!linkUrl) return null;
+                const handleLinkClick = () => {
+                  import('@/integrations/supabase/client').then(({ supabase }) => {
+                    supabase.from('link_clicks').insert({ post_id: post.id, user_id: user?.id ?? null } as any).then(() => {});
+                  });
+                };
+                return (
+                  <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105">
+                    <ExternalLink className="w-4 h-4" />
+                    {linkLabel}
+                  </a>
+                );
+              })()}
+            </>
           ) : (
-            <img src={post.image_url} alt={post.caption ?? 'Post image'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+            /* Text-only post header */
+            <div className="flex items-center justify-between p-3 border-b border-border">
+              <Link to={`/profile/${profile.username}`} className="flex items-center gap-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={profile.avatar_url ?? undefined} />
+                  <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="font-semibold text-sm text-foreground">{profile.username}</span>
+              </Link>
+              <div className="flex items-center gap-2">
+                {user && !isOwnPost && followStatus && !followStatus.isFollowing && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-semibold text-sm h-auto py-1 px-2"
+                    disabled={toggleFollow.isPending}
+                    onClick={() => {
+                      toggleFollow.mutate({ targetUserId: profile.id, isFollowing: false });
+                      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
+                    }}
+                  >
+                    {t('post.follow')}
+                  </Button>
+                )}
+                <PostMenu />
+              </div>
+            </div>
           )}
-          {(() => {
-            const linkUrl = post.link_url || (isAdminPost && post.caption ? post.caption.match(/(https?:\/\/[^\s]+)/)?.[0] : null);
-            const linkLabel = post.link_label || t('post.learnMore');
-            if (!linkUrl) return null;
-            const handleLinkClick = () => {
-              import('@/integrations/supabase/client').then(({ supabase }) => {
-                supabase.from('link_clicks').insert({ post_id: post.id, user_id: user?.id ?? null } as any).then(() => {});
-              });
-            };
-            return (
-              <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm text-black font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-white transition-all hover:scale-105">
-                <ExternalLink className="w-4 h-4" />
-                {linkLabel}
-              </a>
-            );
-          })()}
         </div>
+
+        {/* Text-only post body */}
+        {!post.image_url && post.caption && (
+          <div className="px-4 py-5">
+            <p className="text-base text-foreground whitespace-pre-wrap">
+              <SafeCaption text={post.caption} allowLinks={isAdminPost} />
+            </p>
+          </div>
+        )}
 
         <div className="p-3 space-y-2">
           <div className="flex items-center justify-between">
