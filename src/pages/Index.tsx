@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import logoImg from '@/assets/logo.png';
 import { usePagePresence } from '@/hooks/usePagePresence';
+import { InlinePostComposer } from '@/components/InlinePostComposer';
 
 const PULL_THRESHOLD = 80;
 
