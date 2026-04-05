@@ -167,6 +167,7 @@ const Index = () => {
 
       <main className="max-w-lg mx-auto px-4 md:px-4 py-2 w-full">
         <StoriesBar />
+        <InlinePostComposer />
 
         {isLoading && (
           <div className="space-y-6">
