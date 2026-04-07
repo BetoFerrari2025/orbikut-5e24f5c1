@@ -28,7 +28,7 @@ export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: profile, isLoading: profileLoading } = useProfileByUsername(username);
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfileByUsername(username);
   const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.id);
   const { data: followStatus } = useFollowStatus(profile?.id);
   const { data: followersCount } = useFollowersCount(profile?.id);
@@ -36,6 +36,18 @@ export default function Profile() {
   const toggleFollow = useToggleFollow();
   const getOrCreateConversation = useGetOrCreateConversation();
   const sendNotification = useSendNotification();
+
+  // For new users: if profile not found and it's likely the current user, retry a few times
+  const retryRef = useRef(0);
+  useEffect(() => {
+    if (!profileLoading && !profile && user && retryRef.current < 5) {
+      const timer = setTimeout(() => {
+        retryRef.current++;
+        refetchProfile();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [profileLoading, profile, user, refetchProfile]);
 
   const isOwnProfile = user?.id === profile?.id;
   const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
