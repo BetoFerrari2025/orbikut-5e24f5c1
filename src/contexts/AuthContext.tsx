@@ -2,6 +2,34 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+const getUserMetadataValue = (user: User, key: string) => {
+  const value = user.user_metadata?.[key];
+  return typeof value === 'string' ? value.trim() : '';
+};
+
+const ensureProfileExists = async (user: User) => {
+  const username = getUserMetadataValue(user, 'username') || user.email?.split('@')[0]?.trim();
+
+  if (!username) return;
+
+  const { error } = await supabase
+    .from('profiles')
+    .upsert(
+      {
+        id: user.id,
+        username,
+        full_name: getUserMetadataValue(user, 'full_name') || null,
+        avatar_url: getUserMetadataValue(user, 'avatar_url') || null,
+      },
+      {
+        onConflict: 'id',
+        ignoreDuplicates: true,
+      }
+    );
+
+  if (error) throw error;
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -19,19 +47,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const syncSession = async (nextSession: Session | null) => {
+      try {
+        if (nextSession?.user) {
+          await ensureProfileExists(nextSession.user);
+        }
+      } catch (error) {
+        console.error('Failed to ensure profile exists', error);
+      } finally {
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+        setLoading(false);
+      }
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      void syncSession(session);
     });
 
     // Then check for existing session
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        void syncSession(session);
       })
       .catch(() => {
         setSession(null);

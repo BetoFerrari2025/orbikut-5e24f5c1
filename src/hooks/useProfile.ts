@@ -13,10 +13,10 @@ export function useProfile(userId: string | undefined) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Profile;
+      return data as Profile | null;
     },
     enabled: !!userId,
   });
@@ -32,10 +32,10 @@ export function useProfileByUsername(username: string | undefined) {
         .from('profiles')
         .select('*')
         .eq('username', username)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Profile;
+      return data as Profile | null;
     },
     enabled: !!username,
   });
