@@ -1,9 +1,9 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
+import { useProfile, useProfileByUsername, useUserPosts, useFollowStatus, useToggleFollow, useFollowersCount, useFollowingCount } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { useSendNotification } from '@/hooks/useNotifications';
@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { usePagePresence } from '@/hooks/usePagePresence';
 
 const isVideo = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
+const MAX_PROFILE_RETRIES = 8;
 
 export default function Profile() {
   usePagePresence('profile');
@@ -29,27 +30,52 @@ export default function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfileByUsername(username);
-  const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.id);
-  const { data: followStatus } = useFollowStatus(profile?.id);
-  const { data: followersCount } = useFollowersCount(profile?.id);
-  const { data: followingCount } = useFollowingCount(profile?.id);
+  const authUsername = typeof user?.user_metadata?.username === 'string' ? user.user_metadata.username.trim() : '';
+  const isOwnPendingRoute = Boolean(user && username && (username === authUsername || username === 'undefined' || username === 'null'));
+  const { data: ownProfile, isLoading: ownProfileLoading, refetch: refetchOwnProfile } = useProfile(isOwnPendingRoute ? user?.id : undefined);
+  const resolvedProfile = profile ?? (isOwnPendingRoute ? ownProfile ?? null : null);
+  const { data: posts, isLoading: postsLoading } = useUserPosts(resolvedProfile?.id);
+  const { data: followStatus } = useFollowStatus(resolvedProfile?.id);
+  const { data: followersCount } = useFollowersCount(resolvedProfile?.id);
+  const { data: followingCount } = useFollowingCount(resolvedProfile?.id);
   const toggleFollow = useToggleFollow();
   const getOrCreateConversation = useGetOrCreateConversation();
   const sendNotification = useSendNotification();
 
-  // For new users: if profile not found and it's likely the current user, retry a few times
   const retryRef = useRef(0);
-  useEffect(() => {
-    if (!profileLoading && !profile && user && retryRef.current < 5) {
-      const timer = setTimeout(() => {
-        retryRef.current++;
-        refetchProfile();
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [profileLoading, profile, user, refetchProfile]);
 
-  const isOwnProfile = user?.id === profile?.id;
+  useEffect(() => {
+    retryRef.current = 0;
+  }, [username, user?.id]);
+
+  useEffect(() => {
+    if (!isOwnPendingRoute || !ownProfile?.username || ownProfile.username === username) return;
+    navigate(`/profile/${ownProfile.username}`, { replace: true });
+  }, [isOwnPendingRoute, ownProfile?.username, username, navigate]);
+
+  useEffect(() => {
+    if (
+      profileLoading ||
+      ownProfileLoading ||
+      resolvedProfile ||
+      !isOwnPendingRoute ||
+      retryRef.current >= MAX_PROFILE_RETRIES
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      retryRef.current += 1;
+      void refetchProfile();
+      void refetchOwnProfile();
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [profileLoading, ownProfileLoading, resolvedProfile, isOwnPendingRoute, refetchProfile, refetchOwnProfile]);
+
+  const isRecoveringOwnProfile = isOwnPendingRoute && !resolvedProfile && retryRef.current < MAX_PROFILE_RETRIES;
+
+  const isOwnProfile = user?.id === resolvedProfile?.id;
   const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
 
   const photoPosts = useMemo(() => posts?.filter(p => p.image_url && !isVideo(p.image_url)) ?? [], [posts]);
@@ -57,19 +83,19 @@ export default function Profile() {
   const textPosts = useMemo(() => posts?.filter(p => !p.image_url) ?? [], [posts]);
 
   const handleFollowToggle = () => {
-    if (!profile || !followStatus || !user) return;
-    toggleFollow.mutate({ targetUserId: profile.id, isFollowing: followStatus.isFollowing });
+    if (!resolvedProfile || !followStatus || !user) return;
+    toggleFollow.mutate({ targetUserId: resolvedProfile.id, isFollowing: followStatus.isFollowing });
     if (!followStatus.isFollowing) {
-      sendNotification.mutate({ userId: profile.id, actorId: user.id, type: 'follow' });
+      sendNotification.mutate({ userId: resolvedProfile.id, actorId: user.id, type: 'follow' });
     }
   };
 
   const handleMessage = async () => {
-    if (!profile) return;
-    try { await getOrCreateConversation.mutateAsync(profile.id); navigate('/messages'); } catch { /* ignore */ }
+    if (!resolvedProfile) return;
+    try { await getOrCreateConversation.mutateAsync(resolvedProfile.id); navigate('/messages'); } catch { /* ignore */ }
   };
 
-  if (profileLoading) {
+  if (profileLoading || ownProfileLoading || isRecoveringOwnProfile) {
     return (
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center gap-6 mb-4">
@@ -80,7 +106,7 @@ export default function Profile() {
     );
   }
 
-  if (!profile) {
+  if (!resolvedProfile) {
     return (
       <main className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h2 className="text-xl font-semibold text-foreground">{t('profile.userNotFound')}</h2>
@@ -93,15 +119,15 @@ export default function Profile() {
       <div className="flex items-center gap-4 sm:gap-6 mb-4">
         <div className="relative flex-shrink-0">
           <Avatar className="w-20 h-20 sm:w-28 sm:h-28">
-            <AvatarImage src={profile.avatar_url ?? undefined} />
-            <AvatarFallback className="text-2xl sm:text-4xl">{profile.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarImage src={resolvedProfile.avatar_url ?? undefined} />
+            <AvatarFallback className="text-2xl sm:text-4xl">{resolvedProfile.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <OnlineIndicator isOnline={isUserOnline((profile as any).last_seen)} size="md" />
+          <OnlineIndicator isOnline={isUserOnline((resolvedProfile as any).last_seen)} size="md" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-3 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{profile.username}</h1>
-            {(profile as any).current_streak > 0 && <StreakBadge streak={(profile as any).current_streak} />}
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{resolvedProfile.username}</h1>
+            {(resolvedProfile as any).current_streak > 0 && <StreakBadge streak={(resolvedProfile as any).current_streak} />}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {isOwnProfile ? (
@@ -128,10 +154,10 @@ export default function Profile() {
         <div><span className="font-semibold">{followingCount ?? 0}</span> {t('profile.followingCount')}</div>
       </div>
 
-      {profile.full_name && <p className="font-semibold text-foreground">{profile.full_name}</p>}
-      {profile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-2">{profile.bio}</p>}
-      <ProfileLinks userId={profile.id} isOwnProfile={isOwnProfile} />
-      <ProfileHighlights userId={profile.id} isOwnProfile={isOwnProfile} />
+      {resolvedProfile.full_name && <p className="font-semibold text-foreground">{resolvedProfile.full_name}</p>}
+      {resolvedProfile.bio && <p className="text-sm whitespace-pre-wrap text-foreground mb-2">{resolvedProfile.bio}</p>}
+      <ProfileLinks userId={resolvedProfile.id} isOwnProfile={isOwnProfile} />
+      <ProfileHighlights userId={resolvedProfile.id} isOwnProfile={isOwnProfile} />
 
       <Tabs defaultValue="photos" className="w-full">
         <TabsList className="w-full bg-transparent border-t rounded-none h-auto p-0">

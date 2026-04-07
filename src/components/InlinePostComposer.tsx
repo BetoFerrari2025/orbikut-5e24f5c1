@@ -122,8 +122,8 @@ export function InlinePostComposer() {
       )}
 
       {expanded && (
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
-          <div className="flex items-center gap-1">
+        <div className="mt-3 pt-2 border-t border-border flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-1">
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground h-8 px-2" onClick={() => fileRef.current?.click()}>
               <ImagePlus className="w-4 h-4" /> Foto
             </Button>
@@ -153,13 +153,13 @@ export function InlinePostComposer() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={reset}>
               Cancelar
             </Button>
             <Button
               size="sm"
-              className="h-8 gap-1.5 gradient-brand"
+              className="h-8 gap-1.5 gradient-brand min-w-[112px]"
               onClick={handleSubmit}
               disabled={(!file && !text.trim()) || createPost.isPending}
             >
