@@ -21,9 +21,28 @@ import { useTranslation } from 'react-i18next';
 
 function SafeCaption({ text, allowLinks }: { text: string; allowLinks: boolean }) {
   try {
-    if (!allowLinks) return <>{text}</>;
-    const cleanText = text.replace(/(https?:\/\/[^\s]+)/g, '').trim();
-    return <>{cleanText || text}</>;
+    let processedText = text;
+    if (allowLinks) {
+      processedText = processedText.replace(/(https?:\/\/[^\s]+)/g, '').trim() || text;
+    }
+    // Parse markdown-style formatting: **bold**, *italic*, _italic_
+    const parts = processedText.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g);
+    return (
+      <>
+        {parts.map((part, i) => {
+          if (/^\*\*(.+)\*\*$/.test(part)) {
+            return <strong key={i}>{part.slice(2, -2)}</strong>;
+          }
+          if (/^\*(.+)\*$/.test(part)) {
+            return <em key={i}>{part.slice(1, -1)}</em>;
+          }
+          if (/^_(.+)_$/.test(part)) {
+            return <em key={i}>{part.slice(1, -1)}</em>;
+          }
+          return <span key={i}>{part}</span>;
+        })}
+      </>
+    );
   } catch {
     return <>{text}</>;
   }
