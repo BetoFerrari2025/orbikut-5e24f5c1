@@ -40,8 +40,9 @@ export default function Profile() {
   const isOwnProfile = user?.id === profile?.id;
   const { data: savedPosts, isLoading: savedLoading } = useSavedPosts();
 
-  const photoPosts = useMemo(() => posts?.filter(p => !isVideo(p.image_url)) ?? [], [posts]);
-  const videoPosts = useMemo(() => posts?.filter(p => isVideo(p.image_url)) ?? [], [posts]);
+  const photoPosts = useMemo(() => posts?.filter(p => p.image_url && !isVideo(p.image_url)) ?? [], [posts]);
+  const videoPosts = useMemo(() => posts?.filter(p => p.image_url && isVideo(p.image_url)) ?? [], [posts]);
+  const textPosts = useMemo(() => posts?.filter(p => !p.image_url) ?? [], [posts]);
 
   const handleFollowToggle = () => {
     if (!profile || !followStatus || !user) return;
