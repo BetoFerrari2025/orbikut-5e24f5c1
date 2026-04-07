@@ -1,13 +1,16 @@
 import { useState, useRef } from 'react';
-import { ImagePlus, Video, X, Send } from 'lucide-react';
+import { ImagePlus, Video, X, Send, Smile, Bold, Italic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCreatePost } from '@/hooks/usePosts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+const EMOJI_LIST = ['😀','😂','🥰','😎','🔥','❤️','👏','🎉','💯','✨','😍','🤩','😢','😤','🤔','👀','💪','🙌','🫶','😊','🥳','💀','😭','🤣','💖','⭐','🚀','🌟','👑','🎶'];
 
 export function InlinePostComposer() {
   const { t } = useTranslation();
@@ -19,8 +22,38 @@ export function InlinePostComposer() {
   const [preview, setPreview] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   if (!user) return null;
+
+  const insertFormatting = (prefix: string, suffix: string) => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const selected = text.substring(start, end);
+    const newText = text.substring(0, start) + prefix + selected + suffix + text.substring(end);
+    setText(newText);
+    setTimeout(() => {
+      ta.focus();
+      ta.setSelectionRange(start + prefix.length, end + prefix.length);
+    }, 0);
+  };
+
+  const insertEmoji = (emoji: string) => {
+    const ta = textareaRef.current;
+    if (!ta) {
+      setText(prev => prev + emoji);
+      return;
+    }
+    const start = ta.selectionStart;
+    const newText = text.substring(0, start) + emoji + text.substring(start);
+    setText(newText);
+    setTimeout(() => {
+      ta.focus();
+      ta.setSelectionRange(start + emoji.length, start + emoji.length);
+    }, 0);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -64,6 +97,7 @@ export function InlinePostComposer() {
         </Avatar>
         <div className="flex-1 min-w-0">
           <Textarea
+            ref={textareaRef}
             placeholder="O que você quer postar agora?"
             value={text}
             onChange={(e) => { setText(e.target.value); if (!expanded) setExpanded(true); }}
@@ -96,6 +130,28 @@ export function InlinePostComposer() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground h-8 px-2" onClick={() => fileRef.current?.click()}>
               <Video className="w-4 h-4" /> Vídeo
             </Button>
+            <Button variant="ghost" size="icon" className="text-muted-foreground h-8 w-8" title="Negrito" onClick={() => insertFormatting('**', '**')}>
+              <Bold className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-muted-foreground h-8 w-8" title="Itálico" onClick={() => insertFormatting('*', '*')}>
+              <Italic className="w-4 h-4" />
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground h-8 w-8" title="Emoji">
+                  <Smile className="w-4 h-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2" align="start">
+                <div className="grid grid-cols-6 gap-1">
+                  {EMOJI_LIST.map(emoji => (
+                    <button key={emoji} className="text-xl hover:bg-muted rounded p-1 transition-colors" onClick={() => insertEmoji(emoji)}>
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={reset}>
