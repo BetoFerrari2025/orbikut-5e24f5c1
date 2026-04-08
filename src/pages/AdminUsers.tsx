@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +21,7 @@ import {
 } from 'lucide-react';
 import { usePresenceCount } from '@/hooks/usePresenceCount';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format, subDays, subMonths } from 'date-fns';
+import { formatDistanceToNow, format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -33,6 +35,8 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('30');
+  const [customStart, setCustomStart] = useState<Date | undefined>();
+  const [customEnd, setCustomEnd] = useState<Date | undefined>();
 
   const { data: adminUserIds } = useQuery({
     queryKey: ['admin-role-users'],
@@ -46,14 +50,19 @@ export default function AdminUsers() {
     },
   });
 
-  const startDate = format(
-    dateRange === '7' ? subDays(new Date(), 7)
-      : dateRange === '30' ? subDays(new Date(), 30)
-      : dateRange === '90' ? subDays(new Date(), 90)
-      : subMonths(new Date(), 12),
-    'yyyy-MM-dd'
-  );
-  const endDate = format(new Date(), 'yyyy-MM-dd');
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    const end = format(now, 'yyyy-MM-dd');
+    if (dateRange === 'custom' && customStart && customEnd) {
+      return { startDate: format(customStart, 'yyyy-MM-dd'), endDate: format(customEnd, 'yyyy-MM-dd') };
+    }
+    const daysMap: Record<string, number> = {
+      '0': 0, '1': 1, '3': 3, '7': 7, '14': 14, '20': 20, '30': 30,
+    };
+    const days = daysMap[dateRange] ?? 30;
+    return { startDate: format(subDays(now, days), 'yyyy-MM-dd'), endDate: end };
+  }, [dateRange, customStart, customEnd]);
+
   const { data: signupStats } = useAdminSignupStats(startDate, endDate);
 
   const filteredUsers = users?.filter((u: any) =>
@@ -156,16 +165,19 @@ export default function AdminUsers() {
           {/* Chart */}
           <Card>
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <BarChart3 className="w-4 h-4" /> Novos Cadastros
                 </CardTitle>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                   {[
+                    { label: 'Hoje', value: '0' },
+                    { label: 'Ontem', value: '1' },
+                    { label: '3d', value: '3' },
                     { label: '7d', value: '7' },
-                    { label: '30d', value: '30' },
-                    { label: '90d', value: '90' },
-                    { label: '1a', value: '365' },
+                    { label: '14d', value: '14' },
+                    { label: '20d', value: '20' },
+                    { label: 'Mês', value: '30' },
                   ].map(opt => (
                     <Button
                       key={opt.value}
@@ -177,6 +189,41 @@ export default function AdminUsers() {
                       {opt.label}
                     </Button>
                   ))}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={dateRange === 'custom' ? 'default' : 'ghost'}
+                        size="sm"
+                        className="h-6 px-2 text-[10px] gap-1"
+                      >
+                        <Calendar className="w-3 h-3" /> Personalizado
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3 space-y-2" align="end">
+                      <p className="text-xs font-medium text-foreground">De:</p>
+                      <Input
+                        type="date"
+                        className="h-8 text-xs"
+                        value={customStart ? format(customStart, 'yyyy-MM-dd') : ''}
+                        onChange={(e) => setCustomStart(e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined)}
+                      />
+                      <p className="text-xs font-medium text-foreground">Até:</p>
+                      <Input
+                        type="date"
+                        className="h-8 text-xs"
+                        value={customEnd ? format(customEnd, 'yyyy-MM-dd') : ''}
+                        onChange={(e) => setCustomEnd(e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined)}
+                      />
+                      <Button
+                        size="sm"
+                        className="w-full h-7 text-xs"
+                        disabled={!customStart || !customEnd}
+                        onClick={() => setDateRange('custom')}
+                      >
+                        Aplicar
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </CardHeader>

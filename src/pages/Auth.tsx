@@ -28,7 +28,7 @@ export default function Auth() {
     return () => { document.body.removeChild(script); };
   }, []);
 
-  // Meta Pixel
+  // Meta Pixels
   useEffect(() => {
     const script = document.createElement('script');
     script.innerHTML = `
@@ -37,10 +37,29 @@ export default function Auth() {
       n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
       t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
       document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init','26621257560825002');fbq('track','PageView');
+      fbq('init','26621257560825002');
+      fbq('init','1641404680335617');
+      fbq('init','1111316097827689');
+      fbq('track','PageView');
     `;
     document.head.appendChild(script);
-    return () => { document.head.removeChild(script); };
+
+    // noscript fallback images
+    const ns1 = document.createElement('img');
+    ns1.height = 1; ns1.width = 1; ns1.style.display = 'none';
+    ns1.src = 'https://www.facebook.com/tr?id=1641404680335617&ev=PageView&noscript=1';
+    document.body.appendChild(ns1);
+
+    const ns2 = document.createElement('img');
+    ns2.height = 1; ns2.width = 1; ns2.style.display = 'none';
+    ns2.src = 'https://www.facebook.com/tr?id=1111316097827689&ev=PageView&noscript=1';
+    document.body.appendChild(ns2);
+
+    return () => {
+      document.head.removeChild(script);
+      document.body.removeChild(ns1);
+      document.body.removeChild(ns2);
+    };
   }, []);
 
   // GerenciaROI - Rastreamento ao Vivo
