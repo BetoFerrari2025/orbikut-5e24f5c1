@@ -136,7 +136,39 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-start sm:items-center justify-center bg-background p-4 pt-8 sm:pt-4 overflow-y-auto">
+    <div className="min-h-screen flex items-start sm:items-center justify-center bg-background p-4 pt-8 sm:pt-4 overflow-y-auto relative">
+      {/* Language selector */}
+      <div className="absolute top-4 right-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Globe className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {[
+              { code: 'pt', flag: '🇧🇷', label: 'Português' },
+              { code: 'en', flag: '🇺🇸', label: 'English' },
+              { code: 'es', flag: '🇪🇸', label: 'Español' },
+              { code: 'fr', flag: '🇫🇷', label: 'Français' },
+              { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
+              { code: 'it', flag: '🇮🇹', label: 'Italiano' },
+              { code: 'ja', flag: '🇯🇵', label: '日本語' },
+              { code: 'ko', flag: '🇰🇷', label: '한국어' },
+              { code: 'zh', flag: '🇨🇳', label: '中文' },
+            ].map((lang) => (
+              <DropdownMenuItem
+                key={lang.code}
+                onClick={() => i18n.changeLanguage(lang.code)}
+                className={i18n.language === lang.code ? 'bg-accent' : ''}
+              >
+                <span className="mr-2">{lang.flag}</span>
+                {lang.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
