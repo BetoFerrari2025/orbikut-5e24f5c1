@@ -100,7 +100,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
