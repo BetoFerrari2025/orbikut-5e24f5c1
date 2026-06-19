@@ -72,10 +72,10 @@ export default function Discover() {
   }
 
   return (
-    <div className="h-screen bg-black overflow-hidden">
+    <div className="h-screen bg-black overflow-hidden md:bg-background md:flex md:items-center md:justify-center md:px-4">
       <div
         ref={containerRef}
-        className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide md:h-[85vh] md:max-w-[480px] md:rounded-2xl md:border md:border-border/10 md:shadow-2xl"
         style={{ scrollSnapType: 'y mandatory' }}
       >
         {videoPosts.map((post, index) => (
