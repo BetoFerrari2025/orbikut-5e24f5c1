@@ -253,7 +253,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
 
   return (
     <div
-      className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
+      className="h-screen md:h-full w-full snap-start relative flex items-center justify-center bg-black"
       onClick={handleTap}
     >
       <video
