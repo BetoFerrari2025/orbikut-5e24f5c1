@@ -28,7 +28,7 @@ export default function Discover() {
   const handleScroll = useCallback(() => {
     if (!containerRef.current || !videoPosts.length) return;
     const scrollTop = containerRef.current.scrollTop;
-    const height = window.innerHeight;
+    const height = containerRef.current.clientHeight;
     const newIndex = Math.round(scrollTop / height);
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < videoPosts.length) {
       setCurrentIndex(newIndex);
@@ -72,10 +72,10 @@ export default function Discover() {
   }
 
   return (
-    <div className="h-screen bg-black overflow-hidden">
+    <div className="h-screen bg-black overflow-hidden md:bg-background md:flex md:items-center md:justify-center md:px-4">
       <div
         ref={containerRef}
-        className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide md:h-[85vh] md:max-w-[480px] md:rounded-2xl md:border md:border-border/10 md:shadow-2xl"
         style={{ scrollSnapType: 'y mandatory' }}
       >
         {videoPosts.map((post, index) => (
@@ -253,7 +253,7 @@ function DiscoverCard({ post, isActive, isMuted, showMuteIcon, onToggleMute, onS
 
   return (
     <div
-      className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
+      className="h-screen md:h-full w-full snap-start relative flex items-center justify-center bg-black"
       onClick={handleTap}
     >
       <video
