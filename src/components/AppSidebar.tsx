@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   Home, Search, Rabbit, MessageCircle, Bell, User, Settings,
-  ShieldAlert, PlusSquare, LogOut, Gift,
+  ShieldAlert, PlusSquare, LogOut, Gift, Crown,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,6 +46,7 @@ export function AppSidebar() {
     ...(profile ? [{ title: t('nav.profile'), url: `/profile/${profile.username}`, icon: User }] : []),
     { title: t('nav.settings'), url: '/settings', icon: Settings },
     { title: 'Indique e Ganhe', url: '/referrals', icon: Gift },
+    { title: 'Premium', url: '/premium', icon: Crown },
   ];
 
   return (
