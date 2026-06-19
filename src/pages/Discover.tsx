@@ -28,7 +28,7 @@ export default function Discover() {
   const handleScroll = useCallback(() => {
     if (!containerRef.current || !videoPosts.length) return;
     const scrollTop = containerRef.current.scrollTop;
-    const height = window.innerHeight;
+    const height = containerRef.current.clientHeight;
     const newIndex = Math.round(scrollTop / height);
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < videoPosts.length) {
       setCurrentIndex(newIndex);
