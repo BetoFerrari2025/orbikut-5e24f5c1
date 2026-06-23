@@ -24,12 +24,13 @@ interface Payload {
   tag?: string;
 }
 
+const INTERNAL_TOKEN = 'f0a948fd02f4bc88efc93757c4b128a6476d63b67ee1c91f55d2bae2b023423d';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  // Internal-only: require service role bearer token
-  const expected = `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`;
-  if (req.headers.get('Authorization') !== expected) {
+  // Internal-only: require shared token (DB triggers + cron + admin function)
+  if (req.headers.get('X-Internal-Token') !== INTERNAL_TOKEN) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
