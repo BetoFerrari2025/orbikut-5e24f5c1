@@ -61,7 +61,7 @@ export function usePushNotifications() {
       }
 
       const json: any = sub.toJSON();
-      await supabase.from('push_subscriptions').upsert(
+      await (supabase.from('push_subscriptions') as any).upsert(
         {
           user_id: user.id,
           endpoint: sub.endpoint,
@@ -89,7 +89,7 @@ export function usePushNotifications() {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        await (supabase.from('push_subscriptions') as any).delete().eq('endpoint', sub.endpoint);
         await sub.unsubscribe();
       }
       setSubscribed(false);
