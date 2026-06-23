@@ -6,6 +6,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { PwaInstallButton } from '@/components/PwaInstallButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUpdateOnlineStatus } from '@/hooks/useOnlineStatus';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ interface AppLayoutProps {
 export function AppLayout({ children, hideNavbar }: AppLayoutProps) {
   const { user } = useAuth();
   useUpdateOnlineStatus();
+  usePushNotifications(); // Auto-subscribes when permission already granted
 
   if (!user) {
     return (
