@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Camera, Moon, Globe } from 'lucide-react';
+import { PushNotificationCard } from '@/components/PushNotificationCard';
 import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -167,7 +168,10 @@ export default function Settings() {
       </form>
 
       <div className="mt-8 border-t border-border pt-6 space-y-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">{t('settings.appearance')}</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Notificações</h2>
+        <PushNotificationCard />
+
+        <h2 className="text-lg font-semibold text-foreground mb-4 pt-2">{t('settings.appearance')}</h2>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Moon className="w-5 h-5 text-foreground" />

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'orbita-cache-v3-light';
+const CACHE_NAME = 'orbita-cache-v4-push';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -75,20 +75,37 @@ self.addEventListener('fetch', (event) => {
 
 // Push notification handling
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {};
-  const title = data.title || 'Orbita';
+  let data = {};
+  try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
+  const title = data.title || 'Orbikut';
   const options = {
     body: data.body || 'Você tem uma nova notificação',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
-    data: data.url || '/',
+    icon: data.icon || '/icon-192.png',
+    badge: '/icon-192.png',
+    image: data.image,
+    tag: data.tag,
+    renotify: !!data.tag,
+    vibrate: [120, 60, 120],
+    data: { url: data.url || '/' },
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(
-    self.clients.openWindow(event.notification.data || '/')
-  );
+  const targetUrl = event.notification.data?.url || '/';
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of all) {
+      try {
+        const u = new URL(client.url);
+        if (u.origin === self.location.origin) {
+          await client.focus();
+          if ('navigate' in client) { try { await client.navigate(targetUrl); } catch {} }
+          return;
+        }
+      } catch {}
+    }
+    await self.clients.openWindow(targetUrl);
+  })());
 });

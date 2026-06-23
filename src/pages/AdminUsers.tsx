@@ -17,8 +17,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
-  TrendingUp, UserPlus, FileText, Calendar, Activity, Radio, MousePointerClick, ExternalLink,
+  TrendingUp, UserPlus, FileText, Calendar, Activity, Radio, MousePointerClick, ExternalLink, Bell,
 } from 'lucide-react';
+import { AdminBroadcastPush } from '@/components/AdminBroadcastPush';
 import { usePresenceCount } from '@/hooks/usePresenceCount';
 import { toast } from 'sonner';
 import { formatDistanceToNow, format, subDays } from 'date-fns';
@@ -105,15 +106,18 @@ export default function AdminUsers() {
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-11">
-          <TabsTrigger value="dashboard" className="gap-1.5 text-xs">
-            <BarChart3 className="w-4 h-4" /> Dashboard
+        <TabsList className="grid w-full grid-cols-4 h-11">
+          <TabsTrigger value="dashboard" className="gap-1 text-xs">
+            <BarChart3 className="w-4 h-4" /> Dash
           </TabsTrigger>
-          <TabsTrigger value="users" className="gap-1.5 text-xs">
-            <Users className="w-4 h-4" /> Usuários
+          <TabsTrigger value="users" className="gap-1 text-xs">
+            <Users className="w-4 h-4" /> Users
           </TabsTrigger>
-          <TabsTrigger value="links" className="gap-1.5 text-xs">
+          <TabsTrigger value="links" className="gap-1 text-xs">
             <MousePointerClick className="w-4 h-4" /> Links
+          </TabsTrigger>
+          <TabsTrigger value="push" className="gap-1 text-xs">
+            <Bell className="w-4 h-4" /> Push
           </TabsTrigger>
         </TabsList>
 
@@ -311,6 +315,10 @@ export default function AdminUsers() {
         {/* ── Links/Clicks Tab ── */}
         <TabsContent value="links" className="space-y-4 mt-4">
           <LinkClicksPanel />
+        </TabsContent>
+
+        <TabsContent value="push" className="space-y-4 mt-4">
+          <AdminBroadcastPush />
         </TabsContent>
       </Tabs>
 
