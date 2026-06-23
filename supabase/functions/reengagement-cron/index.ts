@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'X-Internal-Token': 'f0a948fd02f4bc88efc93757c4b128a6476d63b67ee1c91f55d2bae2b023423d',
         },
         body: JSON.stringify({ user_ids: ids, title, body, url: '/' }),
       });
