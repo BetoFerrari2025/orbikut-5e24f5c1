@@ -316,6 +316,10 @@ export default function AdminUsers() {
         <TabsContent value="links" className="space-y-4 mt-4">
           <LinkClicksPanel />
         </TabsContent>
+
+        <TabsContent value="push" className="space-y-4 mt-4">
+          <AdminBroadcastPush />
+        </TabsContent>
       </Tabs>
 
       {selectedUserId && (
