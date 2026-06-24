@@ -171,13 +171,16 @@ export default function AdminUsers() {
           <RealtimePresenceCards />
 
           {/* Chart */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex flex-col gap-2">
+          <Card className="overflow-hidden border-primary/10">
+            <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent">
+              <div className="flex flex-col gap-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" /> Novos Cadastros
+                  <div className="p-1.5 rounded-lg bg-primary/15">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                  </div>
+                  Novos Cadastros
                 </CardTitle>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {[
                     { label: 'Hoje', value: '0' },
                     { label: 'Ontem', value: '1' },
@@ -186,23 +189,34 @@ export default function AdminUsers() {
                     { label: '14d', value: '14' },
                     { label: '20d', value: '20' },
                     { label: 'Mês', value: '30' },
-                  ].map(opt => (
-                    <Button
-                      key={opt.value}
-                      variant={dateRange === opt.value ? 'default' : 'ghost'}
-                      size="sm"
-                      className="h-6 px-2 text-[10px]"
-                      onClick={() => setDateRange(opt.value)}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
+                  ].map(opt => {
+                    const active = dateRange === opt.value;
+                    return (
+                      <Button
+                        key={opt.value}
+                        variant="ghost"
+                        size="sm"
+                        className={`h-7 px-3 text-[11px] rounded-full font-semibold transition-all ${
+                          active
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-sm shadow-primary/30 hover:opacity-90'
+                            : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                        }`}
+                        onClick={() => setDateRange(opt.value)}
+                      >
+                        {opt.label}
+                      </Button>
+                    );
+                  })}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant={dateRange === 'custom' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] gap-1"
+                        className={`h-7 px-3 text-[11px] rounded-full font-semibold gap-1 transition-all ${
+                          dateRange === 'custom'
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-sm'
+                            : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                        }`}
                       >
                         <Calendar className="w-3 h-3" /> Personalizado
                       </Button>
@@ -235,16 +249,16 @@ export default function AdminUsers() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               {signupStats && signupStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={signupStats}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="signup_date" tickFormatter={(v) => format(new Date(v), 'dd/MM')} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                    <XAxis dataKey="signup_date" tickFormatter={(v) => format(new Date(v + 'T00:00:00'), 'dd/MM')} stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} allowDecimals={false} />
                     <Tooltip
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
-                      labelFormatter={(v) => format(new Date(v), "dd 'de' MMMM", { locale: ptBR })}
+                      labelFormatter={(v) => format(new Date(v + 'T00:00:00'), "dd 'de' MMMM", { locale: ptBR })}
                     />
                     <Line type="monotone" dataKey="user_count" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))' }} name="Cadastros" />
                   </LineChart>
@@ -257,6 +271,7 @@ export default function AdminUsers() {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         {/* ── Users Tab ── */}
         <TabsContent value="users" className="space-y-4 mt-4">
