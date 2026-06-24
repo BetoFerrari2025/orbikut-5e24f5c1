@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGetOrCreateConversation } from '@/hooks/useMessages';
 import { useSendNotification } from '@/hooks/useNotifications';
 import { StreakBadge } from '@/components/StreakBadge';
+import { PremiumBadge } from '@/components/PremiumBadge';
 import { Grid3X3, Settings, MessageCircle, Film, Bookmark, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
