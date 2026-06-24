@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Crown, Check, Sparkles, Zap, Star, Lock, Heart, TrendingUp, BadgeCheck, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useIsPremium } from '@/hooks/usePremium';
 
 const plans = [
   {
@@ -60,6 +62,7 @@ const exclusiveContent = [
 
 export default function Subscribers() {
   const [selected, setSelected] = useState('anual');
+  const { data: isPremium } = useIsPremium();
 
   const handleSubscribe = () => {
     toast.info('Pagamentos em breve!', {
@@ -142,30 +145,45 @@ export default function Subscribers() {
 
         {/* Exclusive area preview */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <Lock className="w-5 h-5 text-amber-600" />
-            <h2 className="text-2xl font-bold">Área Exclusiva</h2>
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-amber-600" />
+              <h2 className="text-2xl font-bold">Área Exclusiva</h2>
+            </div>
+            {isPremium && (
+              <Button asChild size="sm" className="bg-gradient-to-r from-amber-500 to-pink-500 text-white">
+                <Link to="/exclusive"><Sparkles className="w-4 h-4 mr-1" /> Acessar agora</Link>
+              </Button>
+            )}
           </div>
-          <p className="text-muted-foreground mb-6">Uma prévia do que te espera ao virar Premium ✨</p>
+          <p className="text-muted-foreground mb-6">
+            {isPremium ? 'Você já tem acesso completo. Clique nos cards para entrar ✨' : 'Uma prévia do que te espera ao virar Premium ✨'}
+          </p>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            {exclusiveContent.map((item, i) => (
-              <Card key={i} className="relative overflow-hidden p-5 group hover:shadow-xl transition-all">
-                <div className={cn('absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br', item.color)} />
-                <div className="relative flex gap-4">
-                  <div className={cn('w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0', item.color)}>
-                    <item.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold">{item.title}</h3>
-                      <Lock className="w-3 h-3 text-muted-foreground" />
+            {exclusiveContent.map((item, i) => {
+              const CardWrapper: any = isPremium ? Link : 'div';
+              const wrapperProps = isPremium ? { to: '/exclusive' } : {};
+              return (
+                <CardWrapper key={i} {...wrapperProps} className="block">
+                  <Card className="relative overflow-hidden p-5 group hover:shadow-xl transition-all cursor-pointer">
+                    <div className={cn('absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br', item.color)} />
+                    <div className="relative flex gap-4">
+                      <div className={cn('w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0', item.color)}>
+                        <item.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold">{item.title}</h3>
+                          {!isPremium && <Lock className="w-3 h-3 text-muted-foreground" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  </Card>
+                </CardWrapper>
+              );
+            })}
           </div>
         </div>
 

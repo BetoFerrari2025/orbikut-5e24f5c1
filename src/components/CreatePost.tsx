@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCreatePost } from '@/hooks/usePosts';
 import { useIsAdmin } from '@/hooks/useAdmin';
+import { useIsPremium } from '@/hooks/usePremium';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +21,8 @@ export function CreatePost() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createPost = useCreatePost();
   const { data: isAdmin } = useIsAdmin();
+  const { data: isPremium } = useIsPremium();
+  const canPostLinks = !!isAdmin || !!isPremium;
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -128,7 +131,7 @@ export function CreatePost() {
             rows={3}
           />
 
-          {isAdmin && (
+          {canPostLinks && (
             <div className="space-y-2 p-3 rounded-lg border border-accent/30 bg-accent/5">
               <p className="text-xs font-semibold text-accent flex items-center gap-1">
                 <Link2 className="w-3 h-3" /> {t('createPost.actionLink')}

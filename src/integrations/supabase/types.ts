@@ -505,6 +505,8 @@ export type Database = {
           last_post_date: string | null
           last_seen: string | null
           max_streak: number | null
+          premium_plan: string | null
+          premium_until: string | null
           referral_code: string | null
           updated_at: string
           username: string
@@ -520,6 +522,8 @@ export type Database = {
           last_post_date?: string | null
           last_seen?: string | null
           max_streak?: number | null
+          premium_plan?: string | null
+          premium_until?: string | null
           referral_code?: string | null
           updated_at?: string
           username: string
@@ -535,6 +539,8 @@ export type Database = {
           last_post_date?: string | null
           last_seen?: string | null
           max_streak?: number | null
+          premium_plan?: string | null
+          premium_until?: string | null
           referral_code?: string | null
           updated_at?: string
           username?: string
@@ -1007,8 +1013,14 @@ export type Database = {
           is_blocked: boolean
           last_sign_in_at: string
           post_count: number
+          premium_plan: string
+          premium_until: string
           username: string
         }[]
+      }
+      admin_set_premium: {
+        Args: { _plan: string; _user_id: string }
+        Returns: undefined
       }
       admin_toggle_block_user: {
         Args: { _blocked: boolean; _user_id: string }
@@ -1030,6 +1042,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_premium: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

@@ -9,15 +9,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import {
   useAdminUsers, useAdminStats, useAdminSignupStats,
   useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost, useAdminToggleRole,
 } from '@/hooks/useAdmin';
+import { useAdminSetPremium } from '@/hooks/usePremium';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
   TrendingUp, UserPlus, FileText, Calendar, Activity, Radio, MousePointerClick, ExternalLink, Bell,
+  Crown, Sparkles,
 } from 'lucide-react';
 import { AdminBroadcastPush } from '@/components/AdminBroadcastPush';
 import { usePresenceCount } from '@/hooks/usePresenceCount';
@@ -33,6 +36,7 @@ export default function AdminUsers() {
   const deleteUser = useAdminDeleteUser();
   const deletePost = useAdminDeletePost();
   const toggleRole = useAdminToggleRole();
+  const setPremium = useAdminSetPremium();
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('30');
@@ -167,13 +171,16 @@ export default function AdminUsers() {
           <RealtimePresenceCards />
 
           {/* Chart */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex flex-col gap-2">
+          <Card className="overflow-hidden border-primary/10">
+            <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent">
+              <div className="flex flex-col gap-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" /> Novos Cadastros
+                  <div className="p-1.5 rounded-lg bg-primary/15">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                  </div>
+                  Novos Cadastros
                 </CardTitle>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {[
                     { label: 'Hoje', value: '0' },
                     { label: 'Ontem', value: '1' },
@@ -182,23 +189,34 @@ export default function AdminUsers() {
                     { label: '14d', value: '14' },
                     { label: '20d', value: '20' },
                     { label: 'Mês', value: '30' },
-                  ].map(opt => (
-                    <Button
-                      key={opt.value}
-                      variant={dateRange === opt.value ? 'default' : 'ghost'}
-                      size="sm"
-                      className="h-6 px-2 text-[10px]"
-                      onClick={() => setDateRange(opt.value)}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
+                  ].map(opt => {
+                    const active = dateRange === opt.value;
+                    return (
+                      <Button
+                        key={opt.value}
+                        variant="ghost"
+                        size="sm"
+                        className={`h-7 px-3 text-[11px] rounded-full font-semibold transition-all ${
+                          active
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-sm shadow-primary/30 hover:opacity-90'
+                            : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                        }`}
+                        onClick={() => setDateRange(opt.value)}
+                      >
+                        {opt.label}
+                      </Button>
+                    );
+                  })}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant={dateRange === 'custom' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] gap-1"
+                        className={`h-7 px-3 text-[11px] rounded-full font-semibold gap-1 transition-all ${
+                          dateRange === 'custom'
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-sm'
+                            : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                        }`}
                       >
                         <Calendar className="w-3 h-3" /> Personalizado
                       </Button>
@@ -231,16 +249,16 @@ export default function AdminUsers() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               {signupStats && signupStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={signupStats}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="signup_date" tickFormatter={(v) => format(new Date(v), 'dd/MM')} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                    <XAxis dataKey="signup_date" tickFormatter={(v) => format(new Date(v + 'T00:00:00'), 'dd/MM')} stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} allowDecimals={false} />
                     <Tooltip
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
-                      labelFormatter={(v) => format(new Date(v), "dd 'de' MMMM", { locale: ptBR })}
+                      labelFormatter={(v) => format(new Date(v + 'T00:00:00'), "dd 'de' MMMM", { locale: ptBR })}
                     />
                     <Line type="monotone" dataKey="user_count" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))' }} name="Cadastros" />
                   </LineChart>
@@ -253,6 +271,7 @@ export default function AdminUsers() {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         {/* ── Users Tab ── */}
         <TabsContent value="users" className="space-y-4 mt-4">
@@ -280,11 +299,22 @@ export default function AdminUsers() {
                     <AvatarFallback>{(u.username ?? 'U')[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="font-semibold text-foreground text-sm truncate">{u.username ?? 'Sem nome'}</p>
                       {adminUserIds?.has(u.id) && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/20 text-primary">ADMIN</span>
                       )}
+                      {(() => {
+                        const isAdmin = adminUserIds?.has(u.id);
+                        const activePremium = isAdmin || u.premium_plan === 'vitalicio' || (u.premium_plan && u.premium_until && new Date(u.premium_until) > new Date());
+                        if (!activePremium) return null;
+                        const planLabel = isAdmin && !u.premium_plan ? 'VITALÍCIO' : (u.premium_plan ?? 'VITALÍCIO').toUpperCase();
+                        return (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-amber-400 to-pink-500 text-white inline-flex items-center gap-0.5">
+                            <Crown className="w-2.5 h-2.5" /> {planLabel}
+                          </span>
+                        );
+                      })()}
                       {u.is_blocked && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-destructive/20 text-destructive">BLOQUEADO</span>
                       )}
@@ -293,6 +323,30 @@ export default function AdminUsers() {
                     <p className="text-[11px] text-muted-foreground">{u.post_count} posts</p>
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Gerenciar plano Premium">
+                          <Crown className={`w-3.5 h-3.5 ${u.premium_plan ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel className="text-xs">Plano Premium</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'mensal' }, { onSuccess: () => toast.success('Plano Mensal ativado') })}>
+                          <Sparkles className="w-3.5 h-3.5 mr-2 text-blue-500" /> Mensal (30d)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'anual' }, { onSuccess: () => toast.success('Plano Anual ativado') })}>
+                          <Sparkles className="w-3.5 h-3.5 mr-2 text-pink-500" /> Anual (1 ano)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'vitalicio' }, { onSuccess: () => toast.success('Plano Vitalício ativado') })}>
+                          <Crown className="w-3.5 h-3.5 mr-2 text-amber-500" /> Vitalício
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'none' }, { onSuccess: () => toast.success('Premium removido') })} className="text-destructive">
+                          <Ban className="w-3.5 h-3.5 mr-2" /> Remover Premium
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button variant="ghost" size="icon" className="h-7 w-7" title={adminUserIds?.has(u.id) ? 'Remover admin' : 'Tornar admin'} onClick={() => handleToggleAdmin(u.id, adminUserIds?.has(u.id) ?? false)}>
                       <ShieldCheck className={`w-3.5 h-3.5 ${adminUserIds?.has(u.id) ? 'text-primary' : 'text-muted-foreground'}`} />
                     </Button>
@@ -306,6 +360,7 @@ export default function AdminUsers() {
                       <Trash2 className="w-3.5 h-3.5 text-destructive" />
                     </Button>
                   </div>
+
                 </div>
               ))}
             </div>
