@@ -23,6 +23,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Install from "./pages/Install";
 import Referrals from "./pages/Referrals";
 import Subscribers from "./pages/Subscribers";
+import Exclusive from "./pages/Exclusive";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -73,6 +74,7 @@ function AppRoutes() {
       <Route path="/admin/users" element={<AppLayout><AdminUsers /></AppLayout>} />
       <Route path="/referrals" element={<AppLayout><Referrals /></AppLayout>} />
       <Route path="/premium" element={<AppLayout><Subscribers /></AppLayout>} />
+      <Route path="/exclusive" element={<AppLayout><Exclusive /></AppLayout>} />
       <Route path="/install" element={<Install />} />
       <Route path="/~oauth/*" element={null} />
       <Route path="*" element={<NotFound />} />
