@@ -9,15 +9,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import {
   useAdminUsers, useAdminStats, useAdminSignupStats,
   useAdminToggleBlock, useAdminDeleteUser, useAdminDeletePost, useAdminToggleRole,
 } from '@/hooks/useAdmin';
+import { useAdminSetPremium } from '@/hooks/usePremium';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, BarChart3, Search, Ban, Trash2, Eye, ShieldAlert, ShieldCheck,
   TrendingUp, UserPlus, FileText, Calendar, Activity, Radio, MousePointerClick, ExternalLink, Bell,
+  Crown, Sparkles,
 } from 'lucide-react';
 import { AdminBroadcastPush } from '@/components/AdminBroadcastPush';
 import { usePresenceCount } from '@/hooks/usePresenceCount';
@@ -33,6 +36,7 @@ export default function AdminUsers() {
   const deleteUser = useAdminDeleteUser();
   const deletePost = useAdminDeletePost();
   const toggleRole = useAdminToggleRole();
+  const setPremium = useAdminSetPremium();
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState('30');
