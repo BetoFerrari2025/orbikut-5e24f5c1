@@ -299,11 +299,22 @@ export default function AdminUsers() {
                     <AvatarFallback>{(u.username ?? 'U')[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="font-semibold text-foreground text-sm truncate">{u.username ?? 'Sem nome'}</p>
                       {adminUserIds?.has(u.id) && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/20 text-primary">ADMIN</span>
                       )}
+                      {(() => {
+                        const isAdmin = adminUserIds?.has(u.id);
+                        const activePremium = isAdmin || u.premium_plan === 'vitalicio' || (u.premium_plan && u.premium_until && new Date(u.premium_until) > new Date());
+                        if (!activePremium) return null;
+                        const planLabel = isAdmin && !u.premium_plan ? 'VITALÍCIO' : (u.premium_plan ?? 'VITALÍCIO').toUpperCase();
+                        return (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-amber-400 to-pink-500 text-white inline-flex items-center gap-0.5">
+                            <Crown className="w-2.5 h-2.5" /> {planLabel}
+                          </span>
+                        );
+                      })()}
                       {u.is_blocked && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-destructive/20 text-destructive">BLOQUEADO</span>
                       )}
@@ -312,6 +323,30 @@ export default function AdminUsers() {
                     <p className="text-[11px] text-muted-foreground">{u.post_count} posts</p>
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Gerenciar plano Premium">
+                          <Crown className={`w-3.5 h-3.5 ${u.premium_plan ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel className="text-xs">Plano Premium</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'mensal' }, { onSuccess: () => toast.success('Plano Mensal ativado') })}>
+                          <Sparkles className="w-3.5 h-3.5 mr-2 text-blue-500" /> Mensal (30d)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'anual' }, { onSuccess: () => toast.success('Plano Anual ativado') })}>
+                          <Sparkles className="w-3.5 h-3.5 mr-2 text-pink-500" /> Anual (1 ano)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'vitalicio' }, { onSuccess: () => toast.success('Plano Vitalício ativado') })}>
+                          <Crown className="w-3.5 h-3.5 mr-2 text-amber-500" /> Vitalício
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setPremium.mutate({ userId: u.id, plan: 'none' }, { onSuccess: () => toast.success('Premium removido') })} className="text-destructive">
+                          <Ban className="w-3.5 h-3.5 mr-2" /> Remover Premium
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button variant="ghost" size="icon" className="h-7 w-7" title={adminUserIds?.has(u.id) ? 'Remover admin' : 'Tornar admin'} onClick={() => handleToggleAdmin(u.id, adminUserIds?.has(u.id) ?? false)}>
                       <ShieldCheck className={`w-3.5 h-3.5 ${adminUserIds?.has(u.id) ? 'text-primary' : 'text-muted-foreground'}`} />
                     </Button>
@@ -325,6 +360,7 @@ export default function AdminUsers() {
                       <Trash2 className="w-3.5 h-3.5 text-destructive" />
                     </Button>
                   </div>
+
                 </div>
               ))}
             </div>
